@@ -1,5 +1,4 @@
-using NUnit.Framework;
-using Rhino;
+﻿using NUnit.Framework;
 using Rhino.DocObjects;
 using Rhino.FileIO;
 using Rhino.Geometry;
@@ -7,85 +6,26 @@ using Rhino.Geometry.Intersect;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 
-namespace MxTests
+namespace RhinoCommonDelayed
 {
-    public class MeshIntersect
+    class ResultMetrics
     {
-        static readonly List<string> g_test_models;
+        public double Length { get; set; }
+        public bool? Closed { get; set; }
+        public bool? Overlap { get; set; }
+    }
 
-        static MeshIntersect()
+    public static class MeshIntersectImplementation
+    {
+        public static void CountedIntersectionsTest(List<string> otherlines, object file_)
         {
-            var folders = OpenRhinoSetup.TestFolders;
+            File3dm file = (File3dm)file_;
 
-            g_test_models = new List<string>();
-            foreach (string folder in folders)
-            {
-                var folder_intersect = Path.Combine(folder, "MeshIntersect");
-                if (Directory.Exists(folder_intersect))
-                    g_test_models.AddRange(
-                        Directory.GetFiles(folder_intersect, @"*.3dm", SearchOption.AllDirectories)
-                        );
-            }
-
-            //g_test_models.RemoveAll(f => Path.GetFileName(f).StartsWith("#", StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        [SetUp]
-        public void Setup()
-        {
-        }
-
-        [Test]
-        public void ThereAreDataDrivenModels()
-        {
-            Assert.IsNotEmpty(g_test_models, "There are no data driven models.");
-        }
-
-        public static IEnumerable<string> TestModels => g_test_models;
-        const string measuredIntersectionsString = "MEASURED INTERSECTIONS";
-
-        [Test, TestCaseSource(nameof(TestModels))]
-        public void Model(string filename)
-        {
-            using (var file = File3dm.Read(filename))
-            {
-                var notes = file.Notes.Notes;
-
-                if (string.IsNullOrWhiteSpace(notes))
-                    throw new NotSupportedException("Expected notes with information on processing.");
-
-                var otherlines = new List<string>();
-                string incipit = null;
-                using (var tr = new StringReader(notes))
-                {
-                    incipit = tr.ReadLine();
-                    string new_line;
-                    while ((new_line = tr.ReadLine()) != null)
-                    {
-                        if (string.IsNullOrWhiteSpace(new_line) ||
-                            new_line.Trim().StartsWith("#", false, CultureInfo.InvariantCulture))
-                            continue;
-                        otherlines.Add(new_line);
-                    }
-                }
-
-                if (incipit.Trim() == measuredIntersectionsString)
-                {
-                    CountedIntersectionsTest(otherlines, file);
-                }
-                else
-                    throw new NotSupportedException($"Unexpected type of test found in notes: {incipit}");
-            }
-        }
-
-        private static void CountedIntersectionsTest(List<string> otherlines, File3dm file)
-        {
             var expected = ExtractExpectedPolylinesLengths(otherlines);
 
-            var items = file.Objects.Select(item => new { item.Id, item.Geometry}).ToList(); //buffer
+            var items = file.Objects.Select(item => new { item.Id, item.Geometry }).ToList(); //buffer
 
             var original_meshes = items.Where(item => item.Geometry.ObjectType == ObjectType.Mesh);
             var curves = items.Where(item => item.Geometry.ObjectType == ObjectType.Curve).ToList();
@@ -141,19 +81,14 @@ namespace MxTests
 
             Assert.AreEqual(expected.Count, result_ordered.Count, "The amount of expected resulting intersections was different.");
 
-            for (int i=0; i < expected.Count; i++)
+            for (int i = 0; i < expected.Count; i++)
             {
                 Assert.AreEqual(expected[i].Length, result_ordered[i].Length, 0.002);
-                if (expected[i].Closed.HasValue) Assert.AreEqual(expected[i].Closed.Value, result_ordered[i].Closed.Value);
-                if (expected[i].Overlap.HasValue) Assert.AreEqual(expected[i].Overlap.Value, result_ordered[i].Overlap.Value);
+                if (expected[i].Closed.HasValue) Assert.AreEqual(expected[i].Closed.Value, result_ordered[i].Closed.Value, 
+                    $"Curve of length {expected[i].Length} was not {(expected[i].Closed.Value ? "closed" : "open")} as expected.");
+                if (expected[i].Overlap.HasValue) Assert.AreEqual(expected[i].Overlap.Value, result_ordered[i].Overlap.Value,
+                    $"Curve of length {expected[i].Length} was not {(expected[i].Overlap.Value ? "ovelapping" : "perforating")} as expected.");
             }
-        }
-
-        class ResultMetrics
-        {
-            public double Length { get; set; }
-            public bool? Closed { get; set; }
-            public bool? Overlap { get; set; }
         }
 
         readonly static string[] separators = new string[] { " ", "\t", "- " };

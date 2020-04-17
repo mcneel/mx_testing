@@ -3,26 +3,24 @@ using System;
 using Rhino;
 using System.IO;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace MxTests
 {
     [SetUpFixture]
-    public sealed class OpenRhinoSetup : IDisposable
+    public class OpenRhinoSetup
     {
-        private static readonly string[] test_folders;
+        private static readonly List<string> test_folders = new List<string>();
         static OpenRhinoSetup()
         {
             string test_dir = TestContext.CurrentContext.TestDirectory; //this will be /bin
+
             string base_dir = Directory.GetParent(test_dir).FullName;
             string public_models = Path.Combine(base_dir, "models");
 
-            var test_folders_list = new List<string>();
-
-            if (Directory.Exists(public_models)) test_folders_list.Add(public_models);
-
-            test_folders = test_folders_list.ToArray();
+            if (Directory.Exists(public_models)) test_folders.Add(public_models);
         }
-        
+
         private IDisposable rhinoCore;
 
         [OneTimeSetUp]
@@ -32,16 +30,16 @@ namespace MxTests
             RhinoInside.Resolver.RhinoSystemDirectory = @"C:\dev\github\mcneel\rhino\src4\bin\Debug";
 
             ReferenceRhinoCommonToOpenRhino();
-
-
         }
-
-        public static IEnumerable<string> TestFolders => test_folders;
-
+        
         void ReferenceRhinoCommonToOpenRhino()
         {
             rhinoCore = new Rhino.Runtime.InProcess.RhinoCore();
         }
+
+        public static IEnumerable<string> TestFolders => test_folders;
+
+
 
         [OneTimeTearDown]
         public void OneTimeTearDown()
@@ -49,18 +47,15 @@ namespace MxTests
             rhinoCore.Dispose();
             rhinoCore = null;
         }
+    }
 
+    public class OpenRhinoSetupTests
+    {
         [Test]
         public void ThereAreDataDrivenFolders()
         {
-            Assert.IsNotEmpty(test_folders);
-        }
-
-        public void Dispose()
-        {
-            if (rhinoCore != null)
-                OneTimeTearDown();
-            GC.SuppressFinalize(this);
+            Assert.IsNotEmpty(OpenRhinoSetup.TestFolders);
         }
     }
 }
+
