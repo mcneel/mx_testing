@@ -12,24 +12,26 @@ namespace MxTests
     [SetUpFixture]
     public class OpenRhinoSetup
     {
-        public static string RhinoSystemDir { get; set; }
+        public static string RhinoSystemDir { get; private set; }
 
         private static Exception to_throw;
+        public static string SettingsFile { get; private set; }
+
+        public const string SettingsFileName = "MxTests.testsettings.xml";
+        public static string SettingsDir { get; private set; }
 
         static OpenRhinoSetup()
         {
-            string dll_dir = TestContext.CurrentContext.TestDirectory; //this will be /bin
-            string settingsfile = Path.Combine(dll_dir, "MxTests.testsettings.xml");
+            SettingsDir = TestContext.CurrentContext.TestDirectory; //this will be /bin
+            SettingsFile = Path.Combine(SettingsDir, SettingsFileName);
 
-            if (File.Exists(settingsfile))
+            if (File.Exists(SettingsFile))
             {
-                SettingsXml = XDocument.Load(settingsfile);
+                SettingsXml = XDocument.Load(SettingsFile);
                 RhinoSystemDir = SettingsXml.Descendants("RhinoSystemDirectory").FirstOrDefault()?.Value ?? null;
             }
             else
-            {
-                to_throw = new FileNotFoundException($"Settings file not found in {dll_dir}.");
-            }
+                SettingsXml = new XDocument();
         }
 
         public static XDocument SettingsXml { get; set; }
@@ -62,5 +64,15 @@ namespace MxTests
             rhinoCore = null;
         }
     }
-}
 
+    [TestFixture]
+    class OpenRhinoTests
+    {
+        [Test]
+        public void SettingsFileExists()
+        {
+            Assert.IsTrue(File.Exists(OpenRhinoSetup.SettingsFile),
+                $"File setting does not exist. Expected '{OpenRhinoSetup.SettingsFile}' in '{OpenRhinoSetup.SettingsDir}'.");
+        }
+    }
+}

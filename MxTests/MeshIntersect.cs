@@ -23,7 +23,11 @@ namespace MxTests
                 bool optional = mdir.Attribute("optional")?.Value != "false"; //defaults to true
 
                 string attempt = mdir.Value;
-                if (!Path.IsPathRooted(mdir.Value)) attempt = Path.Combine(OpenRhinoSetup.RhinoSystemDir, attempt);
+                if (!Path.IsPathRooted(mdir.Value))
+                {
+                    attempt = Path.Combine(OpenRhinoSetup.SettingsDir, attempt);
+                    attempt = Path.GetFullPath(attempt);
+                }
 
                 if (Directory.Exists(attempt))
                 {
