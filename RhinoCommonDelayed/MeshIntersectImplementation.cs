@@ -185,7 +185,7 @@ namespace RhinoCommonDelayed
                             rc.Closed = split[1].Equals("CLOSED", StringComparison.InvariantCultureIgnoreCase);
 
                         if (split.Length > 2)
-                            rc.Closed = split[1].StartsWith("OVERLAP", StringComparison.InvariantCultureIgnoreCase);
+                            rc.Overlap = split[2].StartsWith("OVERLAP", StringComparison.InvariantCultureIgnoreCase);
 
                         return rc;
                     }
