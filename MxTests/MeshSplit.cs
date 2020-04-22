@@ -10,7 +10,7 @@ using System.Xml.Linq;
 namespace MxTests
 {
     [TestFixture]
-    public class MeshIntersect : AnyCommand<MeshIntersect>
+    public class MeshSplit : AnyCommand<MeshSplit>
     {
         [Test, TestCaseSource(nameof(GetTestModels))]
         public void Model(string filename, string filepath)

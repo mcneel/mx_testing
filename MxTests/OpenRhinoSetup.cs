@@ -12,13 +12,13 @@ namespace MxTests
     [SetUpFixture]
     public class OpenRhinoSetup
     {
-        public static string RhinoSystemDir { get; private set; }
+        internal static string RhinoSystemDir { get; private set; }
 
         private static Exception to_throw;
-        public static string SettingsFile { get; private set; }
+        internal static string SettingsFile { get; private set; }
 
-        public const string SettingsFileName = "MxTests.testsettings.xml";
-        public static string SettingsDir { get; private set; }
+        internal const string SettingsFileName = "MxTests.testsettings.xml";
+        internal static string SettingsDir { get; private set; }
 
         static OpenRhinoSetup()
         {
@@ -34,7 +34,44 @@ namespace MxTests
                 SettingsXml = new XDocument();
         }
 
-        public static XDocument SettingsXml { get; set; }
+        internal static XDocument SettingsXml { get; set; }
+
+        internal static void ScanFolders(string heading, List<string> testModels)
+        {
+            var test_folders = new List<string>();
+            foreach (var mdir in OpenRhinoSetup.SettingsXml.Descendants(heading).Descendants("ModelDirectory"))
+            {
+                bool optional = mdir.Attribute("optional")?.Value != "false"; //defaults to true
+
+                string attempt = mdir.Value;
+                if (!Path.IsPathRooted(mdir.Value))
+                {
+                    attempt = Path.Combine(OpenRhinoSetup.SettingsDir, attempt);
+                    attempt = Path.GetFullPath(attempt);
+                }
+
+                if (Directory.Exists(attempt))
+                {
+                    test_folders.Add(attempt);
+                }
+                else if (!optional)
+                {
+                    to_throw = new InvalidOperationException($"Could not find required directory: \"{mdir.Value}\".");
+                    break;
+                }
+            }
+
+            foreach (string folder in test_folders)
+            {
+                if (Directory.Exists(folder))
+                    testModels.AddRange(
+                        Directory.GetFiles(folder, @"*.3dm", SearchOption.AllDirectories)
+                        );
+            }
+
+            testModels.RemoveAll(f => Path.GetFileName(f).StartsWith("#", System.StringComparison.InvariantCultureIgnoreCase));
+            testModels.RemoveAll(f => Path.GetFileName(f).EndsWith("bak", System.StringComparison.InvariantCultureIgnoreCase));
+        }
 
         private IDisposable rhinoCore; //do NOT reference this by its RhinoCommon name
 
@@ -66,7 +103,7 @@ namespace MxTests
     }
 
     [TestFixture]
-    class OpenRhinoTests
+    public class OpenRhinoTests
     {
         [Test]
         public void SettingsFileExists()

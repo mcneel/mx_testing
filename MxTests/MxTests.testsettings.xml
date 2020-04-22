@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Settings>
   <RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Debug\</RhinoSystemDirectory>
-  <MX>
-    <ModelDirectory>..\models\</ModelDirectory>
-    <ModelDirectory optional="true">..\othermodels\models\</ModelDirectory>
-  </MX>
+  <MeshIntersect>
+    <ModelDirectory>..\models\MeshIntersect\</ModelDirectory>
+    <ModelDirectory optional="true">..\private_models\models\MeshIntersect\</ModelDirectory>
+  </MeshIntersect>
 </Settings>
