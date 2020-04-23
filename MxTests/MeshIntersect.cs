@@ -15,7 +15,7 @@ namespace MxTests
         [Test, TestCaseSource(nameof(GetTestModels))]
         public void Model(string filename, string filepath)
         {
-            MeshIntersectImplementation.Model(Path.Combine(filepath, filename));
+            MeshIntersectImplementation.Instance.Model(Path.Combine(filepath, filename));
         }
     }
 }
