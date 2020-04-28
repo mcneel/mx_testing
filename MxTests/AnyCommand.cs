@@ -17,7 +17,10 @@ namespace MxTests
             OpenRhinoSetup.ScanFolders(typeof(T).Name, g_test_models);
         }
 
-        public static IEnumerable<string[]> GetTestModels() => g_test_models.Select(p => new string[] { Path.GetFileName(p), Path.GetDirectoryName(p) });
+        public static IEnumerable<string[]> GetTestModels()
+        {
+            return g_test_models.Select(p => new string[] { Path.GetFileName(p), Path.GetDirectoryName(p) });
+        }
 
         [Test]
         public void ThereAreDataDrivenModels()

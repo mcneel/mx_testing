@@ -5,5 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
-
+[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Not localized.")]
+[assembly: SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "Generics is here a way to circumvent prohibition to use GetType() in static methods.",
+    Scope = "member", Target = "~M:MxTests.AnyCommand`1.GetTestModels~System.Collections.Generic.IEnumerable{System.String[]}")]

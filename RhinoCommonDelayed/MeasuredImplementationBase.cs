@@ -26,7 +26,7 @@ namespace RhinoCommonDelayed
     public abstract class MeasuredImplementationBase
     {
 
-        internal void ParseAndExecuteNotes(string filepath, string notesIncipit)
+        internal void ParseAndExecuteNotes(string filepath, string notesIncipit, bool twoGroups)
         {
             using (var file = File3dm.Read(filepath))
             {
@@ -50,24 +50,24 @@ namespace RhinoCommonDelayed
                     }
                 }
 
-                if (incipit.Trim() == notesIncipit)
+                if (incipit.Trim().StartsWith(notesIncipit))
                 {
-                    MeasuredTest(otherlines, file, filepath);
+                    MeasuredTest(otherlines, file, filepath, twoGroups);
                 }
                 else
                     throw new NotSupportedException($"Unexpected type of test found in notes: {incipit}");
             }
         }
 
-        internal void MeasuredTest(List<string> otherlines, File3dm file, string filepath)
+        internal void MeasuredTest(List<string> otherlines, File3dm file, string filepath, bool twoGroups)
         {
             var expected = ExtractExpectedValues(otherlines);
-            ExtractInputsFromFile(file, out double final_tolerance, out IEnumerable<Mesh> input_meshes);
+            ExtractInputsFromFile(file, twoGroups, out double final_tolerance, out IEnumerable<Mesh> input_meshes, out IEnumerable<Mesh> secondMeshesGroup);
 
             string log_text;
             List<ResultMetrics> result_ordered;
 
-            bool rv = OperateCommand(input_meshes, final_tolerance, out result_ordered, out log_text);
+            bool rv = OperateCommand(input_meshes, secondMeshesGroup, final_tolerance, out result_ordered, out log_text);
 
             try
             {
@@ -89,8 +89,13 @@ namespace RhinoCommonDelayed
                             foreach (var result in result_ordered)
                             {
                                 if (result == null) continue;
-                                new_file.Objects.AddCurve(result.Polyline.ToPolylineCurve(),
-                                    new ObjectAttributes { LayerIndex = debug_layer.Index, ColorSource = ObjectColorSource.ColorFromLayer });
+
+                                if (result.Polyline != null)
+                                    new_file.Objects.AddCurve(result.Polyline.ToPolylineCurve(),
+                                        new ObjectAttributes { LayerIndex = debug_layer.Index, ColorSource = ObjectColorSource.ColorFromLayer });
+                                if (result.Mesh != null)
+                                    new_file.Objects.AddMesh(result.Mesh,
+                                        new ObjectAttributes { LayerIndex = debug_layer.Index, ColorSource = ObjectColorSource.ColorFromLayer });
                             }
                         new_file.Write(new_name, new File3dmWriteOptions());
                     }
@@ -106,41 +111,53 @@ namespace RhinoCommonDelayed
             }
         }
 
-        internal abstract bool OperateCommand(IEnumerable<Mesh> inputMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog);
+        internal abstract bool OperateCommand(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog);
         internal abstract void CheckAssertions(List<ResultMetrics> expected, List<ResultMetrics> returned, bool rv, string textLog);
 
-        internal void ExtractInputsFromFile(File3dm file, out double final_tolerance, out IEnumerable<Mesh> all_meshes)
+        internal virtual void ExtractInputsFromFile(File3dm file, bool usesSecondGroup, out double final_tolerance, out IEnumerable<Mesh> meshes, out IEnumerable<Mesh> secondMeshesGroup)
         {
-            var items = file.Objects.Select(item => new { item.Id, item.Geometry }).ToList(); //buffer
+            secondMeshesGroup = null;
 
-            var original_meshes = items.Where(item => item.Geometry.ObjectType == ObjectType.Mesh);
+            var items = file.Objects.Select(item => new { item.Id, item.Geometry, item.Attributes }).ToList(); //buffer
+
             var curves = items.Where(item => item.Geometry.ObjectType == ObjectType.Curve).ToList();
 
             double doc_tolerance = file.Settings.ModelAbsoluteTolerance;
             double coefficient = Intersection.MeshIntersectionsTolerancesCoefficient;
 
             final_tolerance = doc_tolerance * coefficient;
-            all_meshes = original_meshes.Select(a => a.Geometry as Mesh);
+            var items_meshes = items.Where(a => a.Geometry.ObjectType == ObjectType.Mesh).Select(i => new { i.Id, Geometry = (Mesh)i.Geometry, i.Attributes });
+
             if (curves.Count > 0)
             {
                 BoundingBox box = BoundingBox.Empty;
-                foreach (var orig in original_meshes.Select(a => a.Geometry))
+                foreach (var orig in items_meshes.Select(a => a.Geometry))
                     box.Union(orig.GetBoundingBox(true));
 
                 var test_cplane = file.AllNamedConstructionPlanes.FindName("Test");
-                if (test_cplane == null) throw new NotSupportedException("Curves exist in the document, but there's no Test named CPlane");
+                if (test_cplane == null) throw new NotSupportedException("Curves exist in the document, but there's no Test named CPlane to extrude it.");
 
                 var meshed_curves = curves.Select(
-                    c =>
-                        Mesh.CreateFromCurveExtrusion(
+                    c => new { c.Id,
+                        Geometry = Mesh.CreateFromCurveExtrusion(
                             (Curve)c.Geometry,
                             test_cplane.Plane.ZAxis,
                             MeshingParameters.Default,
                             box
-                            ));
+                            ), c.Attributes});
 
-                all_meshes = all_meshes.Concat(meshed_curves);
+                items_meshes = items_meshes.Concat(meshed_curves);
             }
+
+            if (usesSecondGroup)
+            {
+                var layers = file.AllLayers.OrderBy(l => l.Name).ToList();
+                if (layers.Count < 2) throw new InvalidOperationException("At least two layers are required for operations that take 2 inputs.");
+
+                meshes = items_meshes.Where(i => i.Attributes.LayerIndex == layers[0].Index).Select(i => i.Geometry);
+                secondMeshesGroup = items_meshes.Where(i => i.Attributes.LayerIndex == layers[1].Index).Select(i => i.Geometry);
+            }
+            else meshes = items_meshes.Select(i => i.Geometry);
         }
 
 

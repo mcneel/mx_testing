@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Settings>
   <RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Debug\</RhinoSystemDirectory>
+  
   <MeshIntersect>
     <ModelDirectory>..\models\MeshIntersect\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\MeshIntersect\</ModelDirectory>
   </MeshIntersect>
+  <MeshSplit>
+    <ModelDirectory>..\models\MeshSplit\</ModelDirectory>
+    <ModelDirectory optional="true">..\private_models\models\MeshSplit\</ModelDirectory>
+  </MeshSplit>
 </Settings>
