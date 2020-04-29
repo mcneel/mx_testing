@@ -47,7 +47,7 @@ namespace RhinoCommonDelayed
             return rc;
         }
 
-        internal override void CheckAssertions(List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
+        internal override void CheckAssertions(File3dm file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
         {
             Assert.IsTrue(rv, "Return value of Intersection.MeshMesh function");
             Assert.IsEmpty(log_text, "Textlog of function must be empty");
@@ -56,7 +56,7 @@ namespace RhinoCommonDelayed
 
             for (int i = 0; i < expected.Count; i++)
             {
-                Assert.AreEqual(expected[i].Measurement, result_ordered[i].Measurement, 0.002);
+                Assert.AreEqual(expected[i].Measurement, result_ordered[i].Measurement, Math.Max(expected[i].Measurement * 10e-8, file.Settings.ModelAbsoluteTolerance));
                 if (expected[i].Closed.HasValue) Assert.AreEqual(expected[i].Closed.Value, result_ordered[i].Closed.Value,
                     $"Curve of length {expected[i].Measurement} was not {(expected[i].Closed.Value ? "closed" : "open")} as expected.");
                 if (expected[i].Overlap.HasValue) Assert.AreEqual(expected[i].Overlap.Value, result_ordered[i].Overlap.Value,

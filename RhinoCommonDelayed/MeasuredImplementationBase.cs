@@ -28,12 +28,25 @@ namespace RhinoCommonDelayed
 
         internal void ParseAndExecuteNotes(string filepath, string notesIncipit, bool twoGroups)
         {
+            string filename = Path.GetFileName(filepath);
+            if (filename.StartsWith("!"))
+            {
+                Assert.Throws<AssertionException>(
+                    delegate { RunParseExecuteNotes(filepath, notesIncipit, twoGroups, true); },
+                    "Expected failure, but test succeeded.");
+            }
+            else
+                RunParseExecuteNotes(filepath, notesIncipit, twoGroups, false);
+        }
+
+        private void RunParseExecuteNotes(string filepath, string notesIncipit, bool twoGroups, bool shouldThrow)
+        {
             using (var file = File3dm.Read(filepath))
             {
                 var notes = file.Notes.Notes;
 
                 if (string.IsNullOrWhiteSpace(notes))
-                    throw new System.NotSupportedException("Expected notes with information on processing.");
+                    throw new NotSupportedException("Expected notes with information on processing.");
 
                 var otherlines = new List<string>();
                 string incipit = null;
@@ -52,14 +65,14 @@ namespace RhinoCommonDelayed
 
                 if (incipit.Trim().StartsWith(notesIncipit))
                 {
-                    MeasuredTest(otherlines, file, filepath, twoGroups);
+                    MeasuredTest(otherlines, file, filepath, twoGroups, shouldThrow);
                 }
                 else
                     throw new NotSupportedException($"Unexpected type of test found in notes: {incipit}");
             }
         }
 
-        internal void MeasuredTest(List<string> otherlines, File3dm file, string filepath, bool twoGroups)
+        internal void MeasuredTest(List<string> otherlines, File3dm file, string filepath, bool twoGroups, bool shouldThrow)
         {
             var expected = ExtractExpectedValues(otherlines);
             ExtractInputsFromFile(file, twoGroups, out double final_tolerance, out IEnumerable<Mesh> input_meshes, out IEnumerable<Mesh> secondMeshesGroup);
@@ -71,9 +84,9 @@ namespace RhinoCommonDelayed
 
             try
             {
-                CheckAssertions(expected, result_ordered, rv, log_text);
+                CheckAssertions(file, expected, result_ordered, rv, log_text);
             }
-            catch (AssertionException a)
+            catch (AssertionException a) when (!shouldThrow)
             {
                 string new_name = Path.Combine(Path.GetDirectoryName(filepath), "#" + Path.GetFileName(filepath));
 
@@ -112,7 +125,7 @@ namespace RhinoCommonDelayed
         }
 
         internal abstract bool OperateCommand(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog);
-        internal abstract void CheckAssertions(List<ResultMetrics> expected, List<ResultMetrics> returned, bool rv, string textLog);
+        internal abstract void CheckAssertions(File3dm file, List<ResultMetrics> expected, List<ResultMetrics> returned, bool rv, string textLog);
 
         internal virtual void ExtractInputsFromFile(File3dm file, bool usesSecondGroup, out double final_tolerance, out IEnumerable<Mesh> meshes, out IEnumerable<Mesh> secondMeshesGroup)
         {
