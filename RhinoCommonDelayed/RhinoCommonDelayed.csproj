@@ -19,10 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="RhinoCommon">
-      <HintPath>..\..\..\..\..\Program Files\Rhino 7 WIP\System\RhinoCommon.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+    <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj" />
   </ItemGroup>
 
 </Project>
