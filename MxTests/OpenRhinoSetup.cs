@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using Rhino;
 using System.IO;
@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Xml.Linq;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
+using System.Diagnostics;
 
 namespace MxTests
 {
@@ -115,6 +117,8 @@ namespace MxTests
     [Test]
     public void SettingsFileExists()
     {
+      Trace.WriteLine($"Rhino folder is {OpenRhinoSetup.RhinoSystemDir}.");
+
       Assert.IsTrue(File.Exists(OpenRhinoSetup.SettingsFile),
           $"File setting does not exist. Expected '{OpenRhinoSetup.SettingsFile}' in '{OpenRhinoSetup.SettingsDir}'.");
     }
