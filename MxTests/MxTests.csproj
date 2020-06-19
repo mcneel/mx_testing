@@ -1,5 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Dll.props" />
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
 
@@ -14,12 +14,12 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <WarningLevel>1</WarningLevel>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>$(RhinoBinDir)\$(Configuration)\</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>$(RhinoBinDir)\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,7 +48,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RhinoCommonDelayed\RhinoCommonDelayed.csproj" />
+    <ProjectReference Include="..\RhinoCommonDelayed\RhinoCommonDelayed.csproj">
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
