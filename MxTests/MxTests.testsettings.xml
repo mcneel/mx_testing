@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Settings>
-  <RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Debug\</RhinoSystemDirectory>
+  <!--Do not enable unless sure about what you are doing 
+  <RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Debug\</RhinoSystemDirectory>-->
   
   <MeshIntersect>
     <ModelDirectory>..\models\MeshIntersect\</ModelDirectory>
