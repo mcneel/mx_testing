@@ -48,7 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RhinoCommonDelayed\RhinoCommonDelayed.csproj">
+    <ProjectReference Include="..\RhinoCommonDelayed\RhinoCommonDelayedTests.csproj">
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
     </ProjectReference>
