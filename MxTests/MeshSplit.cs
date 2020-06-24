@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using RhinoCommonDelayed;
+using RhinoCommonDelayedTests;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
