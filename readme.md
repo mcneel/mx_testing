@@ -4,7 +4,7 @@
 
 This is a an NUnit 3.7 testing project for Mesh Intersection.
 
-Its purpose is to be able to run tests in Visual Studio, without needs of big setups. In fact, right now there is no automatic testing system before PR are automatically merged.
+Its purpose is to run tests in Visual Studio, without the need of a big setup. In fact, right now there is no automatic testing system before PR are automatically merged.
 
 ### :microscope: General usage ###
 
