@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System;
 using Rhino;
 using System.IO;
@@ -82,7 +82,7 @@ namespace MxTests
       testModels.RemoveAll(f => Path.GetFileName(f).EndsWith("bak", System.StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private IDisposable rhinoCore; //do NOT reference this by its RhinoCommon name
+    private object rhinoCore; //do NOT reference this by its RhinoCommon name
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
@@ -106,7 +106,7 @@ namespace MxTests
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
-      rhinoCore.Dispose();
+      (rhinoCore as IDisposable)?.Dispose();
       rhinoCore = null;
     }
   }
