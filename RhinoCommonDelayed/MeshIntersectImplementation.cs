@@ -12,12 +12,12 @@ namespace RhinoCommonDelayedTests
       : MeasuredImplementationBase
   {
     static MeshIntersectImplementation() { Instance = new MeshIntersectImplementation(); }
-    private MeshIntersectImplementation() { }
+    protected MeshIntersectImplementation() { }
     public static MeshIntersectImplementation Instance { get; private set; }
 
     const string incipitString = "MEASURED INTERSECTION";
 
-    public void Model(string filepath)
+    public virtual void Model(string filepath)
     {
       ParseAndExecuteNotes(filepath, incipitString, false);
     }
@@ -46,7 +46,7 @@ namespace RhinoCommonDelayedTests
 
     internal override void CheckAssertions(File3dm file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
     {
-      Assert.IsTrue(rv, "Return value of Intersection.MeshMesh function");
+      Assert.IsTrue(rv, "Return value of intersection function was false.");
       Assert.IsEmpty(log_text, "Textlog of function must be empty");
 
       NUnit.Framework.Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} polylines but expected {expected.Count}.");
