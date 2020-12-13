@@ -9,13 +9,21 @@ using System.Xml.Linq;
 
 namespace MxTests
 {
-    [TestFixture]
-    public class MeshIntersect : AnyCommand<MeshIntersect>
+  [TestFixture]
+  public class MeshIntersect : AnyCommand<MeshIntersect>
+  {
+    [Test, TestCaseSource(nameof(GetTestModels))]
+    public void Model(string filename, string filepath)
     {
-        [Test, TestCaseSource(nameof(GetTestModels))]
-        public void Model(string filename, string filepath)
-        {
-            MeshIntersectImplementation.Instance.Model(Path.Combine(filepath, filename));
-        }
+      Console.WriteLine($"SettingsFile: {OpenRhinoSetup.SettingsFile}");
+      Console.WriteLine($"SettingsDir: {OpenRhinoSetup.SettingsDir}");
+      Console.WriteLine($"RhinoSystemDir: {OpenRhinoSetup.RhinoSystemDir}");
+      Console.WriteLine($"RhinoCommon: {typeof(Rhino.Geometry.Mesh).Assembly.Location}");
+      Console.WriteLine($"Resolver.RhinoSystemDirectory: {RhinoInside.Resolver.RhinoSystemDirectory}");
+      Console.WriteLine($"Resolver.RhinoSystemDirectory: {RhinoInside.Resolver.RhinoSystemDirectory}");
+      Console.WriteLine($"Test filename: {filename}");
+      Console.WriteLine($"Path: {filepath}");
+      MeshIntersectImplementation.Instance.Model(Path.Combine(filepath, filename));
     }
+  }
 }
