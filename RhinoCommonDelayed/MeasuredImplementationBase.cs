@@ -146,7 +146,7 @@ namespace RhinoCommonDelayedTests
           box.Union(orig.GetBoundingBox(true));
 
         var test_cplane = file.AllNamedConstructionPlanes.FindName("Test");
-        if (test_cplane == null) throw new NotSupportedException("Curves exist in the document, but there's no Test named CPlane to extrude it.");
+        if (test_cplane == null) throw new NotSupportedException("Curves exist in the document, but there's no CPlane named 'Test' to extrude them.");
 
         var meshed_curves = curves.Select(
             c => new
