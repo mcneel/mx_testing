@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using RhinoCommonDelayedTests;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,7 +9,7 @@ using System.Xml.Linq;
 namespace MxTests
 {
   [TestFixture]
-  public class MinorTests
+  public class MeshSdkTests
   {
     [TestCase(0.0, false,   0.5, 0.5, -1.0,  0.0, 0.0, 1.0,   ExpectedResult = 1.0)]
     [TestCase(0.0, true,   0.5, 0.5, -1.0,  0.0, 0.0, 1.0,   ExpectedResult = 1.0)]
