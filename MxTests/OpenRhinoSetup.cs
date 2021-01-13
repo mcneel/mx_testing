@@ -112,7 +112,7 @@ namespace MxTests
   }
 
   [TestFixture]
-  public class OpenRhinoTests
+  public class _OpenRhinoTests
   {
     [Test]
     public void SettingsFileExists()
