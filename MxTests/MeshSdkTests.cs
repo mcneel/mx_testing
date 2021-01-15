@@ -30,6 +30,10 @@ namespace MxTests
 
     [TestCase(-100.0, false, -99.5, -99.5, -102.0, 0.0, 0.0, -1.0, ExpectedResult = -1.0)]
     [TestCase(-100.0, true, -99.5, -99.5, -102.0, 0.0, 0.0, -1.0, ExpectedResult = -1.0)]
+
+    [TestCase(0.0, false, 1.0, 0.50001, 1.0, 0.0, 0.0, -1.0, ExpectedResult = -1.0)]
+    [TestCase(0.0, false, 1.0, 0.5, 1.0, 0.0, 0.0, -1.0, ExpectedResult = 1.0)]
+    [TestCase(0.0, false, 0.9999, 0.49999, 1.0, 0.0, 0.0, -1.0, ExpectedResult = 1.0)]
     public double IntersectionMeshRay(double meshOffset, bool meshFlip,   double x, double y, double z,   double vx, double vy, double vz)
     {
       return MinorImplmentations.IntersectionMeshRay(meshOffset, meshFlip, x, y, z, vx, vy, vz);
@@ -39,6 +43,7 @@ namespace MxTests
     [TestCase(100.0, 10, 10, 99,99,99, ExpectedResult = false)]
 
     [TestCase(100.0, 100, 100, 70,70,0, ExpectedResult = true)]
+    [TestCase(99.0, 100, 100, 70, 70, 0, ExpectedResult = false)]
     public bool MeshIsPointInside(double radius, int u, int v, double x, double y, double z)
     {
       return MinorImplmentations.MeshIsPointInside(radius, u, v, x, y, z);
