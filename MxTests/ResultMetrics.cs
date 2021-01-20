@@ -1,4 +1,4 @@
-﻿using Rhino.Geometry;
+using Rhino.Geometry;
 
 namespace MxTests
 {
@@ -9,5 +9,9 @@ namespace MxTests
     public bool? Overlap { get; set; }
     public Polyline Polyline { get; set; }
     public Mesh Mesh { get; set; }
+
+    public Curve Curve { get; set; }
+
+    public Point3d? Point { get; set; }
   }
 }

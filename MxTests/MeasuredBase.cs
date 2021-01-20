@@ -15,7 +15,7 @@ namespace MxTests
   /// <summary>
   /// Provides a basic implementation for File3dm-based tests that run from a folder.
   /// </summary>
-  internal abstract class MeasuredImplementationBase
+  internal abstract class MeasuredBase<T> where T : GeometryBase
   {
 
     internal void ParseAndExecuteNotes(string filepath, string notesIncipit, bool twoGroups)
@@ -67,10 +67,10 @@ namespace MxTests
     internal void MeasuredTest(List<string> otherlines, File3dm file, string filepath, bool twoGroups, bool shouldThrow)
     {
       var expected = ExtractExpectedValues(otherlines);
-      ExtractInputsFromFile(file, twoGroups, out double final_tolerance, out IEnumerable<Mesh> input_meshes, out IEnumerable<Mesh> secondMeshesGroup);
+      ExtractInputsFromFile(file, twoGroups, out double final_tolerance, out IEnumerable<T> inputMeshes, out IEnumerable<T> secondMeshesGroup);
 
-      bool rv = OperateMeshCommand(
-        input_meshes, secondMeshesGroup, final_tolerance,
+      bool rv = OperateCommandOnGeometry(
+        inputMeshes, secondMeshesGroup, final_tolerance,
         out List<ResultMetrics> result_ordered, out string log_text);
 
       try
@@ -97,8 +97,16 @@ namespace MxTests
                 if (result.Polyline != null)
                   new_file.Objects.AddCurve(result.Polyline.ToPolylineCurve(),
                       new ObjectAttributes { LayerIndex = debug_layer.Index, ColorSource = ObjectColorSource.ColorFromLayer });
+                else if (result.Curve != null)
+                  new_file.Objects.AddCurve(result.Curve,
+                      new ObjectAttributes { LayerIndex = debug_layer.Index, ColorSource = ObjectColorSource.ColorFromLayer });
+
                 if (result.Mesh != null)
                   new_file.Objects.AddMesh(result.Mesh,
+                      new ObjectAttributes { LayerIndex = debug_layer.Index, ColorSource = ObjectColorSource.ColorFromLayer });
+
+                if (result.Point != null)
+                  new_file.Objects.AddPoint(result.Point.Value,
                       new ObjectAttributes { LayerIndex = debug_layer.Index, ColorSource = ObjectColorSource.ColorFromLayer });
               }
             new_file.Write(new_name, new File3dmWriteOptions());
@@ -115,27 +123,33 @@ namespace MxTests
       }
     }
 
-    internal abstract bool OperateMeshCommand(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog);
+    internal abstract bool OperateCommandOnGeometry
+      (IEnumerable<T> inputMeshes, IEnumerable<T> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog);
     internal abstract void CheckAssertions(File3dm file, List<ResultMetrics> expected, List<ResultMetrics> returned, bool rv, string textLog);
 
-    internal virtual void ExtractInputsFromFile(File3dm file, bool usesSecondGroup, out double final_tolerance, out IEnumerable<Mesh> meshes, out IEnumerable<Mesh> secondMeshesGroup)
+    internal virtual double ToleranceCoefficient { get { return 1.0; } }
+
+    internal virtual void ExtractInputsFromFile<T>(File3dm file, bool usesSecondGroup, out double final_tolerance, out IEnumerable<T> surfaces, out IEnumerable<T> secondSurfacesGroup)
     {
-      secondMeshesGroup = null;
+      secondSurfacesGroup = null;
 
       var items = file.Objects.Select(item => new { item.Id, item.Geometry, item.Attributes }).ToList(); //buffer
 
       var curves = items.Where(item => item.Geometry.ObjectType == ObjectType.Curve).ToList();
 
       double doc_tolerance = file.Settings.ModelAbsoluteTolerance;
-      double coefficient = Intersection.MeshIntersectionsTolerancesCoefficient;
+      double coefficient = ToleranceCoefficient;
 
       final_tolerance = doc_tolerance * coefficient;
-      var items_meshes = items.Where(a => a.Geometry.ObjectType == ObjectType.Mesh).Select(i => new { i.Id, Geometry = (Mesh)i.Geometry, i.Attributes });
+
+      ObjectType filter = typeof(T) == typeof(Mesh) ? ObjectType.Mesh : ObjectType.Surface | ObjectType.Brep;
+
+      var specific_items = items.Where(a => ((a.Geometry.ObjectType & filter) != 0)).Select(i => new { i.Id, Geometry = (T)(object)i.Geometry, i.Attributes });
 
       if (curves.Count > 0)
       {
         BoundingBox box = BoundingBox.Empty;
-        foreach (var orig in items_meshes.Select(a => a.Geometry))
+        foreach (var orig in items.Select(a => a.Geometry))
           box.Union(orig.GetBoundingBox(true));
 
         var test_cplane = file.AllNamedConstructionPlanes.FindName("Test");
@@ -145,16 +159,23 @@ namespace MxTests
             c => new
             {
               c.Id,
-              Geometry = Mesh.CreateFromCurveExtrusion(
+              Geometry = (T)(
+                    typeof(T) == typeof(Mesh) ?
+                    (object)Mesh.CreateFromCurveExtrusion(
                     (Curve)c.Geometry,
                     test_cplane.Plane.ZAxis,
                     MeshingParameters.Default,
                     box
+                    ):
+                    (object)Surface.CreateExtrusion(
+                    (Curve)c.Geometry,
+                    test_cplane.Plane.ZAxis
+                    )
                     ),
               c.Attributes
             });
 
-        items_meshes = items_meshes.Concat(meshed_curves);
+        specific_items = specific_items.Concat(meshed_curves);
       }
 
       if (usesSecondGroup)
@@ -162,10 +183,10 @@ namespace MxTests
         var layers = file.AllLayers.OrderBy(l => l.Name).ToList();
         if (layers.Count < 2) throw new InvalidOperationException("At least two layers are required for operations that take 2 inputs.");
 
-        meshes = items_meshes.Where(i => i.Attributes.LayerIndex == layers[0].Index).Select(i => i.Geometry);
-        secondMeshesGroup = items_meshes.Where(i => i.Attributes.LayerIndex == layers[1].Index).Select(i => i.Geometry);
+        surfaces = specific_items.Where(i => i.Attributes.LayerIndex == layers[0].Index).Select(i => i.Geometry);
+        secondSurfacesGroup = specific_items.Where(i => i.Attributes.LayerIndex == layers[1].Index).Select(i => i.Geometry);
       }
-      else meshes = items_meshes.Select(i => i.Geometry);
+      else surfaces = specific_items.Select(i => i.Geometry);
     }
 
 
@@ -196,6 +217,32 @@ namespace MxTests
           .ToList();
 
       return expected;
+    }
+  }
+
+  internal abstract class MeasuredIntersectionsBase<T>
+    : MeasuredBase<T> where T : GeometryBase
+  {
+    const string incipitString = "MEASURED INTERSECTION";
+    public static string IncipitString => incipitString;
+
+    internal override void CheckAssertions(File3dm file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
+    {
+      Assert.IsTrue(rv, "Return value of intersection function was false.");
+      Assert.IsEmpty(log_text, "Textlog of function must be empty");
+
+      NUnit.Framework.Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} curves but expected {expected.Count}.");
+
+      for (int i = 0; i < expected.Count; i++)
+      {
+        Assert.AreEqual(expected[i].Measurement, result_ordered[i].Measurement, Math.Max(expected[i].Measurement * 10e-8, file.Settings.ModelAbsoluteTolerance));
+        if (expected[i].Closed.HasValue) Assert.AreEqual(expected[i].Closed.Value, result_ordered[i].Closed.Value,
+            $"Curve of length {expected[i].Measurement} was not {(expected[i].Closed.Value ? "closed" : "open")} as expected.");
+        if (expected[i].Overlap.HasValue) Assert.AreEqual(expected[i].Overlap.Value, result_ordered[i].Overlap.Value,
+            $"Curve of length {expected[i].Measurement} was not {(expected[i].Overlap.Value ? "ovelapping" : "perforating")} as expected.");
+        if (expected[i].Point.HasValue) Assert.AreEqual(expected[i].Overlap.Value, result_ordered[i].Overlap.Value,
+            $"Curve of length {expected[i].Measurement} was not {(expected[i].Overlap.Value ? "ovelapping" : "perforating")} as expected.");
+      }
     }
   }
 }

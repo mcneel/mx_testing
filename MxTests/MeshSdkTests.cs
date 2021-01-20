@@ -49,6 +49,8 @@ namespace MxTests
       return MinorImplmentations.MeshIsPointInside(radius, u, v, x, y, z);
     }
 
+
+
     internal static class MinorImplmentations
     {
       public static double IntersectionMeshRay(
