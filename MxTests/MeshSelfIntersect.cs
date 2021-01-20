@@ -33,7 +33,7 @@ namespace MxTests
         ParseAndExecuteNotes(filepath, incipitString, false);
       }
 
-      internal override bool OperateMeshCommand(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, 
+      internal override bool OperateCommandOnGeometry(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, 
         double tolerance, out List<ResultMetrics> returned, out string textLog)
       {
         Polyline[] intersections;
