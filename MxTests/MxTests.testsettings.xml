@@ -15,4 +15,8 @@
     <ModelDirectory>..\models\MeshSplit\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\MeshSplit\</ModelDirectory>
   </MeshSplit>
+  <SurfaceIntersect>
+    <ModelDirectory>..\models\SurfaceIntersect\</ModelDirectory>
+    <ModelDirectory optional="true">..\private_models\models\SurfaceIntersect\</ModelDirectory>
+  </SurfaceIntersect>
 </Settings>

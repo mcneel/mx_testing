@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Rhino.FileIO;
 using Rhino.Geometry;
+using Rhino.Geometry.Intersect;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,11 +19,13 @@ namespace MxTests
     }
 
     internal class MeshSplitImplementation
-    : MeasuredImplementationBase
+    : MeasuredBase<Mesh>
     {
       static MeshSplitImplementation() { Instance = new MeshSplitImplementation(); }
       private MeshSplitImplementation() { }
       public static MeshSplitImplementation Instance { get; private set; }
+
+      internal override double ToleranceCoefficient => Intersection.MeshIntersectionsTolerancesCoefficient;
 
       const string incipitString = "MEASURED SPLIT";
 
@@ -31,7 +34,7 @@ namespace MxTests
         ParseAndExecuteNotes(filepath, incipitString, true);
       }
 
-      internal override bool OperateMeshCommand(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog)
+      internal override bool OperateCommandOnGeometry(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog)
       {
         bool rc = true;
         returned = new List<ResultMetrics>();
