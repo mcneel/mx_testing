@@ -129,7 +129,7 @@ namespace MxTests
 
     internal virtual double ToleranceCoefficient { get { return 1.0; } }
 
-    internal virtual void ExtractInputsFromFile<T>(File3dm file, bool usesSecondGroup, out double final_tolerance, out IEnumerable<T> surfaces, out IEnumerable<T> secondSurfacesGroup)
+    internal virtual void ExtractInputsFromFile(File3dm file, bool usesSecondGroup, out double final_tolerance, out IEnumerable<T> surfaces, out IEnumerable<T> secondSurfacesGroup)
     {
       secondSurfacesGroup = null;
 

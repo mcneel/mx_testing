@@ -1,6 +1,9 @@
 using NUnit.Framework;
+using Rhino.FileIO;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
+using System;
+using System.IO;
 
 namespace MxTests
 {
@@ -49,7 +52,11 @@ namespace MxTests
       return MinorImplmentations.MeshIsPointInside(radius, u, v, x, y, z);
     }
 
-
+    [Test]
+    public void MeshRay()
+    {
+      MinorImplmentations.MeshRay();
+    }
 
     internal static class MinorImplmentations
     {
@@ -80,6 +87,52 @@ namespace MxTests
         using (var sphere = Mesh.CreateFromSphere(new Sphere(new Point3d(), radius), u, v))
         {
           return sphere.IsPointInside(new Point3d(x, y, z), 0.0, true);
+        }
+      }
+
+      internal static void MeshRay()
+      {
+        Random random = new Random(123);
+
+        for (int i = 0; i < 100; i++)
+        {
+          Point3d center = new Point3d(random.NextDouble(), random.NextDouble(), random.NextDouble());
+
+          var largesphere = Mesh.CreateFromSphere(new Sphere(center, 3), 30, 30);
+          var smallsphere = Mesh.CreateFromSphere(new Sphere(center, 2.7), 30, 30);
+
+          largesphere.Append(smallsphere);
+
+          for (int j = 0; j < 1000; j++)
+          {
+            var q = new Quaternion(random.NextDouble(), random.NextDouble(), random.NextDouble(), random.NextDouble());
+            q.Unitize();
+            q.GetRotation(out _, out Vector3d vector);
+            vector.Unitize();
+            vector *= 4;
+            Line line = new Line(center, center + vector);
+
+            Point3d[] points = Intersection.MeshLine(largesphere, line, out _);
+
+            if (points.Length != 2)
+            {
+              File3dm model = new File3dm();
+              model.Objects.AddMesh(largesphere);
+              model.Objects.AddLine(line);
+              for (int k = 0; k < points.Length; k++)
+                model.Objects.AddPoint(points[k]);
+              string message = Path.Combine(OpenRhinoSetup.SettingsDir,
+                "MeshRay_" +
+                i.ToString(System.Globalization.CultureInfo.InvariantCulture) + "_" +
+                j.ToString(System.Globalization.CultureInfo.InvariantCulture) +
+                ".3dm");
+              model.Write(message, 5
+                );
+              Console.WriteLine(message);
+            }
+
+            Assert.AreEqual(2, points.Length);
+          }
         }
       }
     }
