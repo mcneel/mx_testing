@@ -3,6 +3,7 @@ using Rhino.FileIO;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace MxTests
@@ -63,6 +64,7 @@ namespace MxTests
     {
       MinorImplmentations.MeshLineMiss();
       MinorImplmentations.MeshRay_RH62807();
+      MinorImplmentations.MeshRayMultiple();
     }
 
     internal static class MinorImplmentations
@@ -200,6 +202,24 @@ namespace MxTests
         Assert.Contains(3, faceIds);
 
         mesh.Dispose();
+      }
+
+      internal static void MeshRayMultiple()
+      {
+        string meshtext = "{\"version\":10000,\"archive3dm\":70,\"opennurbs\":-1911523059,\"data\":\"+n8CAHYDAAAAAAAA+/8CABQAAAAAAAAA5NTXTkfp0xG/5QAQgwEi8C25G1z8/wIAPgMAAAAAAAA4CgAAAAYAAADSHTOevfjl/9IdM569+OX/0h0znr345f/SHTOevfjl/9IdM569+OX/0h0znr345f/SHTOevfjl/9IdM569+OX/AAAAAAAAAAAAAAAAAAAAAAEA4MABAMDAAAAAAAAAAEEBAKBAAAAAAAAAgD8AAIA/AACAPwAAgL8AAIC/AACAvwAAgD8AAIA/AACAvwAAgL8AAAAAAAAAAAABAAAABQEACAUEAQECBAUDBQgHBgMFCQkJBQYGeAAAAJEjC5IAAAAAQQAAAAAAAAAAAADAQAAAAEAAAAAAAADgwAAAAEAAAAAAAACAvwAAgL8AAAAAAABAwAAAoEAAAAAAAACAPwAAAAAAAAAAAABAQAAAoMAAAAAAAACgQAAAgMAAAAAAAACgQAAAAMAAAAAAAABAwAAAwMAAAAAAeAAAACsKiYoAAAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAQKQAAAAAAAAAAQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPA/AAAAAGk8mKMAAAMAAQCAAEBlAAAAAAAAAAEAAAAAAAAACgAAAPAAAAAw8YKiAQCAAEBAAAAAAAAAAHjaY2AAAQUHBqxAAiaOJi9zALv4h/2oNAxwQNWLoKu3x24vB1SdyAFUcZh+ARziDAew2ysBFwcAqDgMsn5YH8f+CwvkAAAAAAAAHMAAAAAAAAAYwAAAAAAAAAAAAAAAAAAAIEAAAAAAAAAUQAAAAAAAAAAA25435P9/AoAAAAAAAAAAAA==\"}";
+
+        System.Web.Script.Serialization.JavaScriptSerializer serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+        Mesh m = (Mesh)Mesh.FromJSON(serializer.Deserialize<Dictionary<string, string>>(meshtext));
+
+        Rhino.Geometry.Intersect.Intersection.MeshRay(m, new Ray3d(new Point3d(1,0,0.3), new Vector3d(0,0,-1)), out int[] faces);
+
+        Assert.That(faces, Has.Length.EqualTo(6));
+        Assert.That(faces, Contains.Item(0));
+        Assert.That(faces, Contains.Item(1));
+        Assert.That(faces, Contains.Item(2));
+        Assert.That(faces, Contains.Item(3));
+        Assert.That(faces, Contains.Item(4));
+        Assert.That(faces, Contains.Item(5));
       }
     }
   }
