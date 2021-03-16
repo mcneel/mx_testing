@@ -6,6 +6,8 @@ This is a an NUnit 3.7 testing project for Mesh Intersection.
 
 Its purpose is to run tests in Visual Studio, without the need of a big setup. In fact, right now there is no automatic testing system before PR are automatically merged.
 
+YOUR TESTS ADDITIONS ARE WELCOME!
+
 ### :microscope: General usage ###
 
 1. In Visual Studio, open the Rhino.sln solution. It's located in `rhino\src4\BuildSolutions`.

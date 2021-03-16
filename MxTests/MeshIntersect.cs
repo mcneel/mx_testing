@@ -1,11 +1,11 @@
 using NUnit.Framework;
-using RhinoCommonDelayedTests;
+using Rhino.FileIO;
+using Rhino.Geometry;
+using Rhino.Geometry.Intersect;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace MxTests
 {
@@ -13,17 +13,48 @@ namespace MxTests
   public class MeshIntersect : AnyCommand<MeshIntersect>
   {
     [Test, TestCaseSource(nameof(GetTestModels))]
-    public void Model(string filename, string filepath)
+    public override void Run(string filename, string filepath)
     {
-      Console.WriteLine($"SettingsFile: {OpenRhinoSetup.SettingsFile}");
-      Console.WriteLine($"SettingsDir: {OpenRhinoSetup.SettingsDir}");
-      Console.WriteLine($"RhinoSystemDir: {OpenRhinoSetup.RhinoSystemDir}");
-      Console.WriteLine($"RhinoCommon: {typeof(Rhino.Geometry.Mesh).Assembly.Location}");
-      Console.WriteLine($"Resolver.RhinoSystemDirectory: {RhinoInside.Resolver.RhinoSystemDirectory}");
-      Console.WriteLine($"Resolver.RhinoSystemDirectory: {RhinoInside.Resolver.RhinoSystemDirectory}");
-      Console.WriteLine($"Test filename: {filename}");
-      Console.WriteLine($"Path: {filepath}");
+      base.Run(filename, filepath);
+
       MeshIntersectImplementation.Instance.Model(Path.Combine(filepath, filename));
+    }
+
+    internal class MeshIntersectImplementation
+    : MeasuredIntersectionsBase<Mesh>
+    {
+      static MeshIntersectImplementation() { Instance = new MeshIntersectImplementation(); }
+      protected MeshIntersectImplementation() { }
+      public static MeshIntersectImplementation Instance { get; private set; }
+
+      internal override double ToleranceCoefficient => Intersection.MeshIntersectionsTolerancesCoefficient;
+
+      public virtual void Model(string filepath)
+      {
+        ParseAndExecuteNotes(filepath, IncipitString, false);
+      }
+
+      internal override bool OperateCommandOnGeometry(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog)
+      {
+        Polyline[] intersections;
+        Polyline[] overlaps;
+        bool rc;
+
+        using (var log = new TextLog())
+        {
+          rc = Intersection.MeshMesh(inputMeshes, tolerance,
+              out intersections, true, out overlaps, false, out _, log,
+              System.Threading.CancellationToken.None, null);
+          textLog = log.ToString();
+        }
+
+        returned = null;
+        var results = intersections != null ? intersections.Select(a => new ResultMetrics { Closed = a.IsClosed, Measurement = a.Length, Overlap = false, Polyline = a }) : Array.Empty<ResultMetrics>();
+        if (overlaps != null) results = results.Concat(overlaps.Select(a => new ResultMetrics { Closed = a.IsClosed, Measurement = a.Length, Overlap = true, Polyline = a }));
+        returned = results.OrderBy(a => a.Measurement).ToList();
+
+        return rc;
+      }
     }
   }
 }

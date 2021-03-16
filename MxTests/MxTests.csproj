@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Dll.props" />
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
 
     <IsPackable>false</IsPackable>
 
@@ -48,10 +48,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RhinoCommonDelayed\RhinoCommonDelayedTests.csproj">
+    <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj">
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
     </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Web.Extensions" />
   </ItemGroup>
 
 </Project>
