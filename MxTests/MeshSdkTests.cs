@@ -157,14 +157,16 @@ namespace MxTests
 
       internal static void MeshLineMiss()
       {
-        Point3d center = new Point3d(0,0,0);
-        var mesh = Mesh.CreateFromSphere(new Sphere(center, 1), 10, 10);
-        Line line = new Line(20,0,0, 30,0,0);
+        Point3d center = new Point3d(0, 0, 0);
+        using (var mesh = Mesh.CreateFromSphere(new Sphere(center, 1), 10, 10))
+        {
+          Line line = new Line(20, 0, 0, 30, 0, 0);
 
-        var points = Rhino.Geometry.Intersect.Intersection.MeshLine(mesh, line, out int[] faceIds);
+          var points = Rhino.Geometry.Intersect.Intersection.MeshLine(mesh, line, out int[] faceIds);
 
-        Assert.IsEmpty(faceIds);
-        Assert.IsEmpty(points);
+          Assert.IsEmpty(faceIds);
+          Assert.IsEmpty(points);
+        }
       }
 
       internal static void MeshRay_RH62807()
