@@ -10,6 +10,8 @@ using System.Runtime.Remoting.Contexts;
 using System.Diagnostics;
 using WinFormsApp;
 using System.Windows.Forms;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MxTests
 {
@@ -86,19 +88,47 @@ namespace MxTests
 
     private Rhino.Runtime.InProcess.RhinoCore rhinoCore; //do NOT reference this by its RhinoCommon name
     private MainForm mainform;
+    private Thread uiThread;
+    private byte rhinoStarted;
 
-    [OneTimeSetUp, STAThread]
+    [OneTimeSetUp]
     public void OneTimeSetUp()
     {
       if (to_throw != null) throw to_throw;
 
+      uiThread = new Thread(RunTests);
+      uiThread.TrySetApartmentState(ApartmentState.STA);
+      uiThread.ApartmentState = ApartmentState.STA;
+      uiThread.IsBackground = false;
+      uiThread.Start();
+
+      while(Thread.VolatileRead(ref rhinoStarted) == 0) {
+        Thread.Sleep(100);
+      }
+    }
+
+    void RunTests()
+    {
       RhinoInside.Resolver.Initialize();
       if (RhinoSystemDir != null) RhinoInside.Resolver.RhinoSystemDirectory = RhinoSystemDir;
       else RhinoSystemDir = RhinoInside.Resolver.RhinoSystemDirectory;
+
       TestContext.WriteLine("RhinoSystemDir is: " + RhinoSystemDir + ".");
 
+      mainform = new MainForm();
+      mainform.Shown += Mainform_Shown;
+      Application.Run(mainform);
+    }
 
-      Application.Run(new MainForm());
+    private void Mainform_Shown(object sender, EventArgs e)
+    {
+      Application.Idle += RhinoApp_Idle;
+      RhinoDoc.ActiveDoc.Views.Redraw();
+    }
+
+    private void RhinoApp_Idle(object sender, EventArgs e)
+    {
+      Thread.VolatileWrite(ref rhinoStarted, 1);
     }
 
     [OneTimeTearDown]
@@ -106,6 +136,9 @@ namespace MxTests
     {
       (rhinoCore as IDisposable)?.Dispose();
       rhinoCore = null;
+      mainform.Close();
+      RhinoApp.Exit();
+      if (uiThread != null) uiThread.Abort();
     }
   }
 
@@ -116,6 +149,7 @@ namespace MxTests
     public void SettingsFileExists()
     {
       Trace.WriteLine($"Rhino folder is {OpenRhinoSetup.RhinoSystemDir}.");
+      Thread.Sleep(2000);
 
       Assert.IsTrue(File.Exists(OpenRhinoSetup.SettingsFile),
           $"File setting does not exist. Expected '{OpenRhinoSetup.SettingsFile}' in '{OpenRhinoSetup.SettingsDir}'.");

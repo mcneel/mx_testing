@@ -48,8 +48,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\DotNetSDK\Eto\src\Eto\Eto.csproj" />
-    <ProjectReference Include="..\..\..\..\DotNetSDK\Rhino.UI\Rhino.UI.csproj" />
+    <ProjectReference Include="..\..\..\..\DotNetSDK\Eto\src\Eto\Eto.csproj">
+      <Private>true</Private>
+    </ProjectReference>
+	<ProjectReference Include="..\..\..\..\DotNetSDK\Rhino.UI\Rhino.UI.csproj" >
+		<Private>true</Private>
+	</ProjectReference>
     <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj">
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
