@@ -11,5 +11,3 @@ using System.Threading;
 [assembly: SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "Generics is here a way to circumvent prohibition to use GetType() in static methods.",
     Scope = "member", Target = "~M:MxTests.AnyCommand`1.GetTestModels~System.Collections.Generic.IEnumerable{System.String[]}")]
 [assembly: SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Names define ordering in NUnit", Scope = "type", Target = "~T:MxTests._OpenRhinoTests")]
-
-[assembly: Apartment(ApartmentState.STA)]

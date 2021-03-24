@@ -99,7 +99,7 @@ namespace WinFormsApp
 
     #endregion
 
-    private RhinoWindows.Forms.Controls.ViewportControl viewportControl1;
+    public RhinoWindows.Forms.Controls.ViewportControl viewportControl1;
     private System.Windows.Forms.MenuStrip menuStrip1;
     private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;

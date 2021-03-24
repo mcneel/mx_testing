@@ -12,8 +12,10 @@ using WinFormsApp;
 using System.Windows.Forms;
 using System.Threading;
 using System.Threading.Tasks;
+using NUnit.Framework.Internal;
+using NUnit.Framework.Internal.Commands;
 
-namespace MxTests
+namespace VxTests
 {
   [SetUpFixture]
   public class OpenRhinoSetup
@@ -87,7 +89,7 @@ namespace MxTests
     }
 
     private Rhino.Runtime.InProcess.RhinoCore rhinoCore; //do NOT reference this by its RhinoCommon name
-    private MainForm mainform;
+    public static MainForm MainForm { get; set; }
     private Thread uiThread;
     private byte rhinoStarted;
 
@@ -115,20 +117,40 @@ namespace MxTests
 
       TestContext.WriteLine("RhinoSystemDir is: " + RhinoSystemDir + ".");
 
-      mainform = new MainForm();
-      mainform.Shown += Mainform_Shown;
-      Application.Run(mainform);
+      MainForm = new MainForm();
+      MainForm.Shown += Mainform_Shown;
+      Application.Run(MainForm);
     }
 
     private void Mainform_Shown(object sender, EventArgs e)
     {
       Application.Idle += RhinoApp_Idle;
-      RhinoDoc.ActiveDoc.Views.Redraw();
     }
 
     private void RhinoApp_Idle(object sender, EventArgs e)
     {
       Thread.VolatileWrite(ref rhinoStarted, 1);
+      Application.Idle -= RhinoApp_Idle;
+      Application.Idle += ReadyToDoWork;
+    }
+
+    private static System.Collections.Concurrent.ConcurrentBag<Task> tasks = new System.Collections.Concurrent.ConcurrentBag<Task>();
+
+    void ReadyToDoWork(object sender, EventArgs e)
+    {
+      while (tasks.Count > 0)
+      {
+        if(tasks.TryTake(out Task currentTask))
+        {
+          currentTask.RunSynchronously();
+          break;
+        }
+      }
+    }
+
+    public static void EnqueTask(Task task)
+    {
+      tasks.Add(task);
     }
 
     [OneTimeTearDown]
@@ -136,8 +158,8 @@ namespace MxTests
     {
       (rhinoCore as IDisposable)?.Dispose();
       rhinoCore = null;
-      mainform.Close();
-      RhinoApp.Exit();
+      MainForm.Invoke((Action)delegate { MainForm.Close(); });
+      RhinoApp.Exit(true);
       if (uiThread != null) uiThread.Abort();
     }
   }
@@ -153,6 +175,24 @@ namespace MxTests
 
       Assert.IsTrue(File.Exists(OpenRhinoSetup.SettingsFile),
           $"File setting does not exist. Expected '{OpenRhinoSetup.SettingsFile}' in '{OpenRhinoSetup.SettingsDir}'.");
+    }
+  }
+
+  public class UIThreadAttribute : NUnitAttribute, NUnit.Framework.Interfaces.IWrapTestMethod
+  {
+    public TestCommand Wrap(TestCommand command)
+    {
+      return new UICommand(command);
+    }
+  }
+
+  class UICommand : DelegatingTestCommand
+  {
+    public UICommand(TestCommand innerCommand) : base(innerCommand) { }
+
+    public override TestResult Execute(TestExecutionContext context)
+    {
+      context.
     }
   }
 }
