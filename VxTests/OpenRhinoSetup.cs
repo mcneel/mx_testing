@@ -88,7 +88,8 @@ namespace VxTests
       testModels.RemoveAll(f => Path.GetFileName(f).EndsWith("bak", System.StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private Rhino.Runtime.InProcess.RhinoCore rhinoCore; //do NOT reference this by its RhinoCommon name
+    private Rhino.Runtime.InProcess.RhinoCore rhinoCore;
+
     public static MainForm MainForm { get; set; }
     private Thread uiThread;
     private byte rhinoStarted;
@@ -99,8 +100,7 @@ namespace VxTests
       if (to_throw != null) throw to_throw;
 
       uiThread = new Thread(RunTests);
-      uiThread.TrySetApartmentState(ApartmentState.STA);
-      uiThread.ApartmentState = ApartmentState.STA;
+      uiThread.SetApartmentState(ApartmentState.STA);
       uiThread.IsBackground = false;
       uiThread.Start();
 
@@ -130,8 +130,8 @@ namespace VxTests
     private void RhinoApp_Idle(object sender, EventArgs e)
     {
       Thread.VolatileWrite(ref rhinoStarted, 1);
-      Application.Idle -= RhinoApp_Idle;
-      Application.Idle += ReadyToDoWork;
+      //Application.Idle -= RhinoApp_Idle;
+      //Application.Idle += ReadyToDoWork;
     }
 
     private static System.Collections.Concurrent.ConcurrentBag<Task> tasks = new System.Collections.Concurrent.ConcurrentBag<Task>();
@@ -159,8 +159,8 @@ namespace VxTests
       (rhinoCore as IDisposable)?.Dispose();
       rhinoCore = null;
       MainForm.Invoke((Action)delegate { MainForm.Close(); });
-      RhinoApp.Exit(true);
-      if (uiThread != null) uiThread.Abort();
+      //RhinoApp.Exit(true);
+      //if (uiThread != null) uiThread.Abort();
     }
   }
 
@@ -192,7 +192,33 @@ namespace VxTests
 
     public override TestResult Execute(TestExecutionContext context)
     {
-      context.
+      var compute = new Compute { Context = context, InnerCommand = this.innerCommand };
+      RhinoApp.InvokeAndWait(compute.Run);
+      if (compute.Exception != null) throw compute.Exception;
+      return compute.Result;
+    }
+
+    class Compute
+    {
+      public TestResult Result { get; set; }
+      public TestExecutionContext Context { get; set; }
+      public TestCommand InnerCommand { get; set; }
+      public Exception Exception { get; set; }
+
+      public void Run()
+      {
+        try
+        {
+          Result = InnerCommand.Execute(Context);
+        }
+#pragma warning disable CA1031 // Do not catch general exception types
+        catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+        {
+          Exception = ex;
+        }
+      }
     }
   }
+
 }
