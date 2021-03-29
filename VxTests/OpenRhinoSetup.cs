@@ -94,11 +94,16 @@ namespace VxTests
     public static Rhino.Display.RhinoViewport Viewport { get { return MainForm.viewportControl1.Viewport; } }
     public static Rhino.Display.DisplayPipeline Display { get { return MainForm.viewportControl1.Display; } }
 
-    private Thread uiThread;
-    private byte rhinoStarted;
+    private static Thread uiThread;
+    private static byte rhinoStarted;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
+    {
+      Start();
+    }
+
+    public static void Start()
     {
       if (to_throw != null) throw to_throw;
 
@@ -107,12 +112,13 @@ namespace VxTests
       uiThread.IsBackground = false;
       uiThread.Start();
 
-      while(Thread.VolatileRead(ref rhinoStarted) == 0) {
+      while (Thread.VolatileRead(ref rhinoStarted) == 0)
+      {
         Thread.Sleep(100);
       }
     }
 
-    void RunTests()
+    static void RunTests()
     {
       RhinoInside.Resolver.Initialize();
       if (RhinoSystemDir != null) RhinoInside.Resolver.RhinoSystemDirectory = RhinoSystemDir;
@@ -120,17 +126,19 @@ namespace VxTests
 
       TestContext.WriteLine("RhinoSystemDir is: " + RhinoSystemDir + ".");
 
+      //rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(new string[] { "-appmode" }, Rhino.Runtime.InProcess.WindowStyle.Hidden);
+
       MainForm = new MainForm();
       MainForm.Shown += Mainform_Shown;
       Application.Run(MainForm);
     }
 
-    private void Mainform_Shown(object sender, EventArgs e)
+    private static void Mainform_Shown(object sender, EventArgs e)
     {
       Application.Idle += RhinoApp_Idle;
     }
 
-    private void RhinoApp_Idle(object sender, EventArgs e)
+    private static void RhinoApp_Idle(object sender, EventArgs e)
     {
       Thread.VolatileWrite(ref rhinoStarted, 1);
       Application.Idle -= RhinoApp_Idle;
@@ -139,7 +147,7 @@ namespace VxTests
 
     private static System.Collections.Concurrent.ConcurrentBag<Action> actions = new System.Collections.Concurrent.ConcurrentBag<Action>();
 
-    void ReadyToDoWork(object sender, EventArgs e)
+    static void ReadyToDoWork(object sender, EventArgs e)
     {
       while (actions.Count > 0)
       {

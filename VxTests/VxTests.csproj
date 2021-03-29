@@ -10,6 +10,7 @@
     <Nullable>disable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -51,7 +52,7 @@
     <ProjectReference Include="..\..\..\..\DotNetSDK\Eto\src\Eto\Eto.csproj">
       <Private>true</Private>
     </ProjectReference>
-	<ProjectReference Include="..\..\..\..\DotNetSDK\Rhino.UI\Rhino.UI.csproj" >
+	<ProjectReference Include="..\..\..\..\DotNetSDK\Rhino.UI\Rhino.UI.csproj">
 		<Private>true</Private>
 	</ProjectReference>
     <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj">
