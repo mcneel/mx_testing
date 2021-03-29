@@ -1,22 +1,26 @@
 using NUnit.Framework;
 using Rhino;
 using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.IO;
+using System.Windows.Forms;
 
 namespace VxTests
 {
   [TestFixture]
-  public class CaptureTest
+  public class Display
   {
     [Test, UIThread]
-    public void CompareImage()
+    public void ClippingPlane()
     {
-      var bmp = OpenRhinoSetup.MainForm.viewportControl1.Display.FrameBuffer;
+      var basep = OpenRhinoSetup.PathForTest(nameof(Display), nameof(ClippingPlane));
+      var doc = RhinoDoc.Open(basep, out _);
 
-      var path = Environment.ExpandEnvironmentVariables("%appdata%\\Test\\test.png");
-      bmp.Save(path);
+      OpenRhinoSetup.MainForm.viewportControl1.Invalidate();
+      Application.DoEvents();
+
+      var bitmap = OpenRhinoSetup.Display.FrameBuffer;
+      var path = Environment.ExpandEnvironmentVariables("%temp%\\test.png");
+      bitmap.Save(path);
 
       //Assert.Fail("Some text");
     }

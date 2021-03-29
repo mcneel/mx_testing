@@ -54,7 +54,7 @@ namespace VxTests
     internal static void ScanFolders(string heading, List<string> testModels)
     {
       var test_folders = new List<string>();
-      foreach (var mdir in OpenRhinoSetup.SettingsXml.Descendants(heading).Descendants("ModelDirectory"))
+      foreach (var mdir in GetDirectoriesFor(heading))
       {
         bool optional = mdir.Attribute("optional")?.Value != "false"; //defaults to true
 
@@ -91,6 +91,9 @@ namespace VxTests
     private Rhino.Runtime.InProcess.RhinoCore rhinoCore;
 
     public static MainForm MainForm { get; set; }
+    public static Rhino.Display.RhinoViewport Viewport { get { return MainForm.viewportControl1.Viewport; } }
+    public static Rhino.Display.DisplayPipeline Display { get { return MainForm.viewportControl1.Display; } }
+
     private Thread uiThread;
     private byte rhinoStarted;
 
@@ -130,27 +133,27 @@ namespace VxTests
     private void RhinoApp_Idle(object sender, EventArgs e)
     {
       Thread.VolatileWrite(ref rhinoStarted, 1);
-      //Application.Idle -= RhinoApp_Idle;
-      //Application.Idle += ReadyToDoWork;
+      Application.Idle -= RhinoApp_Idle;
+      Application.Idle += ReadyToDoWork;
     }
 
-    private static System.Collections.Concurrent.ConcurrentBag<Task> tasks = new System.Collections.Concurrent.ConcurrentBag<Task>();
+    private static System.Collections.Concurrent.ConcurrentBag<Action> actions = new System.Collections.Concurrent.ConcurrentBag<Action>();
 
     void ReadyToDoWork(object sender, EventArgs e)
     {
-      while (tasks.Count > 0)
+      while (actions.Count > 0)
       {
-        if(tasks.TryTake(out Task currentTask))
+        if(actions.TryTake(out Action currentTask))
         {
-          currentTask.RunSynchronously();
+          currentTask.Invoke();
           break;
         }
       }
     }
 
-    public static void EnqueTask(Task task)
+    public static void EnqueueAction(Action action)
     {
-      tasks.Add(task);
+      actions.Add(action);
     }
 
     [OneTimeTearDown]
@@ -161,6 +164,35 @@ namespace VxTests
       MainForm.Invoke((Action)delegate { MainForm.Close(); });
       //RhinoApp.Exit(true);
       //if (uiThread != null) uiThread.Abort();
+    }
+
+    internal static IEnumerable<XElement> GetDirectoriesFor(string heading)
+    {
+      return SettingsXml.Descendants(heading).Descendants("ModelDirectory");
+    }
+
+    internal static string PathForTest(string heading, string test)
+    {
+      var dirs = GetDirectoriesFor(heading);
+
+      foreach (var mdir in dirs)
+      {
+        string attempt = mdir.Value;
+        if (!Path.IsPathRooted(mdir.Value))
+        {
+          attempt = Path.Combine(OpenRhinoSetup.SettingsDir, attempt);
+          attempt = Path.GetFullPath(attempt);
+        }
+
+        if (Directory.Exists(attempt))
+        {
+          var file = Path.Combine(attempt, test + ".3dm");
+          if (File.Exists(file))
+            return file;
+        }
+      }
+
+      throw new FileNotFoundException($"Impossible to find file {test}.3dm for {heading}.");
     }
   }
 
@@ -193,17 +225,30 @@ namespace VxTests
     public override TestResult Execute(TestExecutionContext context)
     {
       var compute = new Compute { Context = context, InnerCommand = this.innerCommand };
-      RhinoApp.InvokeAndWait(compute.Run);
+      lock (compute.SyncObject)
+      {
+        OpenRhinoSetup.EnqueueAction(compute.Run);
+        while (compute.Block == 1)
+          Monitor.Wait(compute.SyncObject);
+      }
       if (compute.Exception != null) throw compute.Exception;
       return compute.Result;
     }
 
     class Compute
     {
+      public Compute()
+      {
+        SyncObject = new object();
+        Block = 1;
+      }
+
       public TestResult Result { get; set; }
       public TestExecutionContext Context { get; set; }
       public TestCommand InnerCommand { get; set; }
       public Exception Exception { get; set; }
+      public object SyncObject { get; }
+      public volatile byte Block;
 
       public void Run()
       {
@@ -216,6 +261,11 @@ namespace VxTests
 #pragma warning restore CA1031 // Do not catch general exception types
         {
           Exception = ex;
+        }
+        lock (SyncObject)
+        {
+          Block = 0;
+          Monitor.Pulse(SyncObject);
         }
       }
     }
