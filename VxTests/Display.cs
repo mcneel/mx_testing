@@ -17,7 +17,6 @@ namespace VxTests
 
       var doc = RhinoDoc.Open(basep, out _);
 
-      doc.Modified = false;
       RhinoApp.Wait();
 
       var bitmap = doc.Views.First().DisplayPipeline.FrameBuffer;

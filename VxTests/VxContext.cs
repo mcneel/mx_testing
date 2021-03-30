@@ -45,10 +45,10 @@ namespace VxTests
       return Directory.GetFiles(dir, "*.3dm", SearchOption.TopDirectoryOnly);
     }
 
-    public static string GetStorageFolder(string heading)
+    public static string GetStorageFolder()
     {
       var path = Path.GetTempPath();
-      var folder = Path.Combine(path, heading);
+      var folder = Path.Combine(path, "VxTests");
 
       if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
       return folder;
@@ -56,19 +56,21 @@ namespace VxTests
 
     public static void CompareOrSave(string heading, string category, string test, Bitmap bitmap)
     {
-      string folder = GetStorageFolder(heading);
-      string file = Path.Combine(folder, $"{category}-{test}.png");
+      string folder = GetStorageFolder();
+      string file = Path.Combine(folder, heading, $"{category}-{test}.png");
 
       if (File.Exists(file))
       {
-        Assert.IsTrue(
-          BitmapsEqual((Bitmap)Image.FromFile(file), bitmap, 0.02),
-          $"Image for {category} {test} differs.");
+        bool equal = BitmapsEqual((Bitmap)Image.FromFile(file), bitmap, 0.40);
+
+        Assert.IsTrue(equal, $"Image for {category} {test} differs.");
       }
       else
       {
-        Assert.Inconclusive($"Image for {category} {test} didn't have a comparison.");
+        var new_dir = Path.GetDirectoryName(file);
+        if (!Directory.Exists(new_dir)) Directory.CreateDirectory(new_dir);
         bitmap.Save(file);
+        Assert.Inconclusive($"Image for {category} {test} didn't have a comparison.");
       }
     }
 
@@ -79,7 +81,7 @@ namespace VxTests
         return false;
       }
 
-      tolerance *= 255 * 3;
+      tolerance *= (255 * 3);
 
       for (int x = 0; x < bitmap1.Width; x++)
       {
