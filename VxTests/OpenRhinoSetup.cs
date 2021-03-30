@@ -30,6 +30,8 @@ namespace VxTests
       return filePath;
     }
 
+    internal static Rhino.Runtime.InProcess.RhinoCore rhinoCore;
+
     static OpenRhinoSetup()
     {
       SettingsDir = Path.GetDirectoryName(GetCallerFilePath());
@@ -85,8 +87,6 @@ namespace VxTests
       testModels.RemoveAll(f => Path.GetFileName(f).EndsWith("bak", System.StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private static Rhino.Runtime.InProcess.RhinoCore rhinoCore;
-
     private static Thread uiThread;
     private static byte rhinoStarted;
 
@@ -133,7 +133,7 @@ namespace VxTests
     {
       Thread.VolatileWrite(ref rhinoStarted, 1);
       RhinoApp.Idle -= RhinoApp_Idle;
-      RhinoApp.Idle += ReadyToDoWork;
+      RhinoApp.MainLoop += ReadyToDoWork;
     }
 
     private static System.Collections.Concurrent.ConcurrentBag<Action> actions = new System.Collections.Concurrent.ConcurrentBag<Action>();
