@@ -19,9 +19,7 @@ namespace VxTests
 
       var bitmap = doc.Views.First().DisplayPipeline.FrameBuffer;
 
-      bitmap.Save("");
-      
-      //Assert.Fail("Some text");
+      VxContext.CompareOrSave(nameof(Display), category, test, bitmap);
     }
 
     public static IEnumerable<string[]> GetTestModels()
@@ -36,12 +34,6 @@ namespace VxTests
           }
         }
       }
-    }
-
-    public static string GetStorageFolder()
-    {
-      var path = Path.GetTempPath();
-      
     }
   }
 }
