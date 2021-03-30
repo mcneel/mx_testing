@@ -4,7 +4,6 @@
   <RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Release\</RhinoSystemDirectory> 
   
   <Display>
-    <ModelDirectory>..\models\Display\</ModelDirectory>
-    <ModelDirectory optional="true">..\..\MxPrivateModels\models\Display\</ModelDirectory>
+    <ModelDirectory optional="true">..\..\..\..\..\..\rhino_testing\regression\display\</ModelDirectory>
   </Display>
 </Settings>

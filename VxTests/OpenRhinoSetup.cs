@@ -8,10 +8,7 @@ using System.Xml.Linq;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
 using System.Diagnostics;
-using WinFormsApp;
-using System.Windows.Forms;
 using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 
@@ -88,11 +85,7 @@ namespace VxTests
       testModels.RemoveAll(f => Path.GetFileName(f).EndsWith("bak", System.StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private Rhino.Runtime.InProcess.RhinoCore rhinoCore;
-
-    public static MainForm MainForm { get; set; }
-    public static Rhino.Display.RhinoViewport Viewport { get { return MainForm.viewportControl1.Viewport; } }
-    public static Rhino.Display.DisplayPipeline Display { get { return MainForm.viewportControl1.Display; } }
+    private static Rhino.Runtime.InProcess.RhinoCore rhinoCore;
 
     private static Thread uiThread;
     private static byte rhinoStarted;
@@ -126,23 +119,21 @@ namespace VxTests
 
       TestContext.WriteLine("RhinoSystemDir is: " + RhinoSystemDir + ".");
 
-      //rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(new string[] { "-appmode" }, Rhino.Runtime.InProcess.WindowStyle.Hidden);
-
-      MainForm = new MainForm();
-      MainForm.Shown += Mainform_Shown;
-      Application.Run(MainForm);
+      rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(new string[] { "-appmode" }, Rhino.Runtime.InProcess.WindowStyle.Hidden);
+      RhinoApp.Initialized += Mainform_Shown;
+      rhinoCore.Run();
     }
 
     private static void Mainform_Shown(object sender, EventArgs e)
     {
-      Application.Idle += RhinoApp_Idle;
+      RhinoApp.Idle += RhinoApp_Idle;
     }
 
     private static void RhinoApp_Idle(object sender, EventArgs e)
     {
       Thread.VolatileWrite(ref rhinoStarted, 1);
-      Application.Idle -= RhinoApp_Idle;
-      Application.Idle += ReadyToDoWork;
+      RhinoApp.Idle -= RhinoApp_Idle;
+      RhinoApp.Idle += ReadyToDoWork;
     }
 
     private static System.Collections.Concurrent.ConcurrentBag<Action> actions = new System.Collections.Concurrent.ConcurrentBag<Action>();
@@ -167,19 +158,19 @@ namespace VxTests
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
-      (rhinoCore as IDisposable)?.Dispose();
-      rhinoCore = null;
-      MainForm.Invoke((Action)delegate { MainForm.Close(); });
-      //RhinoApp.Exit(true);
+      RhinoApp.Exit(true);
+      //(rhinoCore as IDisposable)?.Dispose();
+      //rhinoCore = null;
+      //MainForm.Invoke((Action)delegate { MainForm.Close(); });
       //if (uiThread != null) uiThread.Abort();
     }
 
-    internal static IEnumerable<XElement> GetDirectoriesFor(string heading)
+    public static IEnumerable<XElement> GetDirectoriesFor(string heading)
     {
       return SettingsXml.Descendants(heading).Descendants("ModelDirectory");
     }
 
-    internal static string PathForTest(string heading, string test)
+    internal static string PathForTest(string heading, string category, string test)
     {
       var dirs = GetDirectoriesFor(heading);
 
@@ -194,13 +185,13 @@ namespace VxTests
 
         if (Directory.Exists(attempt))
         {
-          var file = Path.Combine(attempt, test + ".3dm");
+          var file = Path.Combine(attempt, category, test + ".3dm");
           if (File.Exists(file))
             return file;
         }
       }
 
-      throw new FileNotFoundException($"Impossible to find file {test}.3dm for {heading}.");
+      throw new FileNotFoundException($"Impossible to find file {test}.3dm for heading '{heading}' category '{category}'.");
     }
   }
 
