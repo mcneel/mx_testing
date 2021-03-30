@@ -30,7 +30,10 @@ namespace VxTests
         {
           foreach (var test in VxContext.ModelsFromDirs(dirs))
           {
-            yield return new string[] { test.Substring(root.Length), Path.GetFileNameWithoutExtension(test) };
+            string testname = Path.GetFileNameWithoutExtension(test);
+            string category = Path.GetDirectoryName(test.Substring(root.Length));
+
+            yield return new string[] { category, testname };
           }
         }
       }

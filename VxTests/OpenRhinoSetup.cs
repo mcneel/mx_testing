@@ -119,7 +119,7 @@ namespace VxTests
 
       TestContext.WriteLine("RhinoSystemDir is: " + RhinoSystemDir + ".");
 
-      rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(new string[] { "-appmode" }, Rhino.Runtime.InProcess.WindowStyle.Hidden);
+      rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(new string[] { "-appmode" }, Rhino.Runtime.InProcess.WindowStyle.Normal);
       RhinoApp.Initialized += Mainform_Shown;
       rhinoCore.Run();
     }
@@ -158,11 +158,9 @@ namespace VxTests
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
+      RhinoDoc.ActiveDoc.Modified = false;
       RhinoApp.Exit(true);
-      //(rhinoCore as IDisposable)?.Dispose();
-      //rhinoCore = null;
-      //MainForm.Invoke((Action)delegate { MainForm.Close(); });
-      //if (uiThread != null) uiThread.Abort();
+      (rhinoCore as IDisposable)?.Dispose();
     }
 
     public static IEnumerable<XElement> GetDirectoriesFor(string heading)
