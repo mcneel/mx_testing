@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -60,10 +61,13 @@ namespace VxTests
 
       if (File.Exists(file))
       {
-        BitmapsEqual((Bitmap)Image.FromFile(file), bitmap, 0.02);
+        Assert.IsTrue(
+          BitmapsEqual((Bitmap)Image.FromFile(file), bitmap, 0.02),
+          $"Image for {category} {test} differs.");
       }
       else
       {
+        Assert.Inconclusive($"Image for {category} {test} didn't have a comparison.");
         bitmap.Save(file);
       }
     }

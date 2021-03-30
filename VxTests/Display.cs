@@ -13,8 +13,11 @@ namespace VxTests
     public void Regressions(string category, string test)
     {
       var basep = OpenRhinoSetup.PathForTest(nameof(Display), category, test);
+      if (RhinoDoc.ActiveDoc != null) RhinoDoc.ActiveDoc.Modified = false;
+
       var doc = RhinoDoc.Open(basep, out _);
 
+      doc.Modified = false;
       RhinoApp.Wait();
 
       var bitmap = doc.Views.First().DisplayPipeline.FrameBuffer;

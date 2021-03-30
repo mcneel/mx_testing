@@ -159,7 +159,7 @@ namespace VxTests
     public void OneTimeTearDown()
     {
       RhinoDoc.ActiveDoc.Modified = false;
-      RhinoApp.Exit(true);
+      //RhinoApp.Exit(true);
       (rhinoCore as IDisposable)?.Dispose();
     }
 
