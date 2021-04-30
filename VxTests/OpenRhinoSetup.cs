@@ -194,7 +194,9 @@ namespace VxTests
   }
 
   [TestFixture]
+#pragma warning disable CA1707 // This is named so that the test appears first
   public class _OpenRhinoTests
+#pragma warning restore CA1707
   {
     [Test]
     public void SettingsFileExists()

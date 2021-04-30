@@ -7,12 +7,12 @@ using System.Collections.Generic;
 namespace VxTests
 {
   [TestFixture]
-  public class Display
+  public class DisplayFixture
   {
     [Test, UIThread, TestCaseSource(nameof(GetTestModels))]
     public void Regressions(string category, string test)
     {
-      var basep = OpenRhinoSetup.PathForTest(nameof(Display), category, test);
+      var basep = OpenRhinoSetup.PathForTest(nameof(DisplayFixture), category, test);
       if (RhinoDoc.ActiveDoc != null) RhinoDoc.ActiveDoc.Modified = false;
 
       var doc = RhinoDoc.Open(basep, out _);
@@ -21,12 +21,12 @@ namespace VxTests
 
       var bitmap = doc.Views.First().DisplayPipeline.FrameBuffer;
 
-      VxContext.CompareOrSave(nameof(Display), category, test, bitmap);
+      VxContext.CompareOrSave(nameof(DisplayFixture), category, test, bitmap);
     }
 
     public static IEnumerable<string[]> GetTestModels()
     {
-      foreach(var root in VxContext.RootsFromHeading(nameof(Display)))
+      foreach(var root in VxContext.RootsFromHeading(nameof(DisplayFixture)))
       {
         foreach(var dirs in VxContext.DirsFromRoot(root))
         {
