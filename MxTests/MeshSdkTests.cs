@@ -74,6 +74,15 @@ namespace MxTests
       MinorImplmentations.MeshLine_RH62831();
     }
 
+    [Test]
+    public void CreateContourCurvesTest()
+    {
+      int one = 1;
+      int two = 2;
+
+      Assert.AreEqual(one + two, 3);
+    }
+
     internal static class MinorImplmentations
     {
       public static double IntersectionMeshRay(
