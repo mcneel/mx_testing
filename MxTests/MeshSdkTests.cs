@@ -443,8 +443,6 @@ namespace MxTests
       }
 
     }
-
-
     internal static class GeometryCollections
     {
       internal static IEnumerable<Point3d> CreatePointsForCubeOfSpecifiedSide(double side)
