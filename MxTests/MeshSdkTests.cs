@@ -6,6 +6,7 @@ using Rhino.Geometry.Intersect;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace MxTests
 {
@@ -74,13 +75,10 @@ namespace MxTests
       MinorImplmentations.MeshLine_RH62831();
     }
 
-    [Test]
-    public void CreateContourCurvesTest()
+    [TestCase(10, 1, 11)]
+    public void CreateContourCurvesTest(double size, double dist, int numberPlanes)
     {
-      int one = 1;
-      int two = 2;
-
-      Assert.AreEqual(one + two, 3);
+      MinorImplmentations.TestBoxNumberOfCurves(size, dist, numberPlanes);
     }
 
     internal static class MinorImplmentations
@@ -425,6 +423,55 @@ namespace MxTests
           Assert.That(results[i].DistanceTo(points[i]), Is.LessThan(1e-10));
         }
       }
+
+      internal static void TestBoxNumberOfCurves(double size, double dist, int numberPlanes)
+      {
+        //Arrange
+        var points = GeometryCollections.CreatePointsForCubeOfSpecifiedSide(size);
+        var planes = GeometryCollections.CreateSetOfHorizontalPlanes(numberPlanes, dist);
+        var mesh = Mesh.CreateFromBox(points, 2, 2, 2);
+
+        var ptOrigin = points.ElementAt(0);
+        var ptEnd = points.ElementAt(4);
+
+        //Act
+        var crvsArray = Mesh.CreateContourCurves(mesh, ptOrigin, ptEnd, dist);
+        var polylinesArray = Intersection.MeshPlane(mesh, planes);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+      }
+
     }
+    internal static class GeometryCollections
+    {
+      internal static IEnumerable<Point3d> CreatePointsForCubeOfSpecifiedSide(double side)
+      {
+        var points = new List<Point3d>
+        {
+          new Point3d(0, 0, 0),
+          new Point3d(side, 0, 0),
+          new Point3d(10, side, 0),
+          new Point3d(0, side, 0),
+          new Point3d(0, 0, side),
+          new Point3d(side, 0, side),
+          new Point3d(side, side, side),
+          new Point3d(0, side, side),
+        };
+        return points;
+      }
+      internal static IEnumerable<Plane> CreateSetOfHorizontalPlanes(int number, double dist)
+      {
+        var planes = new List<Plane>();
+        for(int i = 0; i < number; i++)
+        {
+          var z = i * dist;
+          planes.Add(new Plane(new Point3d(0, 0, z), Vector3d.ZAxis));
+        }
+        return planes;
+      }
+
+    }
+
   }
 }
