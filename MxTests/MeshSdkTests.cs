@@ -75,10 +75,12 @@ namespace MxTests
       MinorImplmentations.MeshLine_RH62831();
     }
 
-    [TestCase(10, 1, 11)]
-    public void CreateContourCurvesTest(double size, double dist, int numberPlanes)
+
+    [Test]
+    public void CreateContourCurvesTest( [Values(0.1, 1, 10, 100)] double size, [Range(0,360,22.5)] double angle)
     {
-      MinorImplmentations.TestBoxNumberOfCurves(size, dist, numberPlanes);
+      MinorImplmentations.CheckCenterBoxWithSizeAndOneHorizontalPlane(size);
+      MinorImplmentations.CheckCenterBoxWithSizeAndOneRotatedPlane(size, angle);
     }
 
     internal static class MinorImplmentations
@@ -424,25 +426,38 @@ namespace MxTests
         }
       }
 
-      internal static void TestBoxNumberOfCurves(double size, double dist, int numberPlanes)
+      internal static void CheckCenterBoxWithSizeAndOneHorizontalPlane(double size)
       {
         //Arrange
-        var points = GeometryCollections.CreatePointsForCubeOfSpecifiedSide(size);
-        var planes = GeometryCollections.CreateSetOfHorizontalPlanes(numberPlanes, dist);
-        var mesh = Mesh.CreateFromBox(points, 2, 2, 2);
-
-        var ptOrigin = points.ElementAt(0);
-        var ptEnd = points.ElementAt(4);
+        var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
+        var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
+        var mesh = Mesh.CreateFromBox(points, 1, 1, 1);
 
         //Act
-        var crvsArray = Mesh.CreateContourCurves(mesh, ptOrigin, ptEnd, dist);
-        var polylinesArray = Intersection.MeshPlane(mesh, planes);
+        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
+        var polylinesArray = Intersection.MeshPlane(mesh, plane);
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
       }
 
+      internal static void CheckCenterBoxWithSizeAndOneRotatedPlane(double size, double angle)
+      {
+        //Arrange
+        var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
+        var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
+        plane.Rotate(angle, Vector3d.XAxis);
+        var mesh = Mesh.CreateFromBox(points, 1, 1, 1);
+
+        //Act
+        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
+        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+      }
     }
+
     internal static class GeometryCollections
     {
       internal static IEnumerable<Point3d> CreatePointsForCubeOfSpecifiedSide(double side)
@@ -451,12 +466,28 @@ namespace MxTests
         {
           new Point3d(0, 0, 0),
           new Point3d(side, 0, 0),
-          new Point3d(10, side, 0),
+          new Point3d(side, side, 0),
           new Point3d(0, side, 0),
           new Point3d(0, 0, side),
           new Point3d(side, 0, side),
           new Point3d(side, side, side),
           new Point3d(0, side, side),
+        };
+        return points;
+      }
+      
+      internal static IEnumerable<Point3d> CreatePointsForCenterBoxOfSpecifiedSide(double side)
+      {
+        var points = new List<Point3d>
+        {
+          new Point3d(-side/2, -side/2, -side/2),
+          new Point3d(side/2, -side/2, -side/2),
+          new Point3d(side/2, side/2, -side/2),
+          new Point3d(-side/2, side/2, -side/2),
+          new Point3d(-side/2, -side/2, side/2),
+          new Point3d(side/2, -side/2, side/2),
+          new Point3d(side/2, side/2, side/2),
+          new Point3d(-side/2, side/2, side/2),
         };
         return points;
       }
@@ -470,7 +501,6 @@ namespace MxTests
         }
         return planes;
       }
-
     }
 
   }
