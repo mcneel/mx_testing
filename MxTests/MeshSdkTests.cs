@@ -84,7 +84,7 @@ namespace MxTests
     }
 
     [Test]
-    public void SphereCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double size, [Range(0, 360, 17)] double angle)
+    public void SphereCreateContourCurvesTest([Values(1, 10, 100)] double size, [Range(1, 360, 17)] double angle)
     {
       MinorImplmentations.CheckSphereWithRadiusAndOneHorizontalPlane(size);
       MinorImplmentations.CheckSphereWithRadiusAndOneRotatedPlane(size, angle);
