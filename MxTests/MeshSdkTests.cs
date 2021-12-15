@@ -77,10 +77,17 @@ namespace MxTests
 
 
     [Test]
-    public void CreateContourCurvesTest( [Values(0.1, 1, 10, 100)] double size, [Range(0,360,22.5)] double angle)
+    public void CenterBoxCreateContourCurvesTests( [Values(0.1, 1, 10, 100)] double size, [Range(0,360,22.5)] double angle)
     {
       MinorImplmentations.CheckCenterBoxWithSizeAndOneHorizontalPlane(size);
       MinorImplmentations.CheckCenterBoxWithSizeAndOneRotatedPlane(size, angle);
+    }
+
+    [Test]
+    public void SphereCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double size, [Range(0, 360, 17)] double angle)
+    {
+      MinorImplmentations.CheckSphereWithRadiusAndOneHorizontalPlane(size);
+      MinorImplmentations.CheckSphereWithRadiusAndOneRotatedPlane(size, angle);
     }
 
     internal static class MinorImplmentations
@@ -456,6 +463,37 @@ namespace MxTests
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
       }
+
+      internal static void CheckSphereWithRadiusAndOneHorizontalPlane(double radius)
+      {
+        //Arrange
+        var sphere = new Sphere(Point3d.Origin, radius);
+        var mesh = Mesh.CreateFromSphere(sphere, 6, 6);
+        var plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
+
+        //Act
+        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
+        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+      }
+
+      internal static void CheckSphereWithRadiusAndOneRotatedPlane(double radius, double angle)
+      {
+        //Arrange
+        var sphere = new Sphere(Point3d.Origin, radius);
+        var mesh = Mesh.CreateFromSphere(sphere, 10, 10);
+        var plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
+        plane.Rotate(angle, Vector3d.XAxis);
+
+        //Act
+        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
+        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+      }
     }
 
     internal static class GeometryCollections
@@ -491,6 +529,7 @@ namespace MxTests
         };
         return points;
       }
+
       internal static IEnumerable<Plane> CreateSetOfHorizontalPlanes(int number, double dist)
       {
         var planes = new List<Plane>();
