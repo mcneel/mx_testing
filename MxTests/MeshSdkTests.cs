@@ -75,19 +75,20 @@ namespace MxTests
       MinorImplmentations.MeshLine_RH62831();
     }
 
-
     [Test]
-    public void CenterBoxCreateContourCurvesTests( [Values(0.1, 1, 10, 100)] double size, [Range(0,360,22.5)] double angle)
+    public void CenterBoxCreateContourCurvesTests( [Values(0.1, 1, 10, 100)] double size, [Range(0,360,22.5)] double angle, [Values(2, 4, 6, 8, 10)] double dist)
     {
       MinorImplmentations.CheckCenterBoxWithSizeAndOneHorizontalPlane(size);
       MinorImplmentations.CheckCenterBoxWithSizeAndOneRotatedPlane(size, angle);
+      MinorImplmentations.CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(size, dist);
     }
 
     [Test]
-    public void SphereCreateContourCurvesTest([Values(1, 10, 100)] double size, [Range(1, 360, 18)] double angle)
+    public void SphereCreateContourCurvesTest([Values(1, 10, 100)] double size, [Range(1, 360, 18)] double angle, [Values(2, 4, 6, 8, 10)] double dist)
     {
       MinorImplmentations.CheckSphereWithRadiusAndOneHorizontalPlane(size);
       MinorImplmentations.CheckSphereWithRadiusAndOneRotatedPlane(size, angle);
+      MinorImplmentations.CheckSphereWithRadiusAndSeveralHorizontalPlanes(size, dist);
     }
 
     internal static class MinorImplmentations
@@ -464,6 +465,23 @@ namespace MxTests
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
       }
 
+      internal static void CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(double size, double dist)
+      {
+        //Arrange
+        var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
+        var sizeScaled = size * 0.95;
+        var numberPlanes = (int)(sizeScaled / dist) + 1;
+        var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-sizeScaled / 2, numberPlanes, dist);
+        var mesh = Mesh.CreateFromBox(points, 1, 1, 1);
+
+        //Act
+        var crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0,0,-sizeScaled/2), new Point3d(0, 0, sizeScaled / 2), dist);
+        var polylinesArray = Intersection.MeshPlane(mesh, planes);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+      }
+
       internal static void CheckSphereWithRadiusAndOneHorizontalPlane(double radius)
       {
         //Arrange
@@ -485,11 +503,29 @@ namespace MxTests
         var sphere = new Sphere(Point3d.Origin, radius);
         var mesh = Mesh.CreateFromSphere(sphere, 10, 10);
         var plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
-        plane.Rotate(angle, Vector3d.XAxis);
+        var angleRadians = (Math.PI / 180) * angle;
+        plane.Rotate(angleRadians, Vector3d.XAxis);
 
         //Act
         var crvsArray = Mesh.CreateContourCurves(mesh, plane);
         var polylinesArray = Intersection.MeshPlane(mesh, plane);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+      }
+
+      internal static void CheckSphereWithRadiusAndSeveralHorizontalPlanes(double radius, double dist)
+      {
+        //Arrange
+        var radiusScaled = radius * 0.95;
+        var numberPlanes = (int)(radiusScaled / dist) + 1;
+        var sphere = new Sphere(Point3d.Origin, radius);
+        var mesh = Mesh.CreateFromSphere(sphere, 6, 6);
+        var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-radiusScaled / 2, numberPlanes, dist);
+
+        //Act
+        var crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -radiusScaled / 2), new Point3d(0, 0, radiusScaled / 2), dist);
+        var polylinesArray = Intersection.MeshPlane(mesh, planes);
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
@@ -530,12 +566,12 @@ namespace MxTests
         return points;
       }
 
-      internal static IEnumerable<Plane> CreateSetOfHorizontalPlanes(int number, double dist)
+      internal static IEnumerable<Plane> CreateSetOfHorizontalPlanes(double initZ, int number, double dist)
       {
         var planes = new List<Plane>();
         for(int i = 0; i < number; i++)
         {
-          var z = i * dist;
+          var z = initZ + (i * dist);
           planes.Add(new Plane(new Point3d(0, 0, z), Vector3d.ZAxis));
         }
         return planes;
