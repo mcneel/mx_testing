@@ -91,6 +91,13 @@ namespace MxTests
       MinorImplmentations.CheckSphereWithRadiusAndSeveralHorizontalPlanes(size, dist);
     }
 
+    [Test]
+    public void RectangleCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double width, [Values(0.1, 1, 10, 100)] double height, [Range(0, 360, 18)] double angle)
+    {
+      MinorImplmentations.CheckRectangleWithDifferentSidesAndOneHorizontalPlane(width, height);
+      //MinorImplmentations.CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(width, height, angle);
+    }
+
     internal static class MinorImplmentations
     {
       public static double IntersectionMeshRay(
@@ -530,6 +537,48 @@ namespace MxTests
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
       }
+
+      internal static void CheckRectangleWithDifferentSidesAndOneHorizontalPlane(double width, double height)
+      {
+        //Arrange
+        var planeRect = new Plane(new Point3d(0, 0, 0), Vector3d.XAxis);
+        var wInterval = new Interval(-width / 2, width / 2);
+        var hInterval = new Interval(-height / 2, height / 2);
+        var rect = new Rectangle3d(planeRect, wInterval, hInterval);
+        var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline());
+        var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
+
+        //Act
+        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
+        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+      }
+      
+      internal static void CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(double width, double height, double angle)
+      {
+        //Arrange
+        var planeRect = new Plane(new Point3d(0, 0, 0), Vector3d.XAxis);
+        var wInterval = new Interval(-width / 2, width / 2);
+        var hInterval = new Interval(-height / 2, height / 2);
+
+        var angleRadians = (Math.PI / 180) * angle;
+        planeRect.Rotate(angleRadians, Vector3d.ZAxis);
+
+        var rect = new Rectangle3d(planeRect, wInterval, hInterval);
+
+        var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline());
+        var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
+
+        //Act
+        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
+        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+      }
+
     }
 
     internal static class GeometryCollections
@@ -549,7 +598,6 @@ namespace MxTests
         };
         return points;
       }
-      
       internal static IEnumerable<Point3d> CreatePointsForCenterBoxOfSpecifiedSide(double side)
       {
         var points = new List<Point3d>
@@ -565,7 +613,6 @@ namespace MxTests
         };
         return points;
       }
-
       internal static IEnumerable<Plane> CreateSetOfHorizontalPlanes(double initZ, int number, double dist)
       {
         var planes = new List<Plane>();
