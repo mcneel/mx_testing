@@ -416,6 +416,7 @@ namespace MxTests
         };
 
         Point3dList results;
+
         using (var sphere = Mesh.CreateFromSphere(new Sphere(Point3d.Origin, 10), 8, 8))
         {
           results = new Rhino.Collections.Point3dList();
@@ -444,13 +445,17 @@ namespace MxTests
       internal static void CheckCenterBoxWithSizeAndOneHorizontalPlane(double size)
       {
         //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
         var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
         var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
-        var mesh = Mesh.CreateFromBox(points, 1, 1, 1);
 
-        //Act
-        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
-        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+        using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        };
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
@@ -459,14 +464,17 @@ namespace MxTests
       internal static void CheckCenterBoxWithSizeAndOneRotatedPlane(double size, double angle)
       {
         //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
         var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
         var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
         plane.Rotate(angle, Vector3d.XAxis);
-        var mesh = Mesh.CreateFromBox(points, 1, 1, 1);
-
-        //Act
-        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
-        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+        using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        } 
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
@@ -475,15 +483,19 @@ namespace MxTests
       internal static void CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(double size, double dist)
       {
         //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
         var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
         var sizeScaled = size * 0.95;
         var numberPlanes = (int)(sizeScaled / dist) + 1;
         var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-sizeScaled / 2, numberPlanes, dist);
-        var mesh = Mesh.CreateFromBox(points, 1, 1, 1);
-
-        //Act
-        var crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0,0,-sizeScaled/2), new Point3d(0, 0, sizeScaled / 2), dist);
-        var polylinesArray = Intersection.MeshPlane(mesh, planes);
+        
+        using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -sizeScaled / 2), new Point3d(0, 0, sizeScaled / 2), dist);
+          polylinesArray = Intersection.MeshPlane(mesh, planes);
+        }
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
@@ -492,13 +504,16 @@ namespace MxTests
       internal static void CheckSphereWithRadiusAndOneHorizontalPlane(double radius)
       {
         //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
         var sphere = new Sphere(Point3d.Origin, radius);
-        var mesh = Mesh.CreateFromSphere(sphere, 6, 6);
         var plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
-
-        //Act
-        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
-        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+        using (var mesh = Mesh.CreateFromSphere(sphere, 6, 6))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        }
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
@@ -507,15 +522,19 @@ namespace MxTests
       internal static void CheckSphereWithRadiusAndOneRotatedPlane(double radius, double angle)
       {
         //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
         var sphere = new Sphere(Point3d.Origin, radius);
-        var mesh = Mesh.CreateFromSphere(sphere, 10, 10);
         var plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
         var angleRadians = (Math.PI / 180) * angle;
         plane.Rotate(angleRadians, Vector3d.XAxis);
 
-        //Act
-        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
-        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+        using (var mesh = Mesh.CreateFromSphere(sphere, 10, 10))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        }
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
@@ -524,15 +543,19 @@ namespace MxTests
       internal static void CheckSphereWithRadiusAndSeveralHorizontalPlanes(double radius, double dist)
       {
         //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
         var radiusScaled = radius * 0.95;
         var numberPlanes = (int)(radiusScaled / dist) + 1;
         var sphere = new Sphere(Point3d.Origin, radius);
-        var mesh = Mesh.CreateFromSphere(sphere, 6, 6);
         var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-radiusScaled / 2, numberPlanes, dist);
 
-        //Act
-        var crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -radiusScaled / 2), new Point3d(0, 0, radiusScaled / 2), dist);
-        var polylinesArray = Intersection.MeshPlane(mesh, planes);
+        using (var mesh = Mesh.CreateFromSphere(sphere, 6, 6))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -radiusScaled / 2), new Point3d(0, 0, radiusScaled / 2), dist);
+          polylinesArray = Intersection.MeshPlane(mesh, planes);
+        }
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
@@ -541,16 +564,20 @@ namespace MxTests
       internal static void CheckRectangleWithDifferentSidesAndOneHorizontalPlane(double width, double height)
       {
         //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
         var planeRect = new Plane(new Point3d(0, 0, 0), Vector3d.XAxis);
         var wInterval = new Interval(-width / 2, width / 2);
         var hInterval = new Interval(-height / 2, height / 2);
         var rect = new Rectangle3d(planeRect, wInterval, hInterval);
-        var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline());
         var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
 
-        //Act
-        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
-        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+        using (var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline()))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        }
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
@@ -559,6 +586,8 @@ namespace MxTests
       internal static void CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(double width, double height, double angle)
       {
         //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
         var planeRect = new Plane(new Point3d(0, 0, 0), Vector3d.XAxis);
         var wInterval = new Interval(-width / 2, width / 2);
         var hInterval = new Interval(-height / 2, height / 2);
@@ -567,13 +596,15 @@ namespace MxTests
         planeRect.Rotate(angleRadians, Vector3d.ZAxis);
 
         var rect = new Rectangle3d(planeRect, wInterval, hInterval);
-
-        var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline());
+        
         var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
 
-        //Act
-        var crvsArray = Mesh.CreateContourCurves(mesh, plane);
-        var polylinesArray = Intersection.MeshPlane(mesh, plane);
+        using (var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline()))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        }
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
