@@ -502,7 +502,6 @@ namespace MxTests
           crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -sizeScaled / 2), new Point3d(0, 0, sizeScaled / 2), dist);
           polylinesArray = Intersection.MeshPlane(mesh, planes);
         }
-
         var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
