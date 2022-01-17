@@ -457,8 +457,11 @@ namespace MxTests
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         };
 
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
       }
 
       internal static void CheckCenterBoxWithSizeAndOneRotatedPlane(double size, double angle)
@@ -474,10 +477,13 @@ namespace MxTests
           //Act
           crvsArray = Mesh.CreateContourCurves(mesh, plane);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
-        } 
+        }
+
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
       }
 
       internal static void CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(double size, double dist)
@@ -497,8 +503,11 @@ namespace MxTests
           polylinesArray = Intersection.MeshPlane(mesh, planes);
         }
 
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        //Assert.AreEqual(1, numberOrientations);
       }
 
       internal static void CheckSphereWithRadiusAndOneHorizontalPlane(double radius)
@@ -514,9 +523,11 @@ namespace MxTests
           crvsArray = Mesh.CreateContourCurves(mesh, plane);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
       }
 
       internal static void CheckSphereWithRadiusAndOneRotatedPlane(double radius, double angle)
@@ -535,9 +546,11 @@ namespace MxTests
           crvsArray = Mesh.CreateContourCurves(mesh, plane);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
       }
 
       internal static void CheckSphereWithRadiusAndSeveralHorizontalPlanes(double radius, double dist)
@@ -556,9 +569,11 @@ namespace MxTests
           crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -radiusScaled / 2), new Point3d(0, 0, radiusScaled / 2), dist);
           polylinesArray = Intersection.MeshPlane(mesh, planes);
         }
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
       }
 
       internal static void CheckRectangleWithDifferentSidesAndOneHorizontalPlane(double width, double height)
@@ -578,9 +593,11 @@ namespace MxTests
           crvsArray = Mesh.CreateContourCurves(mesh, plane);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
       }
       
       internal static void CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(double width, double height, double angle)
@@ -605,11 +622,19 @@ namespace MxTests
           crvsArray = Mesh.CreateContourCurves(mesh, plane);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
       }
 
+      internal static int GetNumberOfCurveOrientationEnum(Curve[] curves)
+      {
+        var opt = curves.ToList().Select(x => (int)Enum.Parse(typeof(CurveOrientation), x.ClosedCurveOrientation().ToString()));
+        var hashSet = new HashSet<int>(opt);
+        return hashSet.Count;
+      }
     }
 
     internal static class GeometryCollections
