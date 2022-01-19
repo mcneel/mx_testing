@@ -2,7 +2,8 @@
   <Import Project="..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Dll.props" />
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>999</WarningLevel>
     <IsPackable>false</IsPackable>
 
     <Platforms>x64</Platforms>

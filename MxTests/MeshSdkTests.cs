@@ -92,7 +92,7 @@ namespace MxTests
     }
 
     [Test]
-    public void RectangleCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double width, [Values(0.1, 1, 10, 100)] double height, [Range(0, 360, 18)] double angle)
+    public void RectangleCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double width, [Values(0.1, 1, 10, 100)] double height/*, [Range(0, 360, 18)] double angle*/)
     {
       MinorImplmentations.CheckRectangleWithDifferentSidesAndOneHorizontalPlane(width, height);
       //MinorImplmentations.CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(width, height, angle);
@@ -453,7 +453,7 @@ namespace MxTests
         using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
         {
           //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         };
 
@@ -475,7 +475,7 @@ namespace MxTests
         using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
         {
           //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
 
@@ -499,9 +499,10 @@ namespace MxTests
         using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
         {
           //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -sizeScaled / 2), new Point3d(0, 0, sizeScaled / 2), dist);
+          crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -sizeScaled / 2), new Point3d(0, 0, sizeScaled / 2), dist, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, planes);
         }
+
         var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
@@ -519,7 +520,7 @@ namespace MxTests
         using (var mesh = Mesh.CreateFromSphere(sphere, 6, 6))
         {
           //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
         var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
@@ -542,7 +543,7 @@ namespace MxTests
         using (var mesh = Mesh.CreateFromSphere(sphere, 10, 10))
         {
           //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
         var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
@@ -565,7 +566,7 @@ namespace MxTests
         using (var mesh = Mesh.CreateFromSphere(sphere, 6, 6))
         {
           //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -radiusScaled / 2), new Point3d(0, 0, radiusScaled / 2), dist);
+          crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -radiusScaled / 2), new Point3d(0, 0, radiusScaled / 2), dist, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, planes);
         }
         var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
@@ -589,7 +590,7 @@ namespace MxTests
         using (var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline()))
         {
           //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
         var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
@@ -618,7 +619,7 @@ namespace MxTests
         using (var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline()))
         {
           //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, plane);
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
         var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
