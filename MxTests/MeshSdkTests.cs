@@ -6,6 +6,7 @@ using Rhino.Geometry.Intersect;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace MxTests
 {
@@ -75,12 +76,26 @@ namespace MxTests
     }
 
     [Test]
-    public void CreateContourCurvesTest()
+    public void CenterBoxCreateContourCurvesTests( [Values(0.1, 1, 10, 100)] double size, [Range(0,360,22.5)] double angle, [Values(2, 4, 6, 8, 10)] double dist)
     {
-      int one = 1;
-      int two = 2;
+      MinorImplmentations.CheckCenterBoxWithSizeAndOneHorizontalPlane(size);
+      MinorImplmentations.CheckCenterBoxWithSizeAndOneRotatedPlane(size, angle);
+      MinorImplmentations.CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(size, dist);
+    }
 
-      Assert.AreEqual(one + two, 3);
+    [Test]
+    public void SphereCreateContourCurvesTest([Values(1, 10, 100)] double size, [Range(1, 360, 18)] double angle, [Values(2, 4, 6, 8, 10)] double dist)
+    {
+      MinorImplmentations.CheckSphereWithRadiusAndOneHorizontalPlane(size);
+      MinorImplmentations.CheckSphereWithRadiusAndOneRotatedPlane(size, angle);
+      MinorImplmentations.CheckSphereWithRadiusAndSeveralHorizontalPlanes(size, dist);
+    }
+
+    [Test]
+    public void RectangleCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double width, [Values(0.1, 1, 10, 100)] double height/*, [Range(0, 360, 18)] double angle*/)
+    {
+      MinorImplmentations.CheckRectangleWithDifferentSidesAndOneHorizontalPlane(width, height);
+      //MinorImplmentations.CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(width, height, angle);
     }
 
     internal static class MinorImplmentations
@@ -401,6 +416,7 @@ namespace MxTests
         };
 
         Point3dList results;
+
         using (var sphere = Mesh.CreateFromSphere(new Sphere(Point3d.Origin, 10), 8, 8))
         {
           results = new Rhino.Collections.Point3dList();
@@ -425,6 +441,245 @@ namespace MxTests
           Assert.That(results[i].DistanceTo(points[i]), Is.LessThan(1e-10));
         }
       }
+
+      internal static void CheckCenterBoxWithSizeAndOneHorizontalPlane(double size)
+      {
+        //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
+        var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
+        var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
+
+        using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        };
+
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
+      }
+
+      internal static void CheckCenterBoxWithSizeAndOneRotatedPlane(double size, double angle)
+      {
+        //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
+        var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
+        var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
+        plane.Rotate(angle, Vector3d.XAxis);
+        using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        }
+
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
+      }
+
+      internal static void CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(double size, double dist)
+      {
+        //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
+        var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
+        var sizeScaled = size * 0.95;
+        var numberPlanes = (int)(sizeScaled / dist) + 1;
+        var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-sizeScaled / 2, numberPlanes, dist);
+        
+        using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -sizeScaled / 2), new Point3d(0, 0, sizeScaled / 2), dist, 1e-7);
+          polylinesArray = Intersection.MeshPlane(mesh, planes);
+        }
+
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        //Assert.AreEqual(1, numberOrientations);
+      }
+
+      internal static void CheckSphereWithRadiusAndOneHorizontalPlane(double radius)
+      {
+        //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
+        var sphere = new Sphere(Point3d.Origin, radius);
+        var plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
+        using (var mesh = Mesh.CreateFromSphere(sphere, 6, 6))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        }
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
+      }
+
+      internal static void CheckSphereWithRadiusAndOneRotatedPlane(double radius, double angle)
+      {
+        //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
+        var sphere = new Sphere(Point3d.Origin, radius);
+        var plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
+        var angleRadians = (Math.PI / 180) * angle;
+        plane.Rotate(angleRadians, Vector3d.XAxis);
+
+        using (var mesh = Mesh.CreateFromSphere(sphere, 10, 10))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        }
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
+      }
+
+      internal static void CheckSphereWithRadiusAndSeveralHorizontalPlanes(double radius, double dist)
+      {
+        //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
+        var radiusScaled = radius * 0.95;
+        var numberPlanes = (int)(radiusScaled / dist) + 1;
+        var sphere = new Sphere(Point3d.Origin, radius);
+        var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-radiusScaled / 2, numberPlanes, dist);
+
+        using (var mesh = Mesh.CreateFromSphere(sphere, 6, 6))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -radiusScaled / 2), new Point3d(0, 0, radiusScaled / 2), dist, 1e-7);
+          polylinesArray = Intersection.MeshPlane(mesh, planes);
+        }
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
+      }
+
+      internal static void CheckRectangleWithDifferentSidesAndOneHorizontalPlane(double width, double height)
+      {
+        //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
+        var planeRect = new Plane(new Point3d(0, 0, 0), Vector3d.XAxis);
+        var wInterval = new Interval(-width / 2, width / 2);
+        var hInterval = new Interval(-height / 2, height / 2);
+        var rect = new Rectangle3d(planeRect, wInterval, hInterval);
+        var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
+
+        using (var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline()))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        }
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
+      }
+      
+      internal static void CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(double width, double height, double angle)
+      {
+        //Arrange
+        Curve[] crvsArray;
+        Polyline[] polylinesArray;
+        var planeRect = new Plane(new Point3d(0, 0, 0), Vector3d.XAxis);
+        var wInterval = new Interval(-width / 2, width / 2);
+        var hInterval = new Interval(-height / 2, height / 2);
+
+        var angleRadians = (Math.PI / 180) * angle;
+        planeRect.Rotate(angleRadians, Vector3d.ZAxis);
+
+        var rect = new Rectangle3d(planeRect, wInterval, hInterval);
+        
+        var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
+
+        using (var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline()))
+        {
+          //Act
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
+          polylinesArray = Intersection.MeshPlane(mesh, plane);
+        }
+        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+        //Assert
+        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+        Assert.AreEqual(1, numberOrientations);
+      }
+
+      internal static int GetNumberOfCurveOrientationEnum(Curve[] curves)
+      {
+        var opt = curves.ToList().Select(x => (int)Enum.Parse(typeof(CurveOrientation), x.ClosedCurveOrientation().ToString()));
+        var hashSet = new HashSet<int>(opt);
+        return hashSet.Count;
+      }
     }
+
+    internal static class GeometryCollections
+    {
+      internal static IEnumerable<Point3d> CreatePointsForCubeOfSpecifiedSide(double side)
+      {
+        var points = new List<Point3d>
+        {
+          new Point3d(0, 0, 0),
+          new Point3d(side, 0, 0),
+          new Point3d(side, side, 0),
+          new Point3d(0, side, 0),
+          new Point3d(0, 0, side),
+          new Point3d(side, 0, side),
+          new Point3d(side, side, side),
+          new Point3d(0, side, side),
+        };
+        return points;
+      }
+      internal static IEnumerable<Point3d> CreatePointsForCenterBoxOfSpecifiedSide(double side)
+      {
+        var points = new List<Point3d>
+        {
+          new Point3d(-side/2, -side/2, -side/2),
+          new Point3d(side/2, -side/2, -side/2),
+          new Point3d(side/2, side/2, -side/2),
+          new Point3d(-side/2, side/2, -side/2),
+          new Point3d(-side/2, -side/2, side/2),
+          new Point3d(side/2, -side/2, side/2),
+          new Point3d(side/2, side/2, side/2),
+          new Point3d(-side/2, side/2, side/2),
+        };
+        return points;
+      }
+      internal static IEnumerable<Plane> CreateSetOfHorizontalPlanes(double initZ, int number, double dist)
+      {
+        var planes = new List<Plane>();
+        for(int i = 0; i < number; i++)
+        {
+          var z = initZ + (i * dist);
+          planes.Add(new Plane(new Point3d(0, 0, z), Vector3d.ZAxis));
+        }
+        return planes;
+      }
+    }
+
   }
 }
