@@ -92,7 +92,7 @@ namespace MxTests
     }
 
     [Test]
-    public void RectangleCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double width, [Values(0.1, 1, 10, 100)] double height/*, [Range(0, 360, 18)] double angle*/)
+    public void RectangleCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double width, [Values(0.1, 1, 10, 100)] double height, [Range(0, 360, 18)] double angle)
     {
       MinorImplmentations.CheckRectangleWithDifferentSidesAndOneHorizontalPlane(width, height);
       //MinorImplmentations.CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(width, height, angle);
