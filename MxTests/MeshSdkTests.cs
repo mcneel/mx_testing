@@ -98,6 +98,14 @@ namespace MxTests
       //MinorImplmentations.CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(width, height, angle);
     }
 
+    [Test]
+    public void CheckWindingTests([Range(-80, 80, 5)] double angleX, [Range(-80, 80, 5)] double angleY)
+    {
+      MinorImplmentations.CheckWindingInSimpleCurve();
+      MinorImplmentations.CheckWindingInFlippedCurve();
+      MinorImplmentations.CheckWindingInRotatedCurve(angleX, angleY);
+    }
+
     internal static class MinorImplmentations
     {
       public static double IntersectionMeshRay(
@@ -456,7 +464,6 @@ namespace MxTests
           crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         };
-
         var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
@@ -478,7 +485,6 @@ namespace MxTests
           crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
-
         var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
@@ -502,8 +508,7 @@ namespace MxTests
           crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -sizeScaled / 2), new Point3d(0, 0, sizeScaled / 2), dist, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, planes);
         }
-
-        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+        //var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
         //Assert
         Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
@@ -629,12 +634,95 @@ namespace MxTests
         Assert.AreEqual(1, numberOrientations);
       }
 
+      internal static void CheckWindingInSimpleCurve()
+      {
+        //Arrange
+        CurveOrientation orientation;
+        using (var crv = GeometryCollections.CreatePlanarInterpolatedCurve())
+        {
+          crv.Domain = new Interval(0.0, 1.0);
+
+          var pt0 = crv.PointAt(0.0);
+          var pt1 = crv.PointAt(0.25);
+          var pt2 = crv.PointAt(0.75);
+
+          var vtX = new Vector3d(pt1 - pt0);
+          var vtY = new Vector3d(pt2 - pt0);
+
+          var plane = new Plane(pt0, vtX, vtY);
+
+          //Act
+          orientation = crv.ClosedCurveOrientation(plane.ZAxis);
+        }
+
+        //Assert
+        Assert.AreEqual(CurveOrientation.CounterClockwise, orientation);
+      }
+
+      internal static void CheckWindingInFlippedCurve()
+      {
+        //Arrange
+        CurveOrientation orientation;
+        using (var crv = GeometryCollections.CreatePlanarInterpolatedCurve())
+        {
+          crv.Domain = new Interval(0.0, 1.0);
+          crv.Reverse();
+
+          var pt0 = crv.PointAt(0.0);
+          var pt1 = crv.PointAt(0.25);
+          var pt2 = crv.PointAt(0.75);
+
+          var vtX = new Vector3d(pt1 - pt0);
+          var vtY = new Vector3d(pt2 - pt0);
+
+          var plane = new Plane(pt0, vtX, vtY);
+
+          //Act
+          orientation = crv.ClosedCurveOrientation(plane.ZAxis);
+        }
+
+        //Assert
+        Assert.AreEqual(CurveOrientation.Clockwise, orientation);
+      }
+
+
+      internal static void CheckWindingInRotatedCurve(double angleX, double angleY)
+      {
+        //Arrange
+        CurveOrientation orientation;
+        using (var crv = GeometryCollections.CreatePlanarInterpolatedCurve())
+        {
+          crv.Domain = new Interval(0.0, 1.0);
+
+          var pt0 = crv.PointAt(0.0);
+          var angleRadiansY = (Math.PI / 180) * angleY;
+          var angleRadiansX = (Math.PI / 180) * angleX;
+          crv.Rotate(angleRadiansX, Vector3d.XAxis, pt0);
+          crv.Rotate(angleRadiansY, Vector3d.YAxis, pt0);
+
+          var pt1 = crv.PointAt(0.25);
+          var pt2 = crv.PointAt(0.75);
+
+          var vtX = new Vector3d(pt1 - pt0);
+          var vtY = new Vector3d(pt2 - pt0);
+
+          var plane = new Plane(pt0, vtX, vtY);
+
+          //Act
+          orientation = crv.ClosedCurveOrientation(plane.ZAxis);
+        }
+
+        //Assert
+        Assert.AreEqual(CurveOrientation.CounterClockwise, orientation);
+      }
+
       internal static int GetNumberOfCurveOrientationEnum(Curve[] curves)
       {
         var opt = curves.ToList().Select(x => (int)Enum.Parse(typeof(CurveOrientation), x.ClosedCurveOrientation().ToString()));
         var hashSet = new HashSet<int>(opt);
         return hashSet.Count;
       }
+
     }
 
     internal static class GeometryCollections
@@ -678,6 +766,22 @@ namespace MxTests
           planes.Add(new Plane(new Point3d(0, 0, z), Vector3d.ZAxis));
         }
         return planes;
+      }
+      internal static Curve CreatePlanarInterpolatedCurve()
+      {
+        var points = new List<Point3d>
+          {
+          new Point3d(0, 10, 0),
+          new Point3d(-5, 3, 0),
+          new Point3d(-10, -10, 0),
+          new Point3d(2, -15, 0),
+          new Point3d(10, -2, 0),
+          new Point3d(12, 5, 0),
+          new Point3d(16, 7, 0),
+          new Point3d(20, 2, 0),
+        };
+        var crv = Curve.CreateInterpolatedCurve(points, 3);
+        return crv;
       }
     }
 
