@@ -690,6 +690,7 @@ namespace MxTests
       {
         //Arrange
         CurveOrientation orientation;
+
         using (var crv = GeometryCollections.CreatePlanarInterpolatedCurve())
         {
           crv.Domain = new Interval(0.0, 1.0);
