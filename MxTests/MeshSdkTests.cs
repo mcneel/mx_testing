@@ -463,12 +463,24 @@ namespace MxTests
           //Act
           crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
-        };
-        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
-        //Assert
-        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
-        Assert.AreEqual(1, numberOrientations);
+          var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+          try
+          {
+            //Assert
+            Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+            Assert.AreEqual(1, numberOrientations);
+          }
+          catch (Exception)
+          {
+            DumpObjects(
+              new GeometryBase[] { PlaneSurface.CreateThroughBox(plane, mesh.GetBoundingBox(true)), mesh },
+              crvsArray,
+              polylinesArray.Select(pl => pl.ToPolylineCurve()));
+            throw;
+          }
+        };
       }
 
       internal static void CheckCenterBoxWithSizeAndOneRotatedPlane(double size, double angle)
@@ -622,10 +634,10 @@ namespace MxTests
             Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
             Assert.AreEqual(1, numberOrientations);
           }
-          catch (Exception ex)
+          catch (Exception)
           {
             DumpObjects(
-              new GeometryBase[] { new Point(plane.Origin), mesh },
+              new GeometryBase[] { PlaneSurface.CreateThroughBox(plane, mesh.GetBoundingBox(true)), mesh },
               crvsArray,
               polylinesArray.Select(pl => pl.ToPolylineCurve()));
             throw;
@@ -655,7 +667,7 @@ namespace MxTests
 
           dump.Write(
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "dump.3dm"),
-            new File3dmWriteOptions() { SaveAnalysisMeshes = false, SaveRenderMeshes = false, SaveUserData = false, Version = 6 }
+            new File3dmWriteOptions() { Version = 6 }
             );
         }
       }
