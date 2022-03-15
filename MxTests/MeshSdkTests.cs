@@ -76,18 +76,38 @@ namespace MxTests
     }
 
     [Test]
-    public void CenterBoxCreateContourCurvesTests([Values(0.1, 1, 10, 100)] double size, [Range(0, 360, 22.5)] double angle, [Values(2, 4, 6, 8, 10)] double dist)
+    public void CenterBoxWithSizeAndOneHorizontalPlaneTests([Values(0.1, 1, 10, 100)] double size)
     {
       MinorImplmentations.CheckCenterBoxWithSizeAndOneHorizontalPlane(size);
+    }
+
+    [Test]
+    public void SphereWithRadiusAndOneHorizontalPlaneTest([Values(1, 10, 100)] double size)
+    {
+      MinorImplmentations.CheckSphereWithRadiusAndOneHorizontalPlane(size);
+    }
+
+    [Test]
+    public void CenterBoxCreateContourCurvesTests([Values(0.1, 1, 10, 100)] double size, [Range(0, 360, 22.5)] double angle)
+    {
       MinorImplmentations.CheckCenterBoxWithSizeAndOneRotatedPlane(size, angle);
+    }
+
+    [Test]
+    public void SphereWithRadiusAndOneRotatedPlaneTest([Values(1, 10, 100)] double size, [Range(1, 360, 18)] double angle)
+    {
+      MinorImplmentations.CheckSphereWithRadiusAndOneRotatedPlane(size, angle);
+    }
+
+    [Test]
+    public void CenterBoxWithSizeAndSeveralHorizontalPlanesTests([Values(0.1, 1, 10, 100)] double size, [Values(2, 4, 6, 8, 10)] double dist)
+    {
       MinorImplmentations.CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(size, dist);
     }
 
     [Test]
-    public void SphereCreateContourCurvesTest([Values(1, 10, 100)] double size, [Range(1, 360, 18)] double angle, [Values(2, 4, 6, 8, 10)] double dist)
+    public void SphereWithRadiusAndSeveralHorizontalPlanesTest([Values(1, 10, 100)] double size, [Values(2, 4, 6, 8, 10)] double dist)
     {
-      MinorImplmentations.CheckSphereWithRadiusAndOneHorizontalPlane(size);
-      MinorImplmentations.CheckSphereWithRadiusAndOneRotatedPlane(size, angle);
       MinorImplmentations.CheckSphereWithRadiusAndSeveralHorizontalPlanes(size, dist);
     }
 
@@ -496,12 +516,24 @@ namespace MxTests
           //Act
           crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
-        }
-        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
-        //Assert
-        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
-        Assert.AreEqual(1, numberOrientations);
+          var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+          try
+          {
+            //Assert
+            Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+            Assert.AreEqual(1, numberOrientations);
+          }
+          catch (Exception)
+          {
+            DumpObjects(
+              new GeometryBase[] { mesh, PlaneSurface.CreateThroughBox(plane, mesh.GetBoundingBox(true)) },
+              crvsArray,
+              polylinesArray.Select(pl => pl.ToPolylineCurve()));
+            throw;
+          }
+        }
       }
 
       internal static void CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(double size, double dist)
@@ -656,17 +688,18 @@ namespace MxTests
           using (var oa = new Rhino.DocObjects.ObjectAttributes())
           {
             oa.LayerIndex = data_layer;
-            foreach (var geom in data) dump.Objects.Add(geom, oa);
+            if (data != null) foreach (var geom in data) dump.Objects.Add(geom, oa);
 
             oa.LayerIndex = expected_layer;
-            foreach (var geom in expected) dump.Objects.Add(geom, oa);
+            if (expected != null) foreach (var geom in expected) dump.Objects.Add(geom, oa);
 
             oa.LayerIndex = result_layer;
-            foreach (var geom in result) dump.Objects.Add(geom, oa);
+            if (result != null) foreach(var geom in result) dump.Objects.Add(geom, oa);
           }
 
           dump.Write(
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "dump.3dm"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "dump-" + new System.Diagnostics.StackTrace().GetFrame(1).GetMethod().Name +
+              new Random().Next().ToString(System.Globalization.CultureInfo.InvariantCulture) + ".3dm"),
             new File3dmWriteOptions() { Version = 6 }
             );
         }
@@ -786,8 +819,8 @@ namespace MxTests
 
       internal static int GetNumberOfCurveOrientationEnum(Curve[] curves)
       {
-        var opt = curves.ToList().Select(x => (int)Enum.Parse(typeof(CurveOrientation), x.ClosedCurveOrientation().ToString()));
-        var hashSet = new HashSet<int>(opt);
+        var opt = curves.Select(x => x.ClosedCurveOrientation());
+        var hashSet = new HashSet<CurveOrientation>(opt);
         return hashSet.Count;
       }
 
