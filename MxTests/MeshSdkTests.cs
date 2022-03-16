@@ -76,18 +76,38 @@ namespace MxTests
     }
 
     [Test]
-    public void CenterBoxCreateContourCurvesTests( [Values(0.1, 1, 10, 100)] double size, [Range(0,360,22.5)] double angle, [Values(2, 4, 6, 8, 10)] double dist)
+    public void CenterBoxWithSizeAndOneHorizontalPlaneTests([Values(0.1, 1, 10, 100)] double size)
     {
       MinorImplmentations.CheckCenterBoxWithSizeAndOneHorizontalPlane(size);
+    }
+
+    [Test]
+    public void SphereWithRadiusAndOneHorizontalPlaneTest([Values(1, 10, 100)] double size)
+    {
+      MinorImplmentations.CheckSphereWithRadiusAndOneHorizontalPlane(size);
+    }
+
+    [Test]
+    public void CenterBoxCreateContourCurvesTests([Values(0.1, 1, 10, 100)] double size, [Range(0, 360, 22.5)] double angle)
+    {
       MinorImplmentations.CheckCenterBoxWithSizeAndOneRotatedPlane(size, angle);
+    }
+
+    [Test]
+    public void SphereWithRadiusAndOneRotatedPlaneTest([Values(1, 10, 100)] double size, [Range(1, 360, 18)] double angle)
+    {
+      MinorImplmentations.CheckSphereWithRadiusAndOneRotatedPlane(size, angle);
+    }
+
+    [Test]
+    public void CenterBoxWithSizeAndSeveralHorizontalPlanesTests([Values(0.1, 1, 10, 100)] double size, [Values(2, 4, 6, 8, 10)] double dist)
+    {
       MinorImplmentations.CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(size, dist);
     }
 
     [Test]
-    public void SphereCreateContourCurvesTest([Values(1, 10, 100)] double size, [Range(1, 360, 18)] double angle, [Values(2, 4, 6, 8, 10)] double dist)
+    public void SphereWithRadiusAndSeveralHorizontalPlanesTest([Values(1, 10, 100)] double size, [Values(2, 4, 6, 8, 10)] double dist)
     {
-      MinorImplmentations.CheckSphereWithRadiusAndOneHorizontalPlane(size);
-      MinorImplmentations.CheckSphereWithRadiusAndOneRotatedPlane(size, angle);
       MinorImplmentations.CheckSphereWithRadiusAndSeveralHorizontalPlanes(size, dist);
     }
 
@@ -252,7 +272,7 @@ namespace MxTests
         System.Web.Script.Serialization.JavaScriptSerializer serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
         Mesh m = (Mesh)Mesh.FromJSON(serializer.Deserialize<Dictionary<string, string>>(meshtext));
 
-        Rhino.Geometry.Intersect.Intersection.MeshRay(m, new Ray3d(new Point3d(1,0,0.3), new Vector3d(0,0,-1)), out int[] faces);
+        Rhino.Geometry.Intersect.Intersection.MeshRay(m, new Ray3d(new Point3d(1, 0, 0.3), new Vector3d(0, 0, -1)), out int[] faces);
 
         Assert.That(faces, Has.Length.EqualTo(6));
         Assert.That(faces, Contains.Item(0));
@@ -463,12 +483,24 @@ namespace MxTests
           //Act
           crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
-        };
-        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
-        //Assert
-        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
-        Assert.AreEqual(1, numberOrientations);
+          var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+          try
+          {
+            //Assert
+            Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+            Assert.AreEqual(1, numberOrientations);
+          }
+          catch (Exception)
+          {
+            DumpObjects(
+              new GeometryBase[] { PlaneSurface.CreateThroughBox(plane, mesh.GetBoundingBox(true)), mesh },
+              crvsArray,
+              polylinesArray.Select(pl => pl.ToPolylineCurve()));
+            throw;
+          }
+        };
       }
 
       internal static void CheckCenterBoxWithSizeAndOneRotatedPlane(double size, double angle)
@@ -484,12 +516,24 @@ namespace MxTests
           //Act
           crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
-        }
-        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
-        //Assert
-        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
-        Assert.AreEqual(1, numberOrientations);
+          var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+          try
+          {
+            //Assert
+            Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+            Assert.AreEqual(1, numberOrientations);
+          }
+          catch (Exception)
+          {
+            DumpObjects(
+              new GeometryBase[] { mesh, PlaneSurface.CreateThroughBox(plane, mesh.GetBoundingBox(true)) },
+              crvsArray,
+              polylinesArray.Select(pl => pl.ToPolylineCurve()));
+            throw;
+          }
+        }
       }
 
       internal static void CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(double size, double dist)
@@ -501,7 +545,7 @@ namespace MxTests
         var sizeScaled = size * 0.95;
         var numberPlanes = (int)(sizeScaled / dist) + 1;
         var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-sizeScaled / 2, numberPlanes, dist);
-        
+
         using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
         {
           //Act
@@ -581,6 +625,22 @@ namespace MxTests
         Assert.AreEqual(1, numberOrientations);
       }
 
+      internal static bool UseNewMeshIntersections
+      {
+        get
+        {
+          return (bool)typeof(Intersection).GetMethod("get_UseNewMeshIntersections",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+            .Invoke(null, Array.Empty<object>());
+        }
+        set
+        {
+          typeof(Intersection).GetMethod("set_UseNewMeshIntersections",
+        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+        .Invoke(null, new object[] { value });
+        }
+      }
+
       internal static void CheckRectangleWithDifferentSidesAndOneHorizontalPlane(double width, double height)
       {
         //Arrange
@@ -597,14 +657,54 @@ namespace MxTests
           //Act
           crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
-        }
-        var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
 
-        //Assert
-        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
-        Assert.AreEqual(1, numberOrientations);
+          var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
+
+          try
+          {
+            //Assert
+            Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
+            Assert.AreEqual(1, numberOrientations);
+          }
+          catch (Exception)
+          {
+            DumpObjects(
+              new GeometryBase[] { PlaneSurface.CreateThroughBox(plane, mesh.GetBoundingBox(true)), mesh },
+              crvsArray,
+              polylinesArray.Select(pl => pl.ToPolylineCurve()));
+            throw;
+          }
+        }
       }
-      
+
+      public static void DumpObjects(IEnumerable<GeometryBase> data = null, IEnumerable<GeometryBase> expected = null, IEnumerable<GeometryBase> result = null)
+      {
+        using (var dump = new File3dm())
+        {
+          int data_layer = dump.AllLayers.AddLayer("data", System.Drawing.Color.Black);
+          int expected_layer = dump.AllLayers.AddLayer("expected", System.Drawing.Color.DarkBlue);
+          int result_layer = dump.AllLayers.AddLayer("result", System.Drawing.Color.Red);
+
+          using (var oa = new Rhino.DocObjects.ObjectAttributes())
+          {
+            oa.LayerIndex = data_layer;
+            if (data != null) foreach (var geom in data) dump.Objects.Add(geom, oa);
+
+            oa.LayerIndex = expected_layer;
+            if (expected != null) foreach (var geom in expected) dump.Objects.Add(geom, oa);
+
+            oa.LayerIndex = result_layer;
+            if (result != null) foreach(var geom in result) dump.Objects.Add(geom, oa);
+          }
+
+          dump.Write(
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "dump-" + new System.Diagnostics.StackTrace().GetFrame(1).GetMethod().Name +
+              new Random().Next().ToString(System.Globalization.CultureInfo.InvariantCulture) + ".3dm"),
+            new File3dmWriteOptions() { Version = 6 }
+            );
+        }
+      }
+
       internal static void CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(double width, double height, double angle)
       {
         //Arrange
@@ -618,7 +718,7 @@ namespace MxTests
         planeRect.Rotate(angleRadians, Vector3d.ZAxis);
 
         var rect = new Rectangle3d(planeRect, wInterval, hInterval);
-        
+
         var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
 
         using (var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline()))
@@ -719,8 +819,8 @@ namespace MxTests
 
       internal static int GetNumberOfCurveOrientationEnum(Curve[] curves)
       {
-        var opt = curves.ToList().Select(x => (int)Enum.Parse(typeof(CurveOrientation), x.ClosedCurveOrientation().ToString()));
-        var hashSet = new HashSet<int>(opt);
+        var opt = curves.Select(x => x.ClosedCurveOrientation());
+        var hashSet = new HashSet<CurveOrientation>(opt);
         return hashSet.Count;
       }
 
@@ -761,7 +861,7 @@ namespace MxTests
       internal static IEnumerable<Plane> CreateSetOfHorizontalPlanes(double initZ, int number, double dist)
       {
         var planes = new List<Plane>();
-        for(int i = 0; i < number; i++)
+        for (int i = 0; i < number; i++)
         {
           var z = initZ + (i * dist);
           planes.Add(new Plane(new Point3d(0, 0, z), Vector3d.ZAxis));
