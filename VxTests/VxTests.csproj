@@ -2,8 +2,7 @@
   <Import Project="..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Dll.props" />
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningLevel>999</WarningLevel>
+
     <IsPackable>false</IsPackable>
 
     <Platforms>x64</Platforms>
@@ -11,6 +10,7 @@
     <Nullable>disable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -24,11 +24,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="MxTests.testsettings.xml" />
+    <None Remove="VxTests.testsettings.xml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="MxTests.testsettings.xml">
+    <Content Include="VxTests.testsettings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -49,6 +49,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\DotNetSDK\Eto\src\Eto\Eto.csproj">
+      <Private>true</Private>
+    </ProjectReference>
+	<ProjectReference Include="..\..\..\..\DotNetSDK\Rhino.UI\Rhino.UI.csproj">
+		<Private>true</Private>
+	</ProjectReference>
     <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj">
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
