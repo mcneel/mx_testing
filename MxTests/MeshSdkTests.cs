@@ -473,34 +473,75 @@ namespace MxTests
       internal static void CheckCenterBoxWithSizeAndOneHorizontalPlane(double size)
       {
         //Arrange
-        Curve[] crvsArray;
-        Polyline[] polylinesArray;
+        var tol = 1e-7;
         var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
-        var plane = new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis);
+        var planes = new List<Plane>() { new Plane(new Point3d(0, 0, 0), Vector3d.ZAxis )};
 
         using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
         {
           //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
-          polylinesArray = Intersection.MeshPlane(mesh, plane);
+          var crvsArray = Mesh.CreateContourCurves(mesh, planes[0], tol);
+          var guessedCurves = GeometryCollections.GetGuessedCurves(points, planes);
 
-          var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
-
-          try
+          //Assert
+          for (int i = 0; i < guessedCurves.Count(); i++)
           {
-            //Assert
-            Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
-            Assert.AreEqual(1, numberOrientations);
-          }
-          catch (Exception)
-          {
-            DumpObjects(
-              new GeometryBase[] { PlaneSurface.CreateThroughBox(plane, mesh.GetBoundingBox(true)), mesh },
-              crvsArray,
-              polylinesArray.Select(pl => pl.ToPolylineCurve()));
-            throw;
+            try
+            {
+              Assert.That(Math.Abs(guessedCurves.ElementAt(i).Length - crvsArray[i].GetLength()), Is.LessThan(tol));
+              for (int j = 0; j < guessedCurves.ElementAt(i).Count; j++)
+              {
+                crvsArray[i].ClosestPoint(guessedCurves.ElementAt(i)[j], out var t);
+                Assert.That(crvsArray[i].PointAt(t).DistanceTo(guessedCurves.ElementAt(i)[j]), Is.LessThan(tol));
+              }
+            }
+            catch (Exception)
+            {
+              DumpObjects(
+                new GeometryBase[] { PlaneSurface.CreateThroughBox(planes.ElementAt(i), mesh.GetBoundingBox(true)), mesh },
+                crvsArray);
+              throw;
+            }
           }
         };
+      }
+      
+      internal static void CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(double size, double dist)
+      {
+        //Arrange
+        var tol = 1e-7;
+        var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
+        var sizeScaled = size * 0.95;
+        var numberPlanes = (int)(sizeScaled / dist) + 1;
+        var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-sizeScaled / 2, numberPlanes, dist);
+
+        using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
+        {
+          //Act
+          var crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -sizeScaled / 2), new Point3d(0, 0, sizeScaled / 2), dist, tol);
+          var guessedCurves = GeometryCollections.GetGuessedCurves(points, planes);
+
+          //Assert
+          for (int i = 0; i < guessedCurves.Count(); i++)
+          {
+            try
+            {
+              Assert.That(Math.Abs(guessedCurves.ElementAt(i).Length - crvsArray[i].GetLength()), Is.LessThan(tol));
+              for (int j = 0; j < guessedCurves.ElementAt(i).Count; j++)
+              {
+                crvsArray[i].ClosestPoint(guessedCurves.ElementAt(i)[j], out var t);
+                Assert.That(crvsArray[i].PointAt(t).DistanceTo(guessedCurves.ElementAt(i)[j]), Is.LessThan(tol));
+              }
+            }
+            catch (Exception)
+            {
+              DumpObjects(
+                new GeometryBase[] { PlaneSurface.CreateThroughBox(planes.ElementAt(i), mesh.GetBoundingBox(true)), mesh },
+                crvsArray);
+              throw;
+            }
+          }
+        }
       }
 
       internal static void CheckCenterBoxWithSizeAndOneRotatedPlane(double size, double angle)
@@ -534,29 +575,6 @@ namespace MxTests
             throw;
           }
         }
-      }
-
-      internal static void CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(double size, double dist)
-      {
-        //Arrange
-        Curve[] crvsArray;
-        Polyline[] polylinesArray;
-        var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
-        var sizeScaled = size * 0.95;
-        var numberPlanes = (int)(sizeScaled / dist) + 1;
-        var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-sizeScaled / 2, numberPlanes, dist);
-
-        using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
-        {
-          //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -sizeScaled / 2), new Point3d(0, 0, sizeScaled / 2), dist, 1e-7);
-          polylinesArray = Intersection.MeshPlane(mesh, planes);
-        }
-        //var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
-
-        //Assert
-        Assert.AreEqual(crvsArray.Length, polylinesArray.Length);
-        //Assert.AreEqual(1, numberOrientations);
       }
 
       internal static void CheckSphereWithRadiusAndOneHorizontalPlane(double radius)
@@ -688,13 +706,13 @@ namespace MxTests
           using (var oa = new Rhino.DocObjects.ObjectAttributes())
           {
             oa.LayerIndex = data_layer;
-            if (data != null) foreach (var geom in data) dump.Objects.Add(geom, oa);
+            if (data != null) foreach (Curve geom in data) dump.Objects.AddCurve(geom);
 
             oa.LayerIndex = expected_layer;
-            if (expected != null) foreach (var geom in expected) dump.Objects.Add(geom, oa);
+            if (expected != null) foreach (Curve geom in expected) dump.Objects.AddCurve(geom);
 
             oa.LayerIndex = result_layer;
-            if (result != null) foreach(var geom in result) dump.Objects.Add(geom, oa);
+            if (result != null) foreach(Curve geom in result) dump.Objects.AddCurve(geom, oa);
           }
 
           dump.Write(
@@ -824,6 +842,15 @@ namespace MxTests
         return hashSet.Count;
       }
 
+      internal static Polyline[] ToPolylineArray(Curve[] curves)
+      {
+        var list = new List<Polyline>();
+        foreach (Curve curve in curves)
+          if (curve.TryGetPolyline(out Polyline polyline))
+            list.Add(polyline);
+        return list.ToArray();
+      }
+
     }
 
     internal static class GeometryCollections
@@ -867,6 +894,18 @@ namespace MxTests
           planes.Add(new Plane(new Point3d(0, 0, z), Vector3d.ZAxis));
         }
         return planes;
+      }
+      internal static IEnumerable<Polyline> GetGuessedCurves(IEnumerable<Point3d> points, IEnumerable<Plane> planes)
+      {
+        var guessedCurves = new List<Polyline>();
+        foreach (Plane plane in planes)
+        {
+          var guessedPoints = new List<Point3d>();
+          for (var i = 0; i < 4; i++) guessedPoints.Add(new Point3d(points.ElementAt(i).X, points.ElementAt(i).Y, plane.Origin.Z));
+          guessedPoints.Add(new Point3d(points.ElementAt(0).X, points.ElementAt(0).Y, plane.Origin.Z));
+          guessedCurves.Add(new Polyline(guessedPoints));
+        }
+        return guessedCurves;
       }
       internal static Curve CreatePlanarInterpolatedCurve()
       {
