@@ -92,7 +92,8 @@ namespace MxTests
     public void OneTimeSetUp()
     {
        //ReferenceRhinoCommonToOpenRhino(); preferred in static constructor
-       rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(); //delayed as much as necessary
+       if (rhinoCore == null)
+        rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(); //delayed as much as necessary
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
