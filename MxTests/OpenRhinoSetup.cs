@@ -41,6 +41,8 @@ namespace MxTests
       }
       else
         SettingsXml = new XDocument();
+
+      ReferenceRhinoCommonToOpenRhino();
     }
 
     internal static XDocument SettingsXml { get; set; }
@@ -82,25 +84,30 @@ namespace MxTests
       testModels.RemoveAll(f => Path.GetFileName(f).EndsWith("bak", System.StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private object rhinoCore; //do NOT reference this by its RhinoCommon name
+    private static object rhinoCore; //do NOT reference this by its RhinoCommon name
+    private static bool initialized;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-      if (to_throw != null) throw to_throw;
-
-      RhinoInside.Resolver.Initialize();
-      if (RhinoSystemDir != null) RhinoInside.Resolver.RhinoSystemDirectory = RhinoSystemDir;
-      else RhinoSystemDir = RhinoInside.Resolver.RhinoSystemDirectory;
-      TestContext.WriteLine("RhinoSystemDir is: " + RhinoSystemDir + ".");
-
-      ReferenceRhinoCommonToOpenRhino();
+      //ReferenceRhinoCommonToOpenRhino(); preferred in static constructor
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-    void ReferenceRhinoCommonToOpenRhino()
+    static void ReferenceRhinoCommonToOpenRhino()
     {
-      rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(); //delayed as much as necessary
+      if (!initialized)
+      {
+        if (to_throw != null) throw to_throw;
+
+        RhinoInside.Resolver.Initialize();
+        if (RhinoSystemDir != null) RhinoInside.Resolver.RhinoSystemDirectory = RhinoSystemDir;
+        else RhinoSystemDir = RhinoInside.Resolver.RhinoSystemDirectory;
+        TestContext.WriteLine("RhinoSystemDir is: " + RhinoSystemDir + ".");
+
+        rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(); //delayed as much as necessary
+        initialized = true;
+      }
     }
 
     [OneTimeTearDown]

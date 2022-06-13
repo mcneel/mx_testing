@@ -24,6 +24,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MeshSelfIntersect.cs" />
+    <Compile Remove="MeshSplit.cs" />
+    <Compile Remove="SurfaceIntersect.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="MxTests.testsettings.xml" />
   </ItemGroup>
 
@@ -41,7 +47,11 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
     <PackageReference Include="Rhino.Inside" Version="7.0.0" />
-	<PackageReference Include="Rhinocommon" Version="8.0.22152.4305-wip" />
+	<PackageReference Include="RhinoCommon">
+		<Version>8.0.22152.4305-wip</Version>
+		<PrivateAssets>all</PrivateAssets>
+		<ExcludeAssets>runtime</ExcludeAssets>
+	</PackageReference>
     <PackageReference Include="RhinoWindows" Version="8.0.22152.4305-wip" />
 	<PackageReference Include="Grasshopper" Version="8.0.22152.4305-wip" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
