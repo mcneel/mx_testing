@@ -46,7 +46,7 @@ namespace MxTests
         var results = intersections != null ? intersections.Select(
           a => new ResultMetrics { Closed = a.IsClosed, Measurement = a.GetLength(), Overlap = false, Curve = a }) 
           : Array.Empty<ResultMetrics>();
-        if (points != null) results.Concat(points.Select(a => new ResultMetrics { Point = a }));
+        if (points != null) results = results.Concat(points.Select(a => new ResultMetrics { Point = a }));
         returned = results.OrderBy(a => a.Measurement).ToList();
 
         textLog = string.Empty;
