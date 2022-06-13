@@ -21,7 +21,7 @@ namespace MxTests
     }
 
     internal class SurfaceIntersectImplementation
-    : MeasuredIntersectionsBase<Brep>
+    : MeasuredSurfaceIntersectionsBase
     {
       static SurfaceIntersectImplementation() { Instance = new SurfaceIntersectImplementation(); }
       protected SurfaceIntersectImplementation() { }
@@ -32,7 +32,7 @@ namespace MxTests
         ParseAndExecuteNotes(filepath, IncipitString, false);
       }
 
-      internal override bool OperateCommandOnGeometry(IEnumerable<Brep> inputs, IEnumerable<Brep> _, double tolerance, out List<ResultMetrics> returned, out string textLog)
+      internal override bool OperateCommandOnGeometry(IEnumerable<object> inputs, IEnumerable<object> _, double tolerance, out List<ResultMetrics> returned, out string textLog)
       {
         bool rc;
 

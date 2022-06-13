@@ -15,8 +15,10 @@ namespace MxTests
     /// <summary>
     /// Provides a basic implementation for File3dm-based tests that run from a folder.
     /// </summary>
-    internal abstract class MeasuredBase<T>
+    internal abstract class MeasuredBase
     {
+        //Mesh, etc
+        internal abstract Type TargetType {  get; }
 
         internal void ParseAndExecuteNotes(string filepath, string notesIncipit, bool twoGroups)
         {
@@ -70,7 +72,7 @@ namespace MxTests
         internal void MeasuredTest(List<string> otherlines, object file, string filepath, bool twoGroups, bool shouldThrow)
         {
             var expected = ExtractExpectedValues(otherlines);
-            ExtractInputsFromFile(file, twoGroups, out double final_tolerance, out IEnumerable<T> inputMeshes, out IEnumerable<T> secondMeshesGroup);
+            ExtractInputsFromFile(file, twoGroups, out double final_tolerance, out IEnumerable<object> inputMeshes, out IEnumerable<object> secondMeshesGroup);
 
             bool rv = OperateCommandOnGeometry(
               inputMeshes, secondMeshesGroup, final_tolerance,
@@ -127,13 +129,13 @@ namespace MxTests
         }
 
         internal abstract bool OperateCommandOnGeometry
-          (IEnumerable<T> inputMeshes, IEnumerable<T> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog);
+          (IEnumerable<object> inputMeshes, IEnumerable<object> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog);
         internal abstract void CheckAssertions(object file, List<ResultMetrics> expected, List<ResultMetrics> returned, bool rv, string textLog);
 
         internal virtual double ToleranceCoefficient { get { return 1.0; } }
 
         internal virtual void ExtractInputsFromFile(
-            object file, bool usesSecondGroup, out double final_tolerance, out IEnumerable<T> surfaces, out IEnumerable<T> secondSurfacesGroup)
+            object file, bool usesSecondGroup, out double final_tolerance, out IEnumerable<object> surfaces, out IEnumerable<object> secondSurfacesGroup)
         {
             final_tolerance = 0;
             surfaces = null;
@@ -151,10 +153,10 @@ namespace MxTests
 
             final_tolerance = doc_tolerance * coefficient;
 
-            uint filter = (uint)(typeof(T) == typeof(Mesh) ? ObjectType.Mesh : ObjectType.Surface | ObjectType.Brep);
+            uint filter = (uint)(TargetType == typeof(Mesh) ? ObjectType.Mesh : ObjectType.Surface | ObjectType.Brep);
 
             var specific_items = items.Where(a => ((uint)(((GeometryBase)a.Geometry).ObjectType) & filter) != 0).Select(
-                i => new { i.Id, Geometry = (object)(T)(object)i.Geometry, Attributes = (object)i.Attributes });
+                i => new { i.Id, i.Geometry, i.Attributes });
 
             if (curves.Count > 0)
             {
@@ -172,8 +174,8 @@ namespace MxTests
                     c => new
                     {
                         c.Id,
-                        Geometry = (object)((T)(
-                            typeof(T).IsAssignableFrom(typeof(Mesh)) ?
+                        Geometry = (object)((
+                            TargetType.IsAssignableFrom(typeof(Mesh)) ?
                             (object)Mesh.CreateFromCurveExtrusion(
                             (Curve)c.Geometry,
                             ((ConstructionPlane)test_cplane_obj).Plane.ZAxis,
@@ -198,10 +200,10 @@ namespace MxTests
                 var layer0index = layers[0].Index;
                 var layer1index = layers[1].Index;
 
-                surfaces = specific_items.Where(i => ((ObjectAttributes)i.Attributes).LayerIndex == layer0index).Select(i => i.Geometry).Cast<T>();
-                secondSurfacesGroup = specific_items.Where(i => ((ObjectAttributes)i.Attributes).LayerIndex == layer1index).Select(i => i.Geometry).Cast<T>();
+                surfaces = specific_items.Where(i => ((ObjectAttributes)i.Attributes).LayerIndex == layer0index).Select(i => i.Geometry);
+                secondSurfacesGroup = specific_items.Where(i => ((ObjectAttributes)i.Attributes).LayerIndex == layer1index).Select(i => i.Geometry);
             }
-            else surfaces = specific_items.Select(i => i.Geometry).Cast<T>();
+            else surfaces = specific_items.Select(i => i.Geometry);
         }
 
 

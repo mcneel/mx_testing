@@ -12,9 +12,20 @@ using System.Linq;
 
 namespace MxTests
 {
+    internal abstract class MeasuredMeshIntersectionsBase
+      : MeasuredIntersectionsBase
+    {
+        internal override Type TargetType => typeof(Mesh);
+    }
 
-    internal abstract class MeasuredIntersectionsBase<T>
-      : MeasuredBase<T>
+    internal abstract class MeasuredSurfaceIntersectionsBase
+        : MeasuredIntersectionsBase
+    {
+        internal override Type TargetType => typeof(Surface);
+    }
+
+    internal abstract class MeasuredIntersectionsBase
+      : MeasuredBase
     {
         const string incipitString = "MEASURED INTERSECTION";
         public static string IncipitString => incipitString;

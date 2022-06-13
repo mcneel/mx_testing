@@ -29,20 +29,21 @@ namespace MxTests
 
     static OpenRhinoSetup()
     {
-      SettingsDir = Path.GetDirectoryName(GetCallerFilePath());
+        SettingsDir = Path.GetDirectoryName(GetCallerFilePath());
 
         //TestContext.CurrentContext.TestDirectory; //this will be the location where the .dll is found
-      SettingsFile = Path.Combine(SettingsDir, SettingsFileName);
+        SettingsFile = Path.Combine(SettingsDir, SettingsFileName);
 
-      if (File.Exists(SettingsFile))
-      {
-        SettingsXml = XDocument.Load(SettingsFile);
-        RhinoSystemDir = SettingsXml.Descendants("RhinoSystemDirectory").FirstOrDefault()?.Value ?? null;
-      }
-      else
-        SettingsXml = new XDocument();
+        if (File.Exists(SettingsFile))
+        {
+            SettingsXml = XDocument.Load(SettingsFile);
+            RhinoSystemDir = SettingsXml.Descendants("RhinoSystemDirectory").FirstOrDefault()?.Value ?? null;
+        }
+        else
+            SettingsXml = new XDocument();
 
-      ReferenceRhinoCommonToOpenRhino();
+        ReferenceRhinoCommonToOpenRhino();
+
     }
 
     internal static XDocument SettingsXml { get; set; }
@@ -90,7 +91,8 @@ namespace MxTests
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-      //ReferenceRhinoCommonToOpenRhino(); preferred in static constructor
+       //ReferenceRhinoCommonToOpenRhino(); preferred in static constructor
+       rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(); //delayed as much as necessary
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
@@ -101,11 +103,11 @@ namespace MxTests
         if (to_throw != null) throw to_throw;
 
         RhinoInside.Resolver.Initialize();
+
         if (RhinoSystemDir != null) RhinoInside.Resolver.RhinoSystemDirectory = RhinoSystemDir;
         else RhinoSystemDir = RhinoInside.Resolver.RhinoSystemDirectory;
         TestContext.WriteLine("RhinoSystemDir is: " + RhinoSystemDir + ".");
 
-        rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(); //delayed as much as necessary
         initialized = true;
       }
     }

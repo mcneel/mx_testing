@@ -33,14 +33,14 @@ namespace MxTests
         ParseAndExecuteNotes(filepath, incipitString, false);
       }
 
-      internal override bool OperateCommandOnGeometry(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, 
+      internal override bool OperateCommandOnGeometry(IEnumerable<object> inputMeshes, IEnumerable<object> secondMeshes, 
         double tolerance, out List<ResultMetrics> returned, out string textLog)
       {
         Polyline[] intersections;
         Polyline[] overlaps;
         bool rc;
 
-        var mesh = inputMeshes.FirstOrDefault();
+        var mesh = (Mesh)inputMeshes.FirstOrDefault();
         if (mesh == null) Assert.Fail("Expected one and only one object to test.");
 
         using (var log = new TextLog())

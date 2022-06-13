@@ -5,6 +5,7 @@ using Rhino.Geometry.Intersect;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace MxTests
 {
@@ -19,7 +20,7 @@ namespace MxTests
     }
 
     internal class MeshSplitImplementation
-    : MeasuredBase<Mesh>
+    : MeasuredBase
     {
       static MeshSplitImplementation() { Instance = new MeshSplitImplementation(); }
       private MeshSplitImplementation() { }
@@ -27,24 +28,27 @@ namespace MxTests
 
       internal override double ToleranceCoefficient => Intersection.MeshIntersectionsTolerancesCoefficient;
 
-      const string incipitString = "MEASURED SPLIT";
+      internal override Type TargetType => typeof(Mesh);
+
+       const string incipitString = "MEASURED SPLIT";
 
       public void Model(string filepath)
       {
         ParseAndExecuteNotes(filepath, incipitString, true);
       }
 
-      internal override bool OperateCommandOnGeometry(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog)
+      internal override bool OperateCommandOnGeometry(IEnumerable<object> inputMeshes,
+          IEnumerable<object> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog)
       {
         bool rc = true;
         returned = new List<ResultMetrics>();
 
         using (var log = new TextLog())
         {
-          foreach (var input in inputMeshes)
+          foreach (Mesh input in inputMeshes)
           {
             var new_returned = new ResultMetrics();
-            Mesh[] temp = input.DuplicateMesh().Split(secondMeshes, tolerance, true, log, System.Threading.CancellationToken.None, null);
+            Mesh[] temp = input.DuplicateMesh().Split(secondMeshes.Cast<Mesh>(), tolerance, true, log, System.Threading.CancellationToken.None, null);
 
             if (temp == null)
             {
@@ -70,7 +74,7 @@ namespace MxTests
         return rc;
       }
 
-      internal override void CheckAssertions(File3dm file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
+      internal override void CheckAssertions(object file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
       {
         NUnit.Framework.Assert.IsTrue(rv, "Return value of Mesh.Split() function was null.");
         NUnit.Framework.Assert.IsEmpty(log_text, "Textlog of function must be empty");
@@ -79,7 +83,7 @@ namespace MxTests
 
         for (int i = 0; i < expected.Count; i++)
         {
-          NUnit.Framework.Assert.AreEqual(expected[i].Measurement, result_ordered[i].Measurement, Math.Max(expected[i].Measurement * 10e-8, file.Settings.ModelAbsoluteTolerance));
+          NUnit.Framework.Assert.AreEqual(expected[i].Measurement, result_ordered[i].Measurement, Math.Max(expected[i].Measurement * 10e-8, ((File3dm)file).Settings.ModelAbsoluteTolerance));
           if (expected[i].Closed.HasValue) NUnit.Framework.Assert.AreEqual(expected[i].Closed.Value, result_ordered[i].Closed.Value,
               $"Mesh of area {expected[i].Measurement} was not {(expected[i].Closed.Value ? "closed" : "open")} as expected.");
         }

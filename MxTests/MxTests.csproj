@@ -24,8 +24,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="MeshSelfIntersect.cs" />
-    <Compile Remove="MeshSplit.cs" />
     <Compile Remove="SurfaceIntersect.cs" />
   </ItemGroup>
 

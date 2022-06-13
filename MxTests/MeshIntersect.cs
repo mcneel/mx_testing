@@ -21,10 +21,13 @@ namespace MxTests
     }
 
     internal class MeshIntersectImplementation
-    : MeasuredIntersectionsBase<Mesh>
+    : MeasuredMeshIntersectionsBase
     {
       static MeshIntersectImplementation() { Instance = new MeshIntersectImplementation(); }
-      protected MeshIntersectImplementation() { }
+
+       internal override Type TargetType => typeof(Mesh);
+
+       protected MeshIntersectImplementation() { }
       public static MeshIntersectImplementation Instance { get; private set; }
 
       internal override double ToleranceCoefficient => Intersection.MeshIntersectionsTolerancesCoefficient;
@@ -34,7 +37,7 @@ namespace MxTests
         ParseAndExecuteNotes(filepath, IncipitString, false);
       }
 
-      internal override bool OperateCommandOnGeometry(IEnumerable<Mesh> inputMeshes, IEnumerable<Mesh> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog)
+      internal override bool OperateCommandOnGeometry(IEnumerable<object> inputMeshes, IEnumerable<object> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog)
       {
         Polyline[] intersections;
         Polyline[] overlaps;
@@ -42,7 +45,7 @@ namespace MxTests
 
         using (var log = new TextLog())
         {
-          rc = Intersection.MeshMesh(inputMeshes, tolerance,
+          rc = Intersection.MeshMesh(inputMeshes.Cast<Mesh>(), tolerance,
               out intersections, true, out overlaps, false, out _, log,
               System.Threading.CancellationToken.None, null);
           textLog = log.ToString();
