@@ -27,68 +27,85 @@ namespace MxTests
     [Test]
     public void PolylineCreateByJoiningLines()
     {
-      Random random = new Random(0);
+      Line[] reorderedn = Array.Empty<Line>();
 
-      Line[] lines = new[] {
+      try
+      {
+        Random random = new Random(0);
+
+        Line[] lines = new[] {
         new Line( 0, 0, 0, 1, 0, 0),
         new Line( 1, 0, 0, 1, 1, 0),
         new Line( 1, 1, 0, 0, 1, 0),
         new Line( 0, 1, 0, 0, 0, 0),
         };
 
-      foreach (var reordered in GetPermutations(lines, 4))
-      {
-        for (int i = 0; i < (1<<4); i++)
+        foreach (var reordered in GetPermutations(lines, 4))
         {
-          var reorderedn = reordered.ToArray();
-
-          if ((i & 1) != 0) reorderedn[0].Flip();
-          if ((i & (1<<1)) != 0) reorderedn[1].Flip();
-          if ((i & (1<<2)) != 0) reorderedn[2].Flip();
-          if ((i & (1<<3)) != 0) reorderedn[3].Flip();
-
-          for (int j = 0; j < 4; j++)
+          for (int i = 0; i < (1 << 4); i++)
           {
-            reorderedn[j].From += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
-            reorderedn[j].To += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
+            reorderedn = reordered.ToArray();
+
+            if ((i & 1) != 0) reorderedn[0].Flip();
+            if ((i & (1 << 1)) != 0) reorderedn[1].Flip();
+            if ((i & (1 << 2)) != 0) reorderedn[2].Flip();
+            if ((i & (1 << 3)) != 0) reorderedn[3].Flip();
+
+            for (int j = 0; j < 4; j++)
+            {
+              reorderedn[j].From += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
+              reorderedn[j].To += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
+            }
+
+            Polyline[] results = Polyline.CreateByJoiningLines(reordered.ToArray(), 0.01, true);
+
+            Assert.That(results, Has.Length.EqualTo(1));
+            Assert.That(results[0], Has.Count.EqualTo(5));
+            Assert.That(results[0], Has.Property("IsClosed").True);
           }
+        }
 
-          Polyline[] results = Polyline.CreateByJoiningLines(reordered.ToArray(), 0.01, true);
+        lines = lines.Append(new Line(-1, -1, 0, -0.001, 0.001, 0)).ToArray();
 
-          Assert.That(results, Has.Length.EqualTo(1));
-          Assert.That(results[0], Has.Count.EqualTo(5));
-          Assert.That(results[0], Has.Property("IsClosed").True);
+        foreach (var reordered in GetPermutations(lines, 5))
+        {
+          for (int i = 0; i < (1 << 4); i++)
+          {
+            reorderedn = reordered.ToArray();
+
+            if ((i & 1) != 0) reorderedn[0].Flip();
+            if ((i & (1 << 1)) != 0) reorderedn[1].Flip();
+            if ((i & (1 << 2)) != 0) reorderedn[2].Flip();
+            if ((i & (1 << 3)) != 0) reorderedn[3].Flip();
+
+            for (int j = 0; j < 5; j++)
+            {
+              reorderedn[j].From += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
+              reorderedn[j].To += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
+            }
+
+            Polyline[] results = Polyline.CreateByJoiningLines(reordered.ToArray(), 0.01, true);
+
+            Assert.That(results, Has.Length.EqualTo(2));
+
+            var longer = results[0].Count > 2 ? results[0] : results[1];
+
+            Assert.That(longer, Has.Count.EqualTo(5));
+            Assert.That(longer, Has.Property("IsClosed").True);
+          }
         }
       }
-
-      lines = lines.Append(new Line(-1, -1, 0, -0.001, 0.001, 0)).ToArray();
-
-      foreach (var reordered in GetPermutations(lines, 4))
+      catch (AssertionException)
       {
-        for (int i = 0; i < (1 << 4); i++)
-        {
-          var reorderedn = reordered.ToArray();
+        File3dm file = new File3dm();
 
-          if ((i & 1) != 0) reorderedn[0].Flip();
-          if ((i & (1 << 1)) != 0) reorderedn[1].Flip();
-          if ((i & (1 << 2)) != 0) reorderedn[2].Flip();
-          if ((i & (1 << 3)) != 0) reorderedn[3].Flip();
+        for (int i=0; i< reorderedn.Length; i++)
+          file.Objects.AddLine(reorderedn[i]);
 
-          for (int j = 0; j < 4; j++)
-          {
-            reorderedn[j].From += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
-            reorderedn[j].To += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
-          }
+        file.Write(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "PolylineCreateByJoiningLines.3dm"),
+          new File3dmWriteOptions { Version = 7 });
 
-          Polyline[] results = Polyline.CreateByJoiningLines(reordered.ToArray(), 0.01, true);
-
-          Assert.That(results, Has.Length.EqualTo(2));
-
-          var longer = results[0].Count > 2 ? results[0] : results[1];
-
-          Assert.That(longer, Has.Count.EqualTo(5));
-          Assert.That(longer, Has.Property("IsClosed").True);
-        }
+        throw;
       }
     }
 
