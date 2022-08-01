@@ -13,6 +13,86 @@ namespace MxTests
   [TestFixture]
   public class MeshSdkTests
   {
+    static IEnumerable<IEnumerable<T>>
+        GetPermutations<T>(IEnumerable<T> list, int length)
+    //https://stackoverflow.com/questions/756055/listing-all-permutations-of-a-string-integer
+    {
+      if (length == 1) return list.Select(t => new T[] { t });
+
+      return GetPermutations(list, length - 1)
+          .SelectMany(t => list.Where(e => !t.Contains(e)),
+              (t1, t2) => t1.Concat(new T[] { t2 }));
+    }
+
+    [Test]
+    public void PolylineCreateByJoiningLines()
+    {
+      Random random = new Random(0);
+
+      Line[] lines = new[] {
+        new Line( 0, 0, 0, 1, 0, 0),
+        new Line( 1, 0, 0, 1, 1, 0),
+        new Line( 1, 1, 0, 0, 1, 0),
+        new Line( 0, 1, 0, 0, 0, 0),
+        };
+
+      foreach (var reordered in GetPermutations(lines, 4))
+      {
+        for (int i = 0; i < (1<<4); i++)
+        {
+          var reorderedn = reordered.ToArray();
+
+          if ((i & 1) != 0) reorderedn[0].Flip();
+          if ((i & (1<<1)) != 0) reorderedn[1].Flip();
+          if ((i & (1<<2)) != 0) reorderedn[2].Flip();
+          if ((i & (1<<3)) != 0) reorderedn[3].Flip();
+
+          for (int j = 0; j < 4; j++)
+          {
+            reorderedn[j].From += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
+            reorderedn[j].To += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
+          }
+
+          Polyline[] results = Polyline.CreateByJoiningLines(reordered.ToArray(), 0.01, true);
+
+          Assert.That(results, Has.Length.EqualTo(1));
+          Assert.That(results[0], Has.Count.EqualTo(5));
+          Assert.That(results[0], Has.Property("IsClosed").True);
+        }
+      }
+
+      lines = lines.Append(new Line(-1, -1, 0, -0.001, 0.001, 0)).ToArray();
+
+      foreach (var reordered in GetPermutations(lines, 4))
+      {
+        for (int i = 0; i < (1 << 4); i++)
+        {
+          var reorderedn = reordered.ToArray();
+
+          if ((i & 1) != 0) reorderedn[0].Flip();
+          if ((i & (1 << 1)) != 0) reorderedn[1].Flip();
+          if ((i & (1 << 2)) != 0) reorderedn[2].Flip();
+          if ((i & (1 << 3)) != 0) reorderedn[3].Flip();
+
+          for (int j = 0; j < 4; j++)
+          {
+            reorderedn[j].From += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
+            reorderedn[j].To += new Vector3d((random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001, (random.NextDouble() - 0.5) * 0.00001);
+          }
+
+          Polyline[] results = Polyline.CreateByJoiningLines(reordered.ToArray(), 0.01, true);
+
+          Assert.That(results, Has.Length.EqualTo(2));
+
+          var longer = results[0].Count > 2 ? results[0] : results[1];
+
+          Assert.That(longer, Has.Count.EqualTo(5));
+          Assert.That(longer, Has.Property("IsClosed").True);
+        }
+      }
+    }
+
+
     [TestCase(0.0, false, 0.5, 0.5, -1.0, 0.0, 0.0, 1.0, ExpectedResult = 1.0)]
     [TestCase(0.0, true, 0.5, 0.5, -1.0, 0.0, 0.0, 1.0, ExpectedResult = 1.0)]
 
