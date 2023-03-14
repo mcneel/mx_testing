@@ -18,4 +18,4 @@ if ms:
 text = "\n".join(text)
 
 #print("OLD NOTES: ")
-#print(rs.Notes(text))
+print(rs.Notes(text))
