@@ -4,11 +4,6 @@
   or disable to use the default Rhino 7 install -->
   <RhinoSystemDirectory>C:\Program Files\Rhino 8 WIP\System\</RhinoSystemDirectory>
 
-  <MeshBooleanUnion>
-    <ModelDirectory>..\models\MeshBooleanUnion\</ModelDirectory>
-    <ModelDirectory optional="true">..\private_models\models\MeshBooleanUnion\</ModelDirectory>
-  </MeshBooleanUnion>
-  
   <MeshIntersect>
     <ModelDirectory>..\models\MeshIntersect\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\MeshIntersect\</ModelDirectory>
@@ -21,6 +16,11 @@
     <ModelDirectory>..\models\MeshSplit\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\MeshSplit\</ModelDirectory>
   </MeshSplit>
+  <MeshBooleanUnion>
+    <ModelDirectory>..\models\MeshBooleanUnion\</ModelDirectory>
+    <ModelDirectory optional="true">..\private_models\models\MeshBooleanUnion\</ModelDirectory>
+  </MeshBooleanUnion>
+	
   <SurfaceIntersect>
     <ModelDirectory>..\models\SurfaceIntersect\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\SurfaceIntersect\</ModelDirectory>
