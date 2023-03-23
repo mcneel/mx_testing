@@ -3,7 +3,7 @@ import rhinoscriptsyntax as rs
 ms = rs.GetObjects(filter=rs.filter.mesh)
 if ms:
     
-    text = ["AREA UNION",""]
+    text = ["MEASURED SPLITS",""]
     areas = []
     for m in ms:
         a = rs.Area(m)
