@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Settings>
-  <!-- Point this to the path that you want to test, or disable to use the default Rhino 7 install -->
-  <RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Debug\</RhinoSystemDirectory>
+  <!-- Point this to the path that you want to test and that contains RhinoCommon.dll,
+  or disable to use the default Rhino install -->
+  <RhinoSystemDirectory>C:\Program Files\Rhino 8 WIP\System\</RhinoSystemDirectory>
 
-  <MeshBooleanUnion>
-    <ModelDirectory>..\models\MeshBooleanUnion\</ModelDirectory>
-    <ModelDirectory optional="true">..\private_models\models\MeshBooleanUnion\</ModelDirectory>
-  </MeshBooleanUnion>
   <MeshIntersect>
     <ModelDirectory>..\models\MeshIntersect\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\MeshIntersect\</ModelDirectory>
@@ -19,6 +16,11 @@
     <ModelDirectory>..\models\MeshSplit\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\MeshSplit\</ModelDirectory>
   </MeshSplit>
+  <MeshBooleanUnion>
+    <ModelDirectory>..\models\MeshBooleanUnion\</ModelDirectory>
+    <ModelDirectory optional="true">..\private_models\models\MeshBooleanUnion\</ModelDirectory>
+  </MeshBooleanUnion>
+	
   <SurfaceIntersect>
     <ModelDirectory>..\models\SurfaceIntersect\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\SurfaceIntersect\</ModelDirectory>
