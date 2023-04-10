@@ -803,13 +803,13 @@ namespace MxTests
           using (var oa = new Rhino.DocObjects.ObjectAttributes())
           {
             oa.LayerIndex = data_layer;
-            if (data != null) foreach (Curve geom in data) dump.Objects.AddCurve(geom);
+            if (data != null) foreach (var geom in data) dump.Objects.Add(geom, oa);
 
             oa.LayerIndex = expected_layer;
-            if (expected != null) foreach (Curve geom in expected) dump.Objects.AddCurve(geom);
+            if (expected != null) foreach (var geom in expected) dump.Objects.Add(geom, oa);
 
             oa.LayerIndex = result_layer;
-            if (result != null) foreach(Curve geom in result) dump.Objects.AddCurve(geom, oa);
+            if (result != null) foreach(var geom in result) dump.Objects.Add(geom, oa);
           }
 
           dump.Write(
