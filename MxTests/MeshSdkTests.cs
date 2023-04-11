@@ -610,30 +610,30 @@ namespace MxTests
         var points = GeometryCollections.CreatePointsForCenterBoxOfSpecifiedSide(size);
         var sizeScaled = size * 0.95;
         var numberPlanes = (int)(sizeScaled / dist) + 1;
-        var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-sizeScaled / 2, numberPlanes, dist);
+        var planes = GeometryCollections.CreateSetOfHorizontalPlanes(-sizeScaled / 2, numberPlanes, dist).ToList();
 
         using (var mesh = Mesh.CreateFromBox(points, 1, 1, 1))
         {
           //Act
-          var crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -sizeScaled / 2), new Point3d(0, 0, sizeScaled / 2), dist, tol);
-          var guessedCurves = GeometryCollections.GetGuessedCurves(points, planes);
+          var crvsArray = Mesh.CreateContourCurves(mesh, new Point3d(0, 0, -sizeScaled / 2), new Point3d(0, 0, sizeScaled / 2), dist, tol).ToList();
+          var guessedCurves = GeometryCollections.GetGuessedCurves(points, planes).ToList();
 
           //Assert
           for (int i = 0; i < guessedCurves.Count(); i++)
           {
             try
             {
-              Assert.That(Math.Abs(guessedCurves.ElementAt(i).Length - crvsArray[i].GetLength()), Is.LessThan(tol));
-              for (int j = 0; j < guessedCurves.ElementAt(i).Count; j++)
+              Assert.That(Math.Abs(guessedCurves[i].Length - crvsArray[i].GetLength()), Is.LessThan(tol));
+              for (int j = 0; j < guessedCurves[i].Count; j++)
               {
-                crvsArray[i].ClosestPoint(guessedCurves.ElementAt(i)[j], out var t);
-                Assert.That(crvsArray[i].PointAt(t).DistanceTo(guessedCurves.ElementAt(i)[j]), Is.LessThan(tol));
+                crvsArray[i].ClosestPoint(guessedCurves[i][j], out var t);
+                Assert.That(crvsArray[i].PointAt(t).DistanceTo(guessedCurves[i][j]), Is.LessThan(tol));
               }
             }
             catch (Exception)
             {
               DumpObjects(
-                new GeometryBase[] { PlaneSurface.CreateThroughBox(planes.ElementAt(i), mesh.GetBoundingBox(true)), mesh },
+                new GeometryBase[] { PlaneSurface.CreateThroughBox(planes[i], mesh.GetBoundingBox(true)), mesh },
                 crvsArray);
               throw;
             }
