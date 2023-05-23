@@ -20,6 +20,10 @@
     <ModelDirectory>..\models\MeshBooleanUnion\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\MeshBooleanUnion\</ModelDirectory>
   </MeshBooleanUnion>
+  <MeshBooleanDifference>
+    <ModelDirectory>..\models\MeshBooleanDifference\</ModelDirectory>
+    <ModelDirectory optional="true">..\private_models\models\MeshBooleanDifference\</ModelDirectory>
+  </MeshBooleanDifference>
 	
   <SurfaceIntersect>
     <ModelDirectory>..\models\SurfaceIntersect\</ModelDirectory>

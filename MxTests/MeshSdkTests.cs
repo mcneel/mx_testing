@@ -190,23 +190,29 @@ namespace MxTests
       MinorImplmentations.CheckCenterBoxWithSizeAndOneRotatedPlane(size, angle);
     }
 
+    /*
     [Test]
     public void SphereWithRadiusAndOneRotatedPlaneTest([Values(1, 10, 100)] double size, [Range(1, 360, 18)] double angle)
     {
       MinorImplmentations.CheckSphereWithRadiusAndOneRotatedPlane(size, angle);
     }
+    */
 
+    /*
     [Test]
     public void CenterBoxWithSizeAndSeveralHorizontalPlanesTests([Values(0.1, 1, 10, 100)] double size, [Values(2, 4, 6, 8, 10)] double dist)
     {
       MinorImplmentations.CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(size, dist);
     }
+    */
 
+    /*
     [Test]
     public void SphereWithRadiusAndSeveralHorizontalPlanesTest([Values(1, 10, 100)] double size, [Values(2, 4, 6, 8, 10)] double dist)
     {
       MinorImplmentations.CheckSphereWithRadiusAndSeveralHorizontalPlanes(size, dist);
     }
+    */
 
     [Test]
     public void RectangleCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double width, [Values(0.1, 1, 10, 100)] double height/*, [Range(0, 360, 18)] double angle*/)

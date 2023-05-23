@@ -10,24 +10,24 @@ using System.Linq;
 namespace MxTests
 {
   [TestFixture]
-  public class MeshBooleanUnion : AnyCommand<MeshBooleanUnion>
+  public class MeshBooleanDifference : AnyCommand<MeshBooleanDifference>
   {
     [Test, TestCaseSource(nameof(GetTestModels))]
     public override void Run(string filename, string filepath)
     {
       base.Run(filename, filepath);
-      (new MeshBooleanUnionImplementation()).Model(Path.Combine(filepath, filename), false);
+      (new MeshBooleanDifferenceImplementation()).Model(Path.Combine(filepath, filename), true);
     }
 
-    class MeshBooleanUnionImplementation
+    class MeshBooleanDifferenceImplementation
     : MeshBooleanBase.MeshBooleanBaseImplementation
     {
       public override Mesh[] CreateBooleanOperation(IEnumerable<Mesh> meshes, IEnumerable<Mesh> possiblyOtherMeshes, MeshBooleanOptions options, out Result commandResult)
       {
-        return Mesh.CreateBooleanUnion(meshes, options, out commandResult);
+        return Mesh.CreateBooleanDifference(meshes, possiblyOtherMeshes, options, out commandResult);
       }
 
-      public override string FuncName => nameof(Mesh.CreateBooleanUnion);
+      public override string FuncName => nameof(Mesh.CreateBooleanDifference);
     }
   }
 }
