@@ -38,25 +38,26 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="nunit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1">
+    <PackageReference Include="nunit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0-alpha.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
     <PackageReference Include="Rhino.Inside" Version="7.0.0" />
 	<PackageReference Include="RhinoCommon" Condition=" '$(SolutionFileName)' == 'MxTests.sln'">
-		<Version>8.0.22152.4305-wip</Version>
+		<Version>8.0.23136.12095-wip</Version>
 		<PrivateAssets>all</PrivateAssets>
 		<ExcludeAssets>runtime</ExcludeAssets>
+		<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	</PackageReference>
-    <PackageReference Include="RhinoWindows" Version="8.0.22152.4305-wip" Condition=" '$(SolutionFileName)' == 'MxTests.sln'" />
-	<PackageReference Include="Grasshopper" Version="8.0.22152.4305-wip" Condition=" '$(SolutionFileName)' == 'MxTests.sln'" />
+    <PackageReference Include="RhinoWindows" Version="8.0.23136.12095-wip" Condition=" '$(SolutionFileName)' == 'MxTests.sln'" />
+	<PackageReference Include="Grasshopper" Version="8.0.23136.12095-wip" Condition=" '$(SolutionFileName)' == 'MxTests.sln'" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj"  Condition=" '$(SolutionFileName)' != 'MxTests.sln'" />
+    <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj" Condition=" '$(SolutionFileName)' != 'MxTests.sln'" />
   </ItemGroup>
 
   <ItemGroup>
