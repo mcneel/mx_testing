@@ -1,12 +1,9 @@
 using NUnit.Framework;
 using System;
-using Rhino;
 using System.IO;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Xml.Linq;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Diagnostics;
 
 namespace MxTests
@@ -21,6 +18,7 @@ namespace MxTests
 
     internal const string SettingsFileName = "MxTests.testsettings.xml";
     internal static string SettingsDir { get; private set; }
+    internal static bool Enabled { get; private set; }
 
     internal static string GetCallerFilePath([System.Runtime.CompilerServices.CallerFilePath] string filePath = "")
     {
@@ -38,6 +36,7 @@ namespace MxTests
         {
             SettingsXml = XDocument.Load(SettingsFile);
             RhinoSystemDir = SettingsXml.Descendants("RhinoSystemDirectory").FirstOrDefault()?.Value ?? null;
+            Enabled = (!SettingsXml.Descendants("Enabled").FirstOrDefault()?.Value?.Equals("false", StringComparison.InvariantCultureIgnoreCase)) ?? true;
         }
         else
             SettingsXml = new XDocument();
@@ -94,6 +93,11 @@ namespace MxTests
        //ReferenceRhinoCommonToOpenRhino(); preferred in static constructor
        if (rhinoCore == null)
         rhinoCore = new Rhino.Runtime.InProcess.RhinoCore(); //delayed as much as necessary
+    }
+
+    public static void Prerequisites()
+    {
+      if (!Enabled) Assert.Ignore("All tests are ignored");
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]

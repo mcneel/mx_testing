@@ -27,6 +27,8 @@ namespace MxTests
     [Test]
     public void PolylineCreateByJoiningLines()
     {
+      OpenRhinoSetup.Prerequisites();
+
       Line[] reorderedn = Array.Empty<Line>();
 
       try
@@ -139,6 +141,7 @@ namespace MxTests
     [TestCase(0.0, false, 0.9999, 0.49999, 1.0, 0.0, 0.0, -1.0, ExpectedResult = 1.0)]
     public double IntersectionMeshRay(double meshOffset, bool meshFlip, double x, double y, double z, double vx, double vy, double vz)
     {
+      OpenRhinoSetup.Prerequisites();
       return MinorImplmentations.IntersectionMeshRay(meshOffset, meshFlip, x, y, z, vx, vy, vz);
     }
 
@@ -149,18 +152,21 @@ namespace MxTests
     [TestCase(99.0, 100, 100, 70, 70, 0, ExpectedResult = false)]
     public bool MeshIsPointInside(double radius, int u, int v, double x, double y, double z)
     {
+      OpenRhinoSetup.Prerequisites();
       return MinorImplmentations.MeshIsPointInside(radius, u, v, x, y, z);
     }
 
     [Test]
     public void MeshRay()
     {
+      OpenRhinoSetup.Prerequisites();
       MinorImplmentations.MeshRay();
     }
 
     [Test]
     public void MeshRayOther()
     {
+      OpenRhinoSetup.Prerequisites();
       MinorImplmentations.MeshLineMiss();
       MinorImplmentations.MeshRay_RH62807();
       MinorImplmentations.MeshRayMultiple();
@@ -169,24 +175,28 @@ namespace MxTests
     [Test]
     public void MeshLineOther()
     {
+      OpenRhinoSetup.Prerequisites();
       MinorImplmentations.MeshLine_RH62831();
     }
 
     [Test]
     public void CenterBoxWithSizeAndOneHorizontalPlaneTests([Values(0.1, 1, 10, 100)] double size)
     {
+      OpenRhinoSetup.Prerequisites();
       MinorImplmentations.CheckCenterBoxWithSizeAndOneHorizontalPlane(size);
     }
 
     [Test]
     public void SphereWithRadiusAndOneHorizontalPlaneTest([Values(1, 10, 100)] double size)
     {
+      OpenRhinoSetup.Prerequisites();
       MinorImplmentations.CheckSphereWithRadiusAndOneHorizontalPlane(size);
     }
 
     [Test]
     public void CenterBoxCreateContourCurvesTests([Values(0.1, 1, 10, 100)] double size, [Range(0, 360, 22.5)] double angle)
     {
+      OpenRhinoSetup.Prerequisites();
       MinorImplmentations.CheckCenterBoxWithSizeAndOneRotatedPlane(size, angle);
     }
 
@@ -217,6 +227,7 @@ namespace MxTests
     [Test]
     public void RectangleCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double width, [Values(0.1, 1, 10, 100)] double height/*, [Range(0, 360, 18)] double angle*/)
     {
+      OpenRhinoSetup.Prerequisites();
       MinorImplmentations.CheckRectangleWithDifferentSidesAndOneHorizontalPlane(width, height);
       //MinorImplmentations.CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(width, height, angle);
     }
@@ -224,6 +235,7 @@ namespace MxTests
     [Test]
     public void CheckWindingTests([Range(-80, 80, 5)] double angleX, [Range(-80, 80, 5)] double angleY)
     {
+      OpenRhinoSetup.Prerequisites();
       MinorImplmentations.CheckWindingInSimpleCurve();
       MinorImplmentations.CheckWindingInFlippedCurve();
       MinorImplmentations.CheckWindingInRotatedCurve(angleX, angleY);
