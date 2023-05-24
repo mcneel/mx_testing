@@ -30,4 +30,6 @@
     <ModelDirectory>..\models\SurfaceIntersect\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\SurfaceIntersect\</ModelDirectory>
   </SurfaceIntersect>
+
+  <Enabled>false</Enabled>
 </Settings>

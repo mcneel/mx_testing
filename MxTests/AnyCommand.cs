@@ -48,6 +48,8 @@ namespace MxTests
       Console.WriteLine($"Resolver.RhinoSystemDirectory: {RhinoInside.Resolver.RhinoSystemDirectory}");
       Console.WriteLine($"Test filename: {filename}");
       Console.WriteLine($"Path: {filepath}");
+
+      OpenRhinoSetup.Prerequisites();
     }
   }
 
