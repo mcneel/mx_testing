@@ -41,8 +41,11 @@ namespace MxTests
         else
             SettingsXml = new XDocument();
 
+      try
+      {
         ReferenceRhinoCommonToOpenRhino();
-
+      }
+      catch (Exception ex) { to_throw = ex; }
     }
 
     internal static XDocument SettingsXml { get; set; }
@@ -97,6 +100,7 @@ namespace MxTests
 
     public static void Prerequisites()
     {
+      if (to_throw != null) throw to_throw;
       if (!Enabled) Assert.Ignore("All tests are ignored");
     }
 
@@ -105,8 +109,6 @@ namespace MxTests
     {
       if (!initialized)
       {
-        if (to_throw != null) throw to_throw;
-
         RhinoInside.Resolver.Initialize();
 
         if (RhinoSystemDir != null) RhinoInside.Resolver.RhinoSystemDirectory = RhinoSystemDir;
