@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using Rhino.DocObjects;
 using Rhino.FileIO;
 using Rhino.Geometry;
@@ -48,6 +48,8 @@ namespace MxTests
                 if (expected[i].Point != null) Assert.AreEqual(expected[i].Point, result_ordered[i].Point,
                     $"Point is different.");
             }
+
+            base.CheckAssertions(file, expected, result_ordered, rv, log_text);
         }
     }
 }

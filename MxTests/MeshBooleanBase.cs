@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Rhino;
 using Rhino.Commands;
 using Rhino.FileIO;
 using Rhino.Geometry;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace MxTests
 {
@@ -43,7 +45,11 @@ namespace MxTests
 
         for (int i = 0; i < 2; i++)
         {
-          if (1 == i) inMeshes.Reverse();
+          if (1 == i)
+          {
+            if (inMeshes.Count < 2) { break; }
+            else inMeshes.Reverse();
+          }
 
           Mesh[] temp = CreateBooleanOperation(inMeshes, secondMeshesAsMeshes, options, out Result commandResult);
 
@@ -64,8 +70,9 @@ namespace MxTests
               {
                 Measurement = area,
                 Mesh = m,
-                Closed = m.IsClosed
-              });
+                Closed = m.IsClosed,
+                TextInfo = ObtainVividDescription(m)
+              }) ;
             }
             else
             {
@@ -81,17 +88,20 @@ namespace MxTests
 
       internal override void CheckAssertions(object file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
       {
-        NUnit.Framework.Assert.IsTrue(rv, $"Return value of {FuncName} function was null.");
-        NUnit.Framework.Assert.IsEmpty(log_text, $"Textlog of function must be empty, but was: '${log_text}'");
+        NUnit.Framework.Assert.IsTrue(rv, $"Return value of {FuncName} function was false.");
+        NUnit.Framework.Assert.IsEmpty(log_text ?? string.Empty, $"Textlog of function must be empty, but was: '{log_text}'");
 
         NUnit.Framework.Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} meshes but expected {expected.Count}.");
 
         for (int i = 0; i < expected.Count; i++)
         {
           NUnit.Framework.Assert.AreEqual(expected[i].Measurement, result_ordered[i].Measurement, Math.Max(expected[i].Measurement * 10e-8, ((File3dm)file).Settings.ModelAbsoluteTolerance));
+          
           if (expected[i].Closed.HasValue) NUnit.Framework.Assert.AreEqual(expected[i].Closed.Value, result_ordered[i].Closed.Value,
               $"Mesh of area {expected[i].Measurement} was not {(expected[i].Closed.Value ? "closed" : "open")} as expected.");
         }
+
+        base.CheckAssertions(file, expected, result_ordered, rv, log_text);
       }
     }
   }

@@ -14,5 +14,7 @@ namespace MxTests
     internal object Curve { get; set; }
 
     internal object Point { get; set; }
+
+    internal string TextInfo { get; set; }
   }
 }

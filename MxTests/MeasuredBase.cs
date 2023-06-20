@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace MxTests
 {
@@ -76,11 +77,11 @@ namespace MxTests
 
             bool rv = OperateCommandOnGeometry(
               inputMeshes, secondMeshesGroup, final_tolerance,
-              out List<ResultMetrics> result_ordered, out string log_text);
+              out List<ResultMetrics> returned, out string log_text);
 
             try
             {
-                CheckAssertions(file, expected, result_ordered, rv, log_text);
+                CheckAssertions(file, expected, returned, rv, log_text);
             }
             catch (AssertionException a) when (!shouldThrow)
             {
@@ -94,8 +95,8 @@ namespace MxTests
                         Layer debug_layer = new Layer { Name = "DEBUG", Color = Color.Red };
                         new_file.AllLayers.Add(debug_layer);
                         debug_layer = new_file.AllLayers.FindName(debug_layer.Name, Guid.Empty);
-                        if (result_ordered != null)
-                            foreach (var result in result_ordered)
+                        if (returned != null)
+                            foreach (var result in returned)
                             {
                                 if (result == null) continue;
 
@@ -130,7 +131,14 @@ namespace MxTests
 
         internal abstract bool OperateCommandOnGeometry
           (IEnumerable<object> inputMeshes, IEnumerable<object> secondMeshes, double tolerance, out List<ResultMetrics> returned, out string textLog);
-        internal abstract void CheckAssertions(object file, List<ResultMetrics> expected, List<ResultMetrics> returned, bool rv, string textLog);
+        internal virtual void CheckAssertions(object file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
+        { 
+            for (int i = 0; i < expected.Count; i++)
+            {
+              if (expected[i].TextInfo != null) NUnit.Framework.Assert.AreEqual(expected[i].TextInfo, result_ordered[i].TextInfo,
+                  $"Expected different geometry description:");
+            }
+        }
 
         internal virtual double ToleranceCoefficient { get { return 1.0; } }
 
@@ -227,7 +235,28 @@ namespace MxTests
                         if (split.Length > 2)
                             rc.Overlap = split[2].StartsWith("OVERLAP", StringComparison.InvariantCultureIgnoreCase);
 
-                        return rc;
+                        int open_bracket_index = -1;
+                        for (int i = 0; i < split.Length; i++)
+                        {
+                            if (split[i].Length == 0) continue;
+                            if (split[i].StartsWith("[", StringComparison.InvariantCultureIgnoreCase))  { open_bracket_index = i; break; }
+                        }
+
+                      Console.WriteLine(open_bracket_index);
+
+                        if (open_bracket_index != -1)
+                        {
+                            rc.TextInfo =
+                              string.Join(" ",
+                                split.Skip(open_bracket_index)
+                                  );
+
+                             rc.TextInfo = SimplifyDescription(rc.TextInfo);
+                        }
+
+                      Console.WriteLine(rc.TextInfo);
+
+                      return rc;
                     }
                 )
                 .OrderBy(expectedresult => expectedresult.Measurement)
@@ -235,5 +264,21 @@ namespace MxTests
 
             return expected;
         }
+
+      public static string ObtainVividDescription(Mesh m)
+      {
+        string rc = m.GetGeometryDescription();
+        rc = SimplifyDescription(rc);
+
+        return rc;
+      }
+
+      public static string SimplifyDescription(string rc)
+      {
+        rc = Regex.Replace(rc, @"[\s\(\)\[\]\{\}\;\:]+", " ");
+        rc = rc.Trim();
+
+        return rc;
+      }
     }
 }
