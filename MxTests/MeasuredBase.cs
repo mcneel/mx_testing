@@ -3,6 +3,7 @@ using Rhino.DocObjects;
 using Rhino.FileIO;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
+using Rhino.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -267,14 +268,16 @@ namespace MxTests
 
       public static string ObtainVividDescription(Mesh m)
       {
-        string rc = m.GetGeometryDescription();
+        string rc = HostUtils.DescribeGeometry(m);
         rc = SimplifyDescription(rc);
 
         return rc;
       }
 
       public static string SimplifyDescription(string rc)
-      {
+      { 
+        if (rc == null) return null;
+
         rc = Regex.Replace(rc, @"[\s\(\)\[\]\{\}\;\:]+", " ");
         rc = rc.Trim();
 
