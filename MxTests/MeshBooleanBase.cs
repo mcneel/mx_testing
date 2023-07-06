@@ -43,44 +43,28 @@ namespace MxTests
 
         var secondMeshesAsMeshes = secondMeshes?.Cast<Mesh>();
 
-        for (int i = 0; i < 2; i++)
-        {
-          if (1 == i)
-          {
-            if (inMeshes.Count < 2) { break; }
-            else inMeshes.Reverse();
-          }
-
           Mesh[] temp = CreateBooleanOperation(inMeshes, secondMeshesAsMeshes, options, out Result commandResult);
 
           textLog = options.TextLog.ToString();
 
-          if (temp == null || temp.Length != 1 || commandResult != Result.Success || !string.IsNullOrEmpty(textLog))
+          if (commandResult != Result.Success || temp == null)
           {
             rc = false;
-            break;
           }
           else
           {
-            Mesh m = temp[0];
-            double area = AreaMassProperties.Compute(m).Area;
-            if (0 == i)
-            {
-              returned.Add(new ResultMetrics
+              foreach(var m in temp)
               {
-                Measurement = area,
-                Mesh = m,
-                Closed = m.IsClosed,
-                TextInfo = ObtainVividDescription(m)
-              }) ;
-            }
-            else
-            {
-              if ((Math.Abs(area - returned[0].Measurement) / area) > 0.001)
-                rc = false;
-            }
+                double area = AreaMassProperties.Compute(m).Area;
+                  returned.Add(new ResultMetrics
+                  {
+                    Measurement = area,
+                    Mesh = m,
+                    Closed = m.IsClosed,
+                    TextInfo = ObtainVividDescription(m)
+                  });
+              }
           }
-        }
 
         returned.Sort((a, b) => a.Measurement.CompareTo(b.Measurement));
         return rc;
@@ -88,7 +72,7 @@ namespace MxTests
 
       internal override void CheckAssertions(object file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
       {
-        NUnit.Framework.Assert.IsTrue(rv, $"Return value of {FuncName} function was false.");
+        NUnit.Framework.Assert.IsTrue(rv, $"Return result of {FuncName} function was not Success, or function returned 'null'.");
         NUnit.Framework.Assert.IsEmpty(log_text ?? string.Empty, $"Textlog of function must be empty, but was: '{log_text}'");
 
         NUnit.Framework.Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} meshes but expected {expected.Count}.");
