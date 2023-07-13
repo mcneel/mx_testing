@@ -28,3 +28,7 @@
 *.bak
 *.rhl
 *.tmp
+
+# Git
+hooks/
+lfs/
