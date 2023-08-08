@@ -76,7 +76,7 @@ namespace MxTests
 
       internal override void CheckAssertions(object file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
       {
-        NUnit.Framework.Assert.IsTrue(rv, "Return value of Mesh.Split() function was null.");
+        NUnit.Framework.Assert.IsTrue(rv, "Return value of Mesh.Split() function was false.");
         NUnit.Framework.Assert.IsEmpty(log_text, "Textlog of function must be empty");
 
         NUnit.Framework.Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} splits but expected {expected.Count}.");
