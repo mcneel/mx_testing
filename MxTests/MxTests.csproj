@@ -11,6 +11,8 @@
     <Nullable>disable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <SignAssembly>False</SignAssembly>
+    <AssemblyOriginatorKeyFile>MxTesting.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' And '$(SolutionFileName)' != 'MxTests.sln'">
@@ -58,9 +60,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj" Condition=" '$(SolutionFileName)' != 'MxTests.sln'" />
+    <ProjectReference Include="..\..\MeshCommands\MeshCommands.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
 
