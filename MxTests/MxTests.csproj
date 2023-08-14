@@ -60,7 +60,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj" Condition=" '$(SolutionFileName)' != 'MxTests.sln'" />
-    <ProjectReference Include="..\..\MeshCommands\MeshCommands.csproj" />
+    <ProjectReference Include="..\TestRunner\TestRunner.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,3 @@
-using MeshCommands;
 using NUnit;
 using NUnit.Framework;
 using NUnit.Framework.Api;
@@ -81,7 +80,6 @@ namespace MxTests.RhinoRunner
     {
       var rc = new TestRunSettings();
 
-      Hashtable table;
       if (baseSettings == null) baseSettings = new Hashtable();
 
       baseSettings[FrameworkPackageSettings.RunOnMainThread] = true;
