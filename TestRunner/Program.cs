@@ -113,10 +113,9 @@ public interface ITestRunner
   string LoadTests();
 
   string ExploreTests();
-  string ExploreTests(string filter);
 
   string RunTests();
-  string RunTests(string filter);
+  string RunTestsWithFilter(string filter);
 
   string RunTestByName(string name);
 }

@@ -99,10 +99,10 @@ namespace MxTests.RhinoRunner
 
     public string ExploreTests()
     {
-      return ExploreTests("<filter/>");
+      return ExploreTestsWithFilter("<filter/>");
     }
 
-    public string ExploreTests(string filter)
+    public string ExploreTestsWithFilter(string filter)
     {
       new ExploreTestsAction(testRunSettings.Controller, filter, testRunSettings.Handler);
 
@@ -111,10 +111,10 @@ namespace MxTests.RhinoRunner
 
     public string RunTests()
     {
-      return RunTests("<filter/>");
+      return RunTestsWithFilter("<filter/>");
     }
 
-    public string RunTests(string filter)
+    public string RunTestsWithFilter(string filter)
     {
       new RunTestsAction(testRunSettings.Controller, filter, testRunSettings.Handler);
 
@@ -123,7 +123,7 @@ namespace MxTests.RhinoRunner
 
     public string RunTestByName(string name)
     {
-      return RunTests($"<filter><test>{name}</test></filter>");
+      return RunTestsWithFilter($"<filter><test>{name}</test></filter>");
     }
   }
 }
