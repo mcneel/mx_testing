@@ -30,6 +30,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="C:\Users\Giulio\.nuget\packages\nunit3testadapter\4.5.0\build\net462\nunit.engine.api.dll" />
+    <None Remove="C:\Users\Giulio\.nuget\packages\nunit3testadapter\4.5.0\build\net462\nunit.engine.core.dll" />
+    <None Remove="C:\Users\Giulio\.nuget\packages\nunit3testadapter\4.5.0\build\net462\nunit.engine.dll" />
+    <None Remove="C:\Users\Giulio\.nuget\packages\nunit3testadapter\4.5.0\build\net462\NUnit3.TestAdapter.dll" />
+    <None Remove="C:\Users\Giulio\.nuget\packages\nunit3testadapter\4.5.0\build\net462\NUnit3.TestAdapter.pdb" />
     <None Remove="MxTests.testsettings.xml" />
   </ItemGroup>
 
@@ -45,16 +50,16 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
     <PackageReference Include="Rhino.Inside" Version="7.0.0" />
 	<PackageReference Include="RhinoCommon" Condition=" '$(SolutionFileName)' == 'MxTests.sln'">
-		<Version>8.0.23136.12095-wip</Version>
+		<Version>8.0.23227.12305-wip</Version>
 		<PrivateAssets>all</PrivateAssets>
 		<ExcludeAssets>runtime</ExcludeAssets>
 		<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	</PackageReference>
-    <PackageReference Include="RhinoWindows" Version="8.0.23136.12095-wip" Condition=" '$(SolutionFileName)' == 'MxTests.sln'" />
-	<PackageReference Include="Grasshopper" Version="8.0.23136.12095-wip" Condition=" '$(SolutionFileName)' == 'MxTests.sln'" />
+    <PackageReference Include="RhinoWindows" Version="8.0.23227.12305-wip" Condition=" '$(SolutionFileName)' == 'MxTests.sln'" />
+	<PackageReference Include="Grasshopper" Version="8.0.23227.12305-wip" Condition=" '$(SolutionFileName)' == 'MxTests.sln'" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 

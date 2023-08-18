@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Common.props" />
+  <Import Project="..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Common.props"  Condition=" '$(SolutionFileName)' != 'MxTests.sln'"  />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
