@@ -1,24 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Common.props"  Condition=" '$(SolutionFileName)' != 'MxTests.sln'"  />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Common.props" Condition=" '$(SolutionFileName)' != 'MxTests.sln'" />
 
   <PropertyGroup>
+	<TargetFramework>net48</TargetFramework>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net48</TargetFramework>
-    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
-    <EnableDefaultItems>False</EnableDefaultItems>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\MxTesting.snk</AssemblyOriginatorKeyFile>
-    <OutputPath>$(RhinoBinDir)\$(Configuration)\</OutputPath>
+	<WarningLevel>999</WarningLevel>
+
+    <Platforms>x64</Platforms>
+
+	  <Nullable>disable</Nullable>
+	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	  <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+	  <SignAssembly>False</SignAssembly>
+	  <AssemblyOriginatorKeyFile>MxTesting.snk</AssemblyOriginatorKeyFile>
+
   </PropertyGroup>
 
-	<PropertyGroup  Condition=" '$(SolutionFileName)' != 'MxTests.sln'">
+	<PropertyGroup Label="" Condition=" '$(SolutionFileName)' != 'MxTests.sln' ">
 	<OutputPath>$(RhinoBinDir)\$(Configuration)\</OutputPath>
 	</PropertyGroup>
 
-	<ItemGroup>
-    <Compile Include="Program.cs" />
-  </ItemGroup>
+	<PropertyGroup Condition=" '$(SolutionFileName)' == 'MxTests.sln' ">
+		<OutputPath>bin\</OutputPath>
+	</PropertyGroup>
 
 </Project>
