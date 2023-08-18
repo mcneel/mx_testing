@@ -13,7 +13,11 @@
     <OutputPath>$(RhinoBinDir)\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
+	<PropertyGroup  Condition=" '$(SolutionFileName)' != 'MxTests.sln'">
+	<OutputPath>$(RhinoBinDir)\$(Configuration)\</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
     <Compile Include="Program.cs" />
   </ItemGroup>
 
