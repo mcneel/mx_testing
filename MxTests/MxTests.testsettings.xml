@@ -2,8 +2,8 @@
 <Settings>
   <!-- Point this to the path that you want to test and that contains RhinoCommon.dll,
   or disable to use the default Rhino install -->
-  <RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Debug\</RhinoSystemDirectory>
-  <!-- <RhinoSystemDirectory>C:\Program Files\Rhino 8 WIP\System\</RhinoSystemDirectory> -->
+  <!-- <RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Debug\</RhinoSystemDirectory> -->
+  <RhinoSystemDirectory>C:\Program Files\Rhino 8 WIP\System\</RhinoSystemDirectory>
 
   <MeshIntersect>
     <ModelDirectory>..\models\MeshIntersect\</ModelDirectory>
