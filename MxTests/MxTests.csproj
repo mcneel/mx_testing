@@ -13,6 +13,7 @@
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     <SignAssembly>False</SignAssembly>
     <AssemblyOriginatorKeyFile>MxTesting.snk</AssemblyOriginatorKeyFile>
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' And '$(SolutionFileName)' != 'MxTests.sln'">
