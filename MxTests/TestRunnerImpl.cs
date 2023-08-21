@@ -9,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.UI;
 using static NUnit.Framework.Api.FrameworkController;
 
 namespace MxTests.RhinoRunner
@@ -35,6 +34,7 @@ namespace MxTests.RhinoRunner
       .ToList().AsReadOnly();
   }
 
+  /*
   class MyHandlerClass : ICallbackEventHandler
   {
     string value;
@@ -126,4 +126,5 @@ namespace MxTests.RhinoRunner
       return RunTestsWithFilter($"<filter><test>{name}</test></filter>");
     }
   }
+  */
 }
