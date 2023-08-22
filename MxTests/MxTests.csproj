@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Dll.props" Condition=" '$(SolutionFileName)' != 'MxTests.sln'" />
-
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>999</WarningLevel>
+    <IsPackable>false</IsPackable>
 
     <Platforms>x64</Platforms>
 
@@ -13,8 +13,7 @@
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     <SignAssembly>False</SignAssembly>
     <AssemblyOriginatorKeyFile>MxTesting.snk</AssemblyOriginatorKeyFile>
-    <BaseOutputPath>bin\</BaseOutputPath>
-    <PackageOutputPath />
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' And '$(SolutionFileName)' != 'MxTests.sln'">
@@ -26,11 +25,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' And '$(SolutionFileName)' != 'MxTests.sln'">
     <OutputPath>$(RhinoBinDir)\$(Configuration)\</OutputPath>
   </PropertyGroup>
-
-
-	<PropertyGroup Condition=" '$(SolutionFileName)' == 'MxTests.sln'">
-		<OutputPath>bin\</OutputPath>
-	</PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="SurfaceIntersect.cs" />

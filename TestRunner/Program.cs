@@ -17,19 +17,12 @@ class Program
     var this_location = Assembly.GetExecutingAssembly().Location;
     var test_dir = Path.GetDirectoryName(this_location);
     //var  = Path.GetDirectoryName(plug_dir);
-    
-    var dll_name = "MxTests.dll";
-    var test_dll = Path.Combine(test_dir, dll_name);
 
-    if (!File.Exists(test_dll)) {
-       test_dll = Path.Combine(test_dir, @"..\..\MxTests\bin\", dll_name);
-       test_dll = Path.GetFullPath(test_dll);
-    }
-
+    var test_dll = Path.Combine(test_dir, "MxTests.dll");
     Assembly assembly = Assembly.LoadFrom(test_dll);
 
     var type = assembly.GetType("MxTests.RhinoRunner.CommandTestRunner", true, false);
-    var testRunner = (ITestRunner)assembly.CreateInstance(type.FullName);
+    var testRunner = (ITestRunner)AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assembly.FullName, type.FullName);
 
     testRunner.InitAssembly(null);
     testRunner.LoadTests();

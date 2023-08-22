@@ -9,18 +9,28 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestRunner", "TestRunner\Te
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Debug|Any CPU.Build.0 = Debug|x64
 		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Debug|x64.ActiveCfg = Debug|x64
 		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Debug|x64.Build.0 = Debug|x64
+		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Release|Any CPU.ActiveCfg = Release|x64
+		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Release|Any CPU.Build.0 = Release|x64
 		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Release|x64.ActiveCfg = Release|x64
 		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Release|x64.Build.0 = Release|x64
-		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Debug|x64.ActiveCfg = Debug|x64
-		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Debug|x64.Build.0 = Debug|x64
-		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Release|x64.ActiveCfg = Release|x64
-		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Release|x64.Build.0 = Release|x64
+		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Debug|x64.Build.0 = Debug|Any CPU
+		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Release|x64.ActiveCfg = Release|Any CPU
+		{3B440CBD-C3E1-4D5F-B1EC-2704E5EB6225}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
