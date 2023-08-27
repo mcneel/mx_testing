@@ -13,17 +13,18 @@
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     <SignAssembly>False</SignAssembly>
     <AssemblyOriginatorKeyFile>MxTesting.snk</AssemblyOriginatorKeyFile>
+    
     <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' And '$(SolutionFileName)' != 'MxTests.sln'">
     <WarningLevel>1</WarningLevel>
-    <OutputPath>$(RhinoOutputDir)\Tests\</OutputPath>
+    <OutputPath>$(RhinoBinDir)\$(Configuration)\</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' And '$(SolutionFileName)' != 'MxTests.sln'">
-    <OutputPath>$(RhinoOutputDir)\Tests\</OutputPath>
+    <OutputPath>$(RhinoBinDir)\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
