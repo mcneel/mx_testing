@@ -25,6 +25,14 @@
     <ModelDirectory>..\models\MeshBooleanDifference\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\MeshBooleanDifference\</ModelDirectory>
   </MeshBooleanDifference>
+  <MeshBooleanSplit>
+    <ModelDirectory>..\models\MeshBooleanSplit\</ModelDirectory>
+    <ModelDirectory optional="true">..\private_models\models\MeshBooleanSplit\</ModelDirectory>
+  </MeshBooleanSplit>
+  <MeshBooleanIntersection>
+    <ModelDirectory>..\models\MeshBooleanIntersection\</ModelDirectory>
+    <ModelDirectory optional="true">..\private_models\models\MeshBooleanIntersection\</ModelDirectory>
+  </MeshBooleanIntersection>
 	
   <SurfaceIntersect>
     <ModelDirectory>..\models\SurfaceIntersect\</ModelDirectory>
