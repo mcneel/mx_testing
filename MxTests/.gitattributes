@@ -1,0 +1,2 @@
+*.3dm filter=lfs diff=lfs merge=lfs -text
+MxTests.testsettings.xml merge=ours
