@@ -7,13 +7,12 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	<WarningLevel>999</WarningLevel>
 
-    <Platforms>x64</Platforms>
-
 	  <Nullable>disable</Nullable>
 	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	  <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
 	  <SignAssembly>False</SignAssembly>
 	  <AssemblyOriginatorKeyFile>MxTesting.snk</AssemblyOriginatorKeyFile>
+	  <PlatformTarget>AnyCPU</PlatformTarget>
 
   </PropertyGroup>
 
