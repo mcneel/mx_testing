@@ -141,7 +141,7 @@ namespace MxTests
             }
         }
 
-        internal virtual double ToleranceCoefficient { get { return 1.0; } }
+        internal virtual double ToleranceCoefficient => Rhino.Geometry.Intersect.Intersection.MeshIntersectionsTolerancesCoefficient;
 
         internal virtual void ExtractInputsFromFile(
             object file, bool usesSecondGroup, out double final_tolerance, out IEnumerable<object> surfaces, out IEnumerable<object> secondSurfacesGroup)

@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Rhino;
 using Rhino.Collections;
 using Rhino.FileIO;
 using Rhino.Geometry;
@@ -208,13 +209,13 @@ namespace MxTests
     }
     */
 
-    /*
+    
     [Test]
     public void CenterBoxWithSizeAndSeveralHorizontalPlanesTests([Values(0.1, 1, 10, 100)] double size, [Values(2, 4, 6, 8, 10)] double dist)
     {
       MinorImplmentations.CheckCenterBoxWithSizeAndSeveralHorizontalPlanes(size, dist);
     }
-    */
+    
 
     /*
     [Test]
@@ -856,7 +857,7 @@ namespace MxTests
         using (var mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline()))
         {
           //Act
-          crvsArray = Mesh.CreateContourCurves(mesh, plane, 1e-7);
+          crvsArray = Mesh.CreateContourCurves(mesh, plane, RhinoMath.ZeroTolerance*10);
           polylinesArray = Intersection.MeshPlane(mesh, plane);
         }
         var numberOrientations = GetNumberOfCurveOrientationEnum(crvsArray);
