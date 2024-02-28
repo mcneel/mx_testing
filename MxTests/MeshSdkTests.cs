@@ -28,7 +28,7 @@ namespace MxTests
     [Test]
     public void PolylineCreateByJoiningLines()
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
 
       Line[] reorderedn = Array.Empty<Line>();
 
@@ -142,7 +142,7 @@ namespace MxTests
     [TestCase(0.0, false, 0.9999, 0.49999, 1.0, 0.0, 0.0, -1.0, ExpectedResult = 1.0)]
     public double IntersectionMeshRay(double meshOffset, bool meshFlip, double x, double y, double z, double vx, double vy, double vz)
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
       return MinorImplmentations.IntersectionMeshRay(meshOffset, meshFlip, x, y, z, vx, vy, vz);
     }
 
@@ -153,21 +153,21 @@ namespace MxTests
     [TestCase(99.0, 100, 100, 70, 70, 0, ExpectedResult = false)]
     public bool MeshIsPointInside(double radius, int u, int v, double x, double y, double z)
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
       return MinorImplmentations.MeshIsPointInside(radius, u, v, x, y, z);
     }
 
     [Test]
     public void MeshRay()
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
       MinorImplmentations.MeshRay();
     }
 
     [Test]
     public void MeshRayOther()
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
       MinorImplmentations.MeshLineMiss();
       MinorImplmentations.MeshRay_RH62807();
       MinorImplmentations.MeshRayMultiple();
@@ -176,28 +176,28 @@ namespace MxTests
     [Test]
     public void MeshLineOther()
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
       MinorImplmentations.MeshLine_RH62831();
     }
 
     [Test]
     public void CenterBoxWithSizeAndOneHorizontalPlaneTests([Values(0.1, 1, 10, 100)] double size)
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
       MinorImplmentations.CheckCenterBoxWithSizeAndOneHorizontalPlane(size);
     }
 
     [Test]
     public void SphereWithRadiusAndOneHorizontalPlaneTest([Values(1, 10, 100)] double size)
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
       MinorImplmentations.CheckSphereWithRadiusAndOneHorizontalPlane(size);
     }
 
     [Test]
     public void CenterBoxCreateContourCurvesTests([Values(0.1, 1, 10, 100)] double size, [Range(0, 360, 22.5)] double angle)
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
       MinorImplmentations.CheckCenterBoxWithSizeAndOneRotatedPlane(size, angle);
     }
 
@@ -228,7 +228,7 @@ namespace MxTests
     [Test]
     public void RectangleCreateContourCurvesTest([Values(0.1, 1, 10, 100)] double width, [Values(0.1, 1, 10, 100)] double height/*, [Range(0, 360, 18)] double angle*/)
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
       MinorImplmentations.CheckRectangleWithDifferentSidesAndOneHorizontalPlane(width, height);
       //MinorImplmentations.CheckRotatedRectangleWithDifferentSidesAndOneHorizontalPlane(width, height, angle);
     }
@@ -236,7 +236,7 @@ namespace MxTests
     [Test]
     public void CheckWindingTests([Range(-80, 80, 5)] double angleX, [Range(-80, 80, 5)] double angleY)
     {
-      OpenRhinoSetup.Prerequisites();
+      SetupFixture.Prerequisites();
       MinorImplmentations.CheckWindingInSimpleCurve();
       MinorImplmentations.CheckWindingInFlippedCurve();
       MinorImplmentations.CheckWindingInRotatedCurve(angleX, angleY);
@@ -307,7 +307,7 @@ namespace MxTests
                   model.Objects.AddLine(line);
                   for (int k = 0; k < points.Length; k++)
                     model.Objects.AddPoint(points[k]);
-                  message = Path.Combine(OpenRhinoSetup.SettingsDir,
+                  message = Path.Combine(SetupFixture.Settings.SettingsDir,
                     "MeshRay_" +
                     i.ToString(System.Globalization.CultureInfo.InvariantCulture) + "_" +
                     j.ToString(System.Globalization.CultureInfo.InvariantCulture) +

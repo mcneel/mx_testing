@@ -1,19 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Dll.props" Condition=" '$(SolutionFileName)' != 'MxTests.sln'" />
+
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFrameworks>net48;net7.0-windows</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>999</WarningLevel>
     <IsPackable>false</IsPackable>
 
     <Nullable>disable</Nullable>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     <SignAssembly>False</SignAssembly>
     <AssemblyOriginatorKeyFile>MxTesting.snk</AssemblyOriginatorKeyFile>
-    
     <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="SurfaceIntersect.cs" />
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' And '$(SolutionFileName)' != 'MxTests.sln'">
     <WarningLevel>1</WarningLevel>
@@ -23,48 +26,30 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' And '$(SolutionFileName)' != 'MxTests.sln'">
     <OutputPath>$(RhinoBinDir)\$(Configuration)\</OutputPath>
+    <DefineConstants>RELEASE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="SurfaceIntersect.cs" />
+    <Content Include="Rhino.Testing.Configs.xml" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="MxTests.testsettings.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="MxTests.testsettings.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
-    <PackageReference Include="Rhino.Inside" Version="7.0.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+    <PackageReference Include="NUnit" Version="3.*" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.*" />
+    <PackageReference Include="Rhino.Testing" Version="8.0.9-beta" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(SolutionFileName)' == 'MxTests.sln'">
-    <PackageReference Include="RhinoWindows" Version="8.0.23227.12305-wip" />
-    <PackageReference Include="Grasshopper" Version="8.0.23227.12305-wip" />
-	  <PackageReference Include="RhinoCommon">
-		  <Version>8.0.23227.12305-wip</Version>
-		  <PrivateAssets>all</PrivateAssets>
-		  <ExcludeAssets>runtime</ExcludeAssets>
-		  <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
+    <PackageReference Include="RhinoCommon">
+      <Version>8.*</Version>
+      <PrivateAssets>all</PrivateAssets>
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj" Condition=" '$(SolutionFileName)' != 'MxTests.sln'" Private="False" PrivateAssets="all" />
-    <ProjectReference Include="..\TestRunner\TestRunner.csproj" />
   </ItemGroup>
-
-
 </Project>
