@@ -6,8 +6,6 @@
     <WarningLevel>999</WarningLevel>
     <IsPackable>false</IsPackable>
 
-    <Platforms>x64</Platforms>
-
     <Nullable>disable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
