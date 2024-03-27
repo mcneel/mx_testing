@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MxTests", "MxTests\MxTests.csproj", "{392311DB-D29D-4001-AE3F-9EA77E88CE27}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetSDKTests", "NetSDKTests\NetSDKTests.csproj", "{692CBB90-DB75-4AAF-9527-1FBCE7CE0F9F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{392311DB-D29D-4001-AE3F-9EA77E88CE27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{692CBB90-DB75-4AAF-9527-1FBCE7CE0F9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{692CBB90-DB75-4AAF-9527-1FBCE7CE0F9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{692CBB90-DB75-4AAF-9527-1FBCE7CE0F9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{692CBB90-DB75-4AAF-9527-1FBCE7CE0F9F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
