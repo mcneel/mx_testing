@@ -19,7 +19,7 @@ namespace MxTests
 
     static AnyCommand()
     {
-      OpenRhinoSetup.ScanFolders(typeof(T).Name, g_test_models);
+      SetupFixture.ScanFolders(typeof(T).Name, g_test_models);
     }
 
     public static IEnumerable<string[]> GetTestModels()
@@ -40,17 +40,13 @@ namespace MxTests
     /// <param name="filepath">The file path</param>
     public virtual void Run(string filename, string filepath)
     {
-      Console.WriteLine($"SettingsFile: {OpenRhinoSetup.SettingsFile}");
-      Console.WriteLine($"SettingsDir: {OpenRhinoSetup.SettingsDir}");
-      Console.WriteLine($"RhinoSystemDir: {OpenRhinoSetup.RhinoSystemDir}");
+      Console.WriteLine($"SettingsFile: {SetupFixture.Settings.SettingsFile}");
+      Console.WriteLine($"SettingsDir: {SetupFixture.Settings.SettingsDir}");
+      Console.WriteLine($"RhinoSystemDir: {SetupFixture.Settings.RhinoSystemDir}");
+      Console.WriteLine($"Resolver.RhinoSystemDirectory: {SetupFixture.Settings.RhinoSystemDir}");
       Console.WriteLine($"RhinoCommon: {typeof(Rhino.Geometry.Mesh).Assembly.Location}");
-      Console.WriteLine($"Resolver.RhinoSystemDirectory: {RhinoInside.Resolver.RhinoSystemDirectory}");
-      Console.WriteLine($"Resolver.RhinoSystemDirectory: {RhinoInside.Resolver.RhinoSystemDirectory}");
       Console.WriteLine($"Test filename: {filename}");
       Console.WriteLine($"Path: {filepath}");
-
-      OpenRhinoSetup.Prerequisites();
     }
   }
-
 }

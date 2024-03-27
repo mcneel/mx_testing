@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Settings>
+  <RhinoSystemDirectory>C:\Program Files\Rhino 8\System\</RhinoSystemDirectory>
+  <!-- Uncomment line below and set to system path of Rhino to test (overrides value set above) -->
+  <!--<RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Release\</RhinoSystemDirectory>-->
+
+  <LoadGrasshopper>false</LoadGrasshopper>
+
+  <Enabled>true</Enabled>
+
+  <ModelDirectories>
+    <ModelDirectory Fixture="MeshIntersect" Location="..\..\..\..\models\MeshIntersect\" Enabled="true" />
+    <ModelDirectory Fixture="MeshIntersect" Location="..\..\..\..\private_models\models\MeshIntersect\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="MeshSelfIntersect" Location="..\..\..\..\models\MeshSelfIntersect\" Enabled="true" />
+    <ModelDirectory Fixture="MeshSelfIntersect" Location="..\..\..\..\private_models\models\MeshSelfIntersect\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="MeshSplit" Location="..\..\..\..\models\MeshSplit\" Enabled="true" />
+    <ModelDirectory Fixture="MeshSplit" Location="..\..\..\..\private_models\models\MeshSplit\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="MeshBooleanUnion" Location="..\..\..\..\models\MeshBooleanUnion\" Enabled="true" />
+    <ModelDirectory Fixture="MeshBooleanUnion" Location="..\..\..\..\private_models\models\MeshBooleanUnion\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="MeshBooleanDifference" Location="..\..\..\..\models\MeshBooleanDifference\" Enabled="true" />
+    <ModelDirectory Fixture="MeshBooleanDifference" Location="..\..\..\..\private_models\models\MeshBooleanDifference\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="MeshBooleanSplit" Location="..\..\..\..\models\MeshBooleanSplit\" Enabled="true" />
+    <ModelDirectory Fixture="MeshBooleanSplit" Location="..\..\..\..\private_models\models\MeshBooleanSplit\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="MeshBooleanIntersection" Location="..\..\..\..\models\MeshBooleanIntersection\" Enabled="true" />
+    <ModelDirectory Fixture="MeshBooleanIntersection" Location="..\..\..\..\private_models\models\MeshBooleanIntersection\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="SurfaceIntersect" Location="..\..\..\..\models\SurfaceIntersect\" Enabled="true" />
+    <ModelDirectory Fixture="SurfaceIntersect" Location="..\..\..\..\private_models\models\SurfaceIntersect\" Optional="true" Enabled="true" />
+  </ModelDirectories>
+
+</Settings>
