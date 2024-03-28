@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RhinoCSDLLPropsFile>$(MSBuildThisFileDirectory)\..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Dll.props</RhinoCSDLLPropsFile>
+    <InRhino>False</InRhino>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="Exists('$(RhinoCSDLLPropsFile)')">
+    <InRhino>True</InRhino>
+  </PropertyGroup>
+
+  <Import Condition="'$(InRhino)' == 'True'" Project="$(RhinoCSDLLPropsFile)" />
+  
+  <PropertyGroup>
+    <TargetFrameworks>net48;net7.0-windows</TargetFrameworks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>999</WarningLevel>
+    <IsPackable>false</IsPackable>
+
+    
+    <Nullable>disable</Nullable>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <SignAssembly>False</SignAssembly>
+    <AssemblyOriginatorKeyFile>MxTesting.snk</AssemblyOriginatorKeyFile>
+    <NoWarn>NU1701</NoWarn>
+    <NoWarn>CA1416</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(InRhino)' == 'True'">
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath Condition="$(TargetFramework) == 'net48'">$(RhinoOutputDir)</OutputPath>
+    <OutputPath Condition="$(TargetFramework) == 'net7.0-windows'">$(RhinoOutputDir)netcore\</OutputPath>
+    <IntermediateOutputPath>obj\$(OS)\$(Configuration)\$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(InRhino)' == 'False'">
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin\$Configuration)</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
+    <WarningLevel>1</WarningLevel>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('Release'))">
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageReference Include="NUnit.Analyzers" Version="3.3.0" />
+    <PackageReference Include="coverlet.collector" Version="3.1.2" />
+    <PackageReference Include="Rhino.Testing" Version="8.0.9-beta" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj" Private="False" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Rhino.Testing.Configs.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Target Name="PrintInRhino" BeforeTargets="Build">
+    <Message Text="InRhino: $(InRhino)" Importance="high"/>
+  </Target>
+</Project>

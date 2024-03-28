@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Settings>
+	<!--<RhinoSystemDirectory>C:\Program Files\Rhino 8\System\</RhinoSystemDirectory>-->
+	<!-- Uncomment line below and set to system path of Rhino to test (overrides value set above) -->
+	<RhinoSystemDirectory>D:\dev\github\mcneel\rhino\src4\bin\Debug\</RhinoSystemDirectory>
+
+	<LoadGrasshopper>false</LoadGrasshopper>
+
+	<Enabled>true</Enabled>
+</Settings>
