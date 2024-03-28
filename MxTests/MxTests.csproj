@@ -39,10 +39,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Rhino.Testing.Configs.xml" CopyToOutputDirectory="Always" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="NUnit" Version="3.14.0" />
@@ -64,5 +60,29 @@
 
   <Target Name="PrintInRhino" BeforeTargets="Build">
     <Message Text="InRhino: $(InRhino)" Importance="high"/>
+  </Target>
+
+  <!-- copy the config file. -->
+  <Target Name="CopyConfigXml"
+          BeforeTargets="Build">
+    <Copy SourceFiles="Rhino.Testing.Configs.xml"
+          DestinationFolder="$(OutputPath)"/>
+  </Target>
+
+  <!-- modify the testing config file if we're building inside the Rhino build. -->
+  <Target Name="WriteRhinoSystemDirectory"
+          Condition="'$(InRhino)' == 'True'"
+          AfterTargets="CopyConfigXml">
+    <XmlPoke
+      XmlInputPath="$(OutputPath)/Rhino.Testing.Configs.xml"
+      Value="$(RhinoOutputDir)"
+      Query="/Settings/RhinoSystemDirectory"/>
+  </Target>
+
+  <!-- give some feedback -->
+  <Target Name="PrintCopied"
+        Condition="'$(InRhino)' == 'True'"
+        AfterTargets="WriteRhinoSystemDirectory">
+    <Message Text="Copied Rhino.Testing.Configs.xml with RhinoSystemDir=$(RhinoOutputDir) to $(OutputPath)" Importance="high"/>
   </Target>
 </Project>
