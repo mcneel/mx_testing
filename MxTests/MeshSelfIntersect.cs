@@ -30,7 +30,7 @@ namespace MxTests
 
       public override void Model(string filepath)
       {
-        ParseAndExecuteNotes(filepath, incipitString, false);
+        ParseNotesAndExecute(filepath, incipitString, false);
       }
 
       internal override bool OperateCommandOnGeometry(IEnumerable<object> inputMeshes, IEnumerable<object> secondMeshes, 

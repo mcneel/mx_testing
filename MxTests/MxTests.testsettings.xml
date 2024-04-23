@@ -5,6 +5,10 @@
   <RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Release\</RhinoSystemDirectory>
   <!--<RhinoSystemDirectory>C:\Program Files\Rhino 8\System\</RhinoSystemDirectory> -->
 
+  <AlignVertices>
+    <ModelDirectory>..\models\AlignVertices\</ModelDirectory>
+    <ModelDirectory optional="true">..\private_models\models\AlignVertices\</ModelDirectory>
+  </AlignVertices>
   <MeshIntersect>
     <ModelDirectory>..\models\MeshIntersect\</ModelDirectory>
     <ModelDirectory optional="true">..\private_models\models\MeshIntersect\</ModelDirectory>

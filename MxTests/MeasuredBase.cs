@@ -22,21 +22,21 @@ namespace MxTests
         //Mesh, etc
         internal abstract Type TargetType {  get; }
 
-        internal void ParseAndExecuteNotes(string filepath, string notesIncipit, bool twoGroups)
+        internal void ParseNotesAndExecute(string filepath, string notesIncipit, bool twoGroups)
         {
             string filename = Path.GetFileName(filepath);
             if (filename.StartsWith("!", StringComparison.InvariantCultureIgnoreCase))
             {
                 Assert.Throws<AssertionException>(
-                    delegate { RunParseExecuteNotes(filepath, notesIncipit, twoGroups, true); },
+                    delegate { PrivateParseNotesAndExecute(filepath, notesIncipit, twoGroups, true); },
                     "Expected failure, but test succeeded.");
             }
             else
-                RunParseExecuteNotes(filepath, notesIncipit, twoGroups, false);
+                PrivateParseNotesAndExecute(filepath, notesIncipit, twoGroups, false);
         }
 
 
-        private void RunParseExecuteNotes(string filepath, string notesIncipit, bool twoGroups, bool shouldThrow)
+        private void PrivateParseNotesAndExecute(string filepath, string notesIncipit, bool twoGroups, bool shouldThrow)
         {
             using (var file = File3dm.Read(filepath))
             {
@@ -63,7 +63,7 @@ namespace MxTests
 
                 if (incipit.Trim().StartsWith(notesIncipit, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    MeasuredTest(otherlines, file, filepath, twoGroups, shouldThrow);
+                    RunExecuteTest(otherlines, file, filepath, twoGroups, shouldThrow);
                 }
                 else
                     throw new NotSupportedException($"Unexpected type of test found in notes: {incipit}");
@@ -71,10 +71,10 @@ namespace MxTests
         }
         
 
-        internal void MeasuredTest(List<string> otherlines, object file, string filepath, bool twoGroups, bool shouldThrow)
+        internal void RunExecuteTest(List<string> lines, object file, string filepath, bool twoGroups, bool shouldThrow)
         {
-            var expected = ExtractExpectedValues(otherlines);
-            ExtractInputsFromFile(file, twoGroups, out double final_tolerance, out IEnumerable<object> inputMeshes, out IEnumerable<object> secondMeshesGroup);
+            var expected = ExtractExpectedValuesFromNotes(lines);
+            ExtractInputGeometryFromFile(file, twoGroups, out double final_tolerance, out IEnumerable<object> inputMeshes, out IEnumerable<object> secondMeshesGroup);
 
             bool rv = OperateCommandOnGeometry(
               inputMeshes, secondMeshesGroup, final_tolerance,
@@ -143,7 +143,7 @@ namespace MxTests
 
         internal virtual double ToleranceCoefficient => Rhino.Geometry.Intersect.Intersection.MeshIntersectionsTolerancesCoefficient;
 
-        internal virtual void ExtractInputsFromFile(
+        internal virtual void ExtractInputGeometryFromFile(
             object file, bool usesSecondGroup, out double final_tolerance, out IEnumerable<object> surfaces, out IEnumerable<object> secondSurfacesGroup)
         {
             final_tolerance = 0;
@@ -216,32 +216,42 @@ namespace MxTests
         }
 
 
-        readonly static string[] separators = new string[] { " ", "\t", "- " };
-        internal static List<ResultMetrics> ExtractExpectedValues(List<string> otherlines)
+        readonly static string[] separators = new string[] { " ", "\t", "- ", "=" };
+        protected virtual List<ResultMetrics> ExtractExpectedValuesFromNotes(List<string> lines)
         {
-            var expected = otherlines
+            var expected = lines
                 .Select(
                     line =>
                     {
-                        var split = line.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+                      var split = line.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 
-                        var rc = new ResultMetrics
-                        {
-                            Measurement = double.Parse(split[0], CultureInfo.InvariantCulture),
-                        };
+                      var rc = new ResultMetrics();
 
-                        if (split.Length > 1)
-                            rc.Closed = split[1].Equals("CLOSED", StringComparison.InvariantCultureIgnoreCase);
+                      if (double.TryParse(split[0], NumberStyles.Number, CultureInfo.InvariantCulture, out double measurement))
+                      {
+                        rc.Measurement = measurement;
+                      }
+                      else
+                      {
+                        rc.Measurement = 0;
+                        rc.TextInfo = split[0];
+                        rc.AdditionalTextValue = string.Join(" ", split.Skip(1));
 
-                        if (split.Length > 2)
-                            rc.Overlap = split[2].StartsWith("OVERLAP", StringComparison.InvariantCultureIgnoreCase);
+                        return rc;
+                      }
 
-                        int open_bracket_index = -1;
-                        for (int i = 0; i < split.Length; i++)
-                        {
-                            if (split[i].Length == 0) continue;
-                            if (split[i].StartsWith("[", StringComparison.InvariantCultureIgnoreCase))  { open_bracket_index = i; break; }
-                        }
+                      if (split.Length > 1)
+                        rc.Closed = split[1].Equals("CLOSED", StringComparison.InvariantCultureIgnoreCase);
+
+                      if (split.Length > 2)
+                        rc.Overlap = split[2].StartsWith("OVERLAP", StringComparison.InvariantCultureIgnoreCase);
+
+                      int open_bracket_index = -1;
+                      for (int i = 0; i < split.Length; i++)
+                      {
+                        if (split[i].Length == 0) continue;
+                        if (split[i].StartsWith("[", StringComparison.InvariantCultureIgnoreCase)) { open_bracket_index = i; break; }
+                      }
 
                       Console.WriteLine(open_bracket_index);
 

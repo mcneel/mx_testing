@@ -22,7 +22,7 @@ namespace MxTests
 
       public void Model(string filepath, bool twoGroups)
       {
-        ParseAndExecuteNotes(filepath, "AREA", twoGroups);
+        ParseNotesAndExecute(filepath, "AREA", twoGroups);
       }
 
       public abstract Mesh[] CreateBooleanOperation(

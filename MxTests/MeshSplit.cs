@@ -34,7 +34,7 @@ namespace MxTests
 
       public void Model(string filepath)
       {
-        ParseAndExecuteNotes(filepath, incipitString, true);
+        ParseNotesAndExecute(filepath, incipitString, true);
       }
 
       internal override bool OperateCommandOnGeometry(IEnumerable<object> inputMeshes,

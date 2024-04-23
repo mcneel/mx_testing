@@ -16,5 +16,7 @@ namespace MxTests
     internal object Point { get; set; }
 
     internal string TextInfo { get; set; }
+
+    internal string AdditionalTextValue { get; set; }
   }
 }
