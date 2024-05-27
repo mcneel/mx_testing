@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using NUnit.Framework.Constraints;
 using Rhino.Geometry;
 using System;
@@ -40,7 +40,15 @@ namespace NetSDKTests
             Brep[] filleted = Fillet(box, edges, r0, r1, bt, rt, Is.Not.Null);
             Assert.That(filleted.Length, Is.EqualTo(1));
             Assert.That(filleted[0].IsValid, Is.True);
-            Assert.That(filleted[0].Faces.Count, Is.EqualTo(26)); // 6 faces, 12 edges and 8 corners
+            if (bt == BlendType.Blend)
+            {
+              // Blend uses setback corners with 6 surfaces per corner
+              Assert.That(filleted[0].Faces.Count, Is.EqualTo(66)); // 6 faces, 12 edges and 6*8 corners 
+            }
+            else
+            {
+              Assert.That(filleted[0].Faces.Count, Is.EqualTo(26)); // 6 faces, 12 edges and 8 corners
+            }
             Console.WriteLine("Pass with {0}/{1}", bt, rt);
           }
         }
