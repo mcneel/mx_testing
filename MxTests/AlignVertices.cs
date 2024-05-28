@@ -43,22 +43,25 @@ namespace MxTests
       {
         Polyline[] intersections;
         Polyline[] overlaps;
-        bool rc;
+        int rc = 0;
 
         using (var log = new TextLog())
         {
-          rc = Intersection.MeshMesh(inputMeshes.Cast<Mesh>(), tolerance,
-              out intersections, true, out overlaps, false, out _, log,
-              System.Threading.CancellationToken.None, null);
+          foreach (var inputMesh in inputMeshes.Cast<Mesh>())
+          {
+            rc = inputMesh.Vertices.Align(tolerance, null);
+            
+          }
+
           textLog = log.ToString();
         }
 
         returned = null;
-        var results = intersections != null ? intersections.Select(a => new ResultMetrics { Closed = a.IsClosed, Measurement = a.Length, Overlap = false, Polyline = a }) : Array.Empty<ResultMetrics>();
-        if (overlaps != null) results = results.Concat(overlaps.Select(a => new ResultMetrics { Closed = a.IsClosed, Measurement = a.Length, Overlap = true, Polyline = a }));
-        returned = results.OrderBy(a => a.Measurement).ToList();
+        //var results = intersections != null ? intersections.Select(a => new ResultMetrics { Closed = a.IsClosed, Measurement = a.Length, Overlap = false, Polyline = a }) : Array.Empty<ResultMetrics>();
+        //if (overlaps != null) results = results.Concat(overlaps.Select(a => new ResultMetrics { Closed = a.IsClosed, Measurement = a.Length, Overlap = true, Polyline = a }));
+        //returned = results.OrderBy(a => a.Measurement).ToList();
 
-        return rc;
+        return rc > 0;
       }
     }
   }
