@@ -30,6 +30,9 @@
     <ModelDirectory Fixture="MeshBooleanIntersection" Location="..\..\..\..\models\MeshBooleanIntersection\" Enabled="true" />
     <ModelDirectory Fixture="MeshBooleanIntersection" Location="..\..\..\..\private_models\models\MeshBooleanIntersection\" Optional="true" Enabled="true" />
 
+	<ModelDirectory Fixture="Windings" Location="..\..\..\..\models\Windings\" Enabled="true" />
+	<ModelDirectory Fixture="Windings" Location="..\..\..\..\private_models\models\Windings\" Optional="true" Enabled="true" />
+
     <ModelDirectory Fixture="SurfaceIntersect" Location="..\..\..\..\models\SurfaceIntersect\" Enabled="true" />
     <ModelDirectory Fixture="SurfaceIntersect" Location="..\..\..\..\private_models\models\SurfaceIntersect\" Optional="true" Enabled="true" />
   </ModelDirectories>

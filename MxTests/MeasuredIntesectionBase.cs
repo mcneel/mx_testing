@@ -28,7 +28,7 @@ namespace MxTests
       : MeasuredBase
     {
         const string incipitString = "MEASURED INTERSECTION";
-        public static string IncipitString => incipitString;
+        public virtual string IncipitString => incipitString;
 
         internal override void CheckAssertions(object file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
         {
