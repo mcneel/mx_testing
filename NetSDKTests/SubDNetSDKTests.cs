@@ -1,5 +1,7 @@
 using NUnit.Framework;
 using Rhino.Geometry;
+using System;
+using System.Linq;
 using System.Reflection;
 
 namespace NetSDKTests
@@ -101,7 +103,11 @@ namespace NetSDKTests
         SubDEdge edge851 = box.Edges.Find(851);
         SubDEdge[] chain_edges = { edge841, edge481, edge572, edge491, edge851 };
         bool[] chain_dirs = { true, false, false, true, false };
-        box.SetEdgeSharpness(chain_edges, chain_dirs, chain_sharp, false);
+        foreach (var tuple in chain_edges.Zip(chain_dirs, (x, y) => (edge: x, dir: y)))
+        {
+          tuple.edge.ComponentDirection = tuple.dir;
+        }
+        box.SetEdgeSharpness(chain_edges, chain_sharp, false);
 
         Assert.That(box.SharpEdgeCount(out range), Is.EqualTo(126));
         Assert.That(range, Is.EqualTo(new SubDEdgeSharpness(0.0, 3.0)));
@@ -140,11 +146,184 @@ namespace NetSDKTests
       SubDEdge edgec2 = box.Edges.Find(22);
       SubDEdge edgec3 = box.Edges.Find(23);
       SubDEdge edgec4 = box.Edges.Find(24);
-      SubDEdge[] chainedges = { edgec1, edgec2, edgec3, edgec4 };
-      bool[] chaindirs = { true, false, true, false };
+      SubDEdge[] chain_edges = { edgec1, edgec2, edgec3, edgec4 };
+      bool[] chain_dirs = { true, false, true, false };
+      foreach (var tuple in chain_edges.Zip(chain_dirs, (x, y) => (edge: x, dir: y)))
+      {
+        tuple.edge.ComponentDirection = tuple.dir;
+      }
 
-      SubDFace face = box.Faces.Add(chainedges, chaindirs);
+      SubDFace face = box.Faces.Add(chain_edges);
       Assert.That(face.LimitSurfaceCenterPoint.DistanceTo(new Point3d(0.2, 0.2, 0.2)), Is.LessThan(1e-6));
+    }
+
+    [Test]
+    [TestCase(2U)]
+    [TestCase(3U)]
+    [TestCase(4U)]
+    [TestCase(5U)]
+    [TestCase(6U)]
+    [TestCase(7U)]
+    public void TestBigSubDIndexing(uint power)
+    {
+      if (power < 2 || power > 7U)
+        return;
+      uint two_pow_x = (uint)Math.Pow(2, power);
+      uint box_size = two_pow_x - 1U;
+      Box basebox = new Box(Plane.WorldXY, new Point3d[] { new Point3d(0.0, 0.0, 0.0), new Point3d(box_size, box_size, box_size) });
+      Mesh meshbox = Mesh.CreateFromBox(basebox, (int)box_size, (int)box_size, (int)box_size);
+      SubD box = SubD.CreateFromMesh(meshbox);
+
+      uint vid_max = 6 * ((uint)Math.Pow(2, 2 * power) - (uint)Math.Pow(2, power + 1)) + 8;
+      uint eid_max = 2 * vid_max - 4;
+      uint fid_max = vid_max - 2;
+
+      Assert.That(vid_max, Is.EqualTo(box.Vertices.Count));
+      Assert.That(eid_max, Is.EqualTo(box.Edges.Count));
+      Assert.That(fid_max, Is.EqualTo(box.Faces.Count));
+
+      SubDVertex vertex_max = box.Vertices.Find(vid_max);
+      SubDEdge edge_max = box.Edges.Find(eid_max);
+      SubDFace face_max_minus_1 = box.Faces.Find(fid_max - 1U);
+
+      Assert.That(vertex_max.Id, Is.EqualTo(box.Vertices.Count));
+      Assert.That(edge_max.Id, Is.EqualTo(box.Edges.Count));
+      Assert.That(face_max_minus_1.Id, Is.EqualTo(box.Faces.Count - 1U));
+
+      uint vid_corner = 2 * two_pow_x * two_pow_x;
+      uint eid_corner = 4 * two_pow_x * (two_pow_x + 1) - 8;
+      SubDEdge edge_corner = box.Edges.Find(eid_corner);
+      SubDVertex vertex_corner = box.Vertices.Find(vid_corner);
+
+      Assert.That(vertex_max.ControlNetPoint.DistanceTo(new Point3d(0.0, 1.0, box_size - 1.0)), Is.LessThan(1e-6));
+
+      if (power == 2U)
+      {
+        edge_max.ReverseComponentDirection();
+        Assert.That(vertex_max.EdgeAt(3).ComponentDirection, Is.True);
+        Assert.That(edge_max.ComponentDirection, Is.True);
+      }
+      else
+      {
+        Assert.That(vertex_max.EdgeAt(3).ComponentDirection, Is.False);
+        Assert.That(edge_max.ComponentDirection, Is.False);
+      }
+      Assert.That(vertex_max.EdgeAt(3), Is.EqualTo(edge_max));
+      Assert.That(edge_max.RelativeVertexFrom, Is.EqualTo(vertex_max));
+      Assert.That(edge_max.RelativeVertexTo.Id, Is.EqualTo(vid_max - 1U));
+      Assert.That(edge_max.RelativeFaceRight.ReverseComponentDirection(), Is.EqualTo(face_max_minus_1));
+      Assert.That(edge_max.RelativeFaceLeft.Id, Is.EqualTo(fid_max - two_pow_x));
+
+      edge_max.ComponentDirection = true;
+      if (power == 2U)
+      {
+        edge_max.ReverseComponentDirection();
+        Assert.That(vertex_max.EdgeAt(3).ComponentDirection, Is.True);
+        Assert.That(edge_max.ComponentDirection, Is.False);
+      }
+      else
+      {
+        Assert.That(vertex_max.EdgeAt(3).ComponentDirection, Is.False);
+        Assert.That(edge_max.ComponentDirection, Is.True);
+      }
+      Assert.That(vertex_max.EdgeAt(3).ReverseComponentDirection(), Is.EqualTo(edge_max));
+      Assert.That(edge_max.RelativeVertexFrom.Id, Is.EqualTo(vid_max - 1U));
+      Assert.That(edge_max.RelativeVertexTo, Is.EqualTo(vertex_max));
+      Assert.That(edge_max.RelativeFaceRight.Id, Is.EqualTo(fid_max - two_pow_x));
+      Assert.That(edge_max.RelativeFaceLeft, Is.EqualTo(face_max_minus_1));
+
+      Assert.That(vertex_corner.ControlNetPoint.DistanceTo(new Point3d(box_size, box_size, box_size)), Is.LessThan(1e-6));
+      Assert.That(edge_corner.RelativeVertexTo, Is.EqualTo(vertex_corner));
+      edge_corner.ReverseComponentDirection();
+      for (int i = 0; i < vertex_max.EdgeCount; i++)
+      {
+        Console.WriteLine(vertex_max.EdgeAt(i));
+      }
+      Assert.That(vertex_max.EdgeAt(power == 2U ? 3 : 2), Is.EqualTo(edge_corner));
+      BindingFlags binding_flags = BindingFlags.NonPublic | BindingFlags.Instance;
+      MethodInfo edge_cptr_method = edge_max.GetType().GetMethod("ConstSubDComponentPtr", binding_flags);
+      SubDComponent.SubDComponentPtr edge_cptr = (SubDComponent.SubDComponentPtr)edge_cptr_method.Invoke(edge_max, null);
+      // TODO: Make a tests that forces assigning to a part of memory after UInt32.MaxValue?
+      // Assert.That((uint)edge_cptr.BasePtr, Is.GreaterThan(UInt32.MaxValue));
+      Assert.That(IntPtr.Size, Is.EqualTo(8));
+
+      ComponentIndex ci_vertex_max = vertex_max.ComponentIndex();
+      Assert.That(ci_vertex_max.ComponentIndexType, Is.EqualTo(ComponentIndexType.SubdVertex));
+      Assert.That(ci_vertex_max.Index, Is.EqualTo(vid_max));
+      SubDVertex vertex_max_from_ci = SubDComponent.FromComponentIndex(box, ci_vertex_max) as SubDVertex;
+      Assert.That(vertex_max_from_ci, Is.EqualTo(vertex_max));
+
+      box.UpdateSurfaceMeshCache(true);
+      Assert.That((face_max_minus_1.SurfaceCenterNormal - new Vector3d(-0.9899494936611665, 0.0, 0.1414213562373095)).IsTiny(), Is.True);
+      face_max_minus_1.ReverseComponentDirection();
+      Assert.That((face_max_minus_1.SurfaceCenterNormal - new Vector3d(-0.9899494936611665, 0.0, 0.1414213562373095)).IsTiny(), Is.True);
+
+      Line emax_cnetline = edge_max.ControlNetLine;
+      Line expected = new Line(box.Vertices.Find(vid_max).ControlNetPoint, new Vector3d(0.0, 1.0, 0.0));
+      if (power == 2u)
+        expected = new Line(expected.To, expected.From);
+      Console.WriteLine(box.Vertices.Find(vid_max).ControlNetPoint);
+      Console.WriteLine(emax_cnetline);
+      Assert.That((emax_cnetline.From - expected.From).IsTiny(), Is.True);
+      Assert.That((emax_cnetline.To - expected.To).IsTiny(), Is.True);
+      edge_max.ReverseComponentDirection();
+      Assert.That((emax_cnetline.From - expected.From).IsTiny(), Is.True);
+      Assert.That((emax_cnetline.To - expected.To).IsTiny(), Is.True);
+    }
+
+    [Test]
+    [TestCase(2U)]
+    [TestCase(3U)]
+    [TestCase(8U)]
+    [TestCase(9U)]
+    public void TestBigSubDIndexingDirectSubDFromBox(uint power)
+    {
+      if (power < 2)
+        return;
+      uint two_pow_x = (uint)Math.Pow(2, power);
+      uint box_size = two_pow_x - 1U;
+      Box basebox = new Box(Plane.WorldXY, new Point3d[] { new Point3d(0.0, 0.0, 0.0), new Point3d(box_size, box_size, box_size) });
+      SubD box = SubD.CreateSubDBox(basebox, box_size);
+
+      uint vid_max = 6 * ((uint)Math.Pow(2, 2 * power) - (uint)Math.Pow(2, power + 1)) + 8;
+      uint eid_max = 2 * vid_max - 4;
+      uint fid_max = vid_max - 2;
+
+      Assert.That(vid_max, Is.EqualTo(box.Vertices.Count));
+      Assert.That(eid_max, Is.EqualTo(box.Edges.Count));
+      Assert.That(fid_max, Is.EqualTo(box.Faces.Count));
+
+      SubDVertex vertex_max = box.Vertices.Find(vid_max);
+      SubDEdge edge_max = box.Edges.Find(eid_max);
+      SubDFace face_max = box.Faces.Find(fid_max);
+
+      Assert.That(vertex_max.Id, Is.EqualTo(box.Vertices.Count));
+      Assert.That(edge_max.Id, Is.EqualTo(box.Edges.Count));
+      Assert.That(face_max.Id, Is.EqualTo(box.Faces.Count));
+
+      Assert.That(vertex_max.ControlNetPoint.DistanceTo(new Point3d(box_size, box_size, box_size)), Is.LessThan(1e-6));
+
+      Assert.That(edge_max.ComponentDirection, Is.False);
+      Assert.That(edge_max.RelativeVertexTo, Is.EqualTo(vertex_max));
+      Assert.That(edge_max.RelativeVertexFrom.Id, Is.EqualTo(vid_max - two_pow_x - 1U));
+      Assert.That(edge_max.RelativeFaceRight.ReverseComponentDirection(), Is.EqualTo(face_max));
+
+      BindingFlags binding_flags = BindingFlags.NonPublic | BindingFlags.Instance;
+      MethodInfo edge_cptr_method = edge_max.GetType().GetMethod("ConstSubDComponentPtr", binding_flags);
+      SubDComponent.SubDComponentPtr edge_cptr = (SubDComponent.SubDComponentPtr)edge_cptr_method.Invoke(edge_max, null);
+      //Assert.That(edge_cptr.BasePtr, Is.GreaterThan(Math.Pow(2, 32)));
+
+      ComponentIndex ci_vertex_max = vertex_max.ComponentIndex();
+      Assert.That(ci_vertex_max.ComponentIndexType, Is.EqualTo(ComponentIndexType.SubdVertex));
+      Assert.That(ci_vertex_max.Index, Is.EqualTo(vid_max));
+      SubDVertex vertex_max_from_ci = SubDComponent.FromComponentIndex(box, ci_vertex_max) as SubDVertex;
+      Assert.That(vertex_max_from_ci, Is.EqualTo(vertex_max));
+
+      ComponentIndex ci_edge_max = edge_max.ComponentIndex();
+      Assert.That(ci_edge_max.ComponentIndexType, Is.EqualTo(ComponentIndexType.SubdEdge));
+      Assert.That(ci_edge_max.Index, Is.EqualTo(eid_max));
+      SubDEdge edge_max_from_ci = SubDComponent.FromComponentIndex(box, ci_edge_max) as SubDEdge;
+      Assert.That(edge_max_from_ci, Is.EqualTo(edge_max));
     }
   }
 }
