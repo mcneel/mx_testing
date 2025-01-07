@@ -3,6 +3,7 @@ using Rhino.Geometry;
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 
 namespace NetSDKTests
 {
@@ -143,18 +144,41 @@ namespace NetSDKTests
       SubD box = SubD.CreateSubDBox(basebox, 2.0, 10, 10, 10);
 
       SubDEdge edgec1 = box.Edges.Find(21);
-      SubDEdge edgec2 = box.Edges.Find(22);
-      SubDEdge edgec3 = box.Edges.Find(23);
-      SubDEdge edgec4 = box.Edges.Find(24);
+      SubDEdge edgec2 = box.Edges.Find(621);
+      SubDEdge edgec3 = box.Edges.Find(486);
+      SubDEdge edgec4 = box.Edges.Find(611);
       SubDEdge[] chain_edges = { edgec1, edgec2, edgec3, edgec4 };
       bool[] chain_dirs = { true, false, true, false };
-      foreach (var tuple in chain_edges.Zip(chain_dirs, (x, y) => (edge: x, dir: y)))
-      {
-        tuple.edge.ComponentDirection = tuple.dir;
-      }
+      SubDEdgeSharpness[] edge_sharps = { edgec1.Sharpness, edgec2.Sharpness, edgec3.Sharpness, edgec4.Sharpness };
+      edgec1.ComponentDirection = chain_dirs[0];
+      edgec2.ComponentDirection = chain_dirs[1];
+      edgec3.ComponentDirection = chain_dirs[2];
+      edgec4.ComponentDirection = chain_dirs[3];
+
+      SubDFace orig_face = box.Faces.Find(206);
+      box.UpdateSurfaceMeshCache(false);
+      Assert.That(orig_face.LimitSurfaceCenterPoint.DistanceTo(new Point3d(0.55, 0.0, 0.05)), Is.LessThan(1e-6));
+      Assert.That(box.DeleteComponents(new SubDFace[1] { orig_face }), Is.True);
 
       SubDFace face = box.Faces.Add(chain_edges);
-      Assert.That(face.LimitSurfaceCenterPoint.DistanceTo(new Point3d(0.2, 0.2, 0.2)), Is.LessThan(1e-6));
+      Assert.That(face.Id, Is.EqualTo(orig_face.Id));
+      Assert.That(face, Is.Not.EqualTo(orig_face));
+      edgec1.Sharpness = edge_sharps[0];
+      edgec2.Sharpness = edge_sharps[1];
+      edgec3.Sharpness = edge_sharps[2];
+      edgec4.Sharpness = edge_sharps[3];
+      box.UpdateSurfaceMeshCache(false);
+      Assert.That(face.LimitSurfaceCenterPoint.DistanceTo(new Point3d(0.55, 0.0, 0.05)), Is.LessThan(1e-6));
+
+      Assert.That(box.DeleteComponents(new SubDFace[1] { face }), Is.True);
+      Assert.That(face.Id, Is.EqualTo(orig_face.Id));
+      Assert.That(face, Is.Not.EqualTo(orig_face));
+      edgec1.Sharpness = edge_sharps[0];
+      edgec2.Sharpness = edge_sharps[1];
+      edgec3.Sharpness = edge_sharps[2];
+      edgec4.Sharpness = edge_sharps[3];
+      box.UpdateSurfaceMeshCache(false);
+      Assert.That(face.LimitSurfaceCenterPoint.DistanceTo(new Point3d(0.55, 0.0, 0.05)), Is.LessThan(1e-6));
     }
 
     [Test]
@@ -233,13 +257,20 @@ namespace NetSDKTests
       Assert.That(edge_max.RelativeFaceLeft, Is.EqualTo(face_max_minus_1));
 
       Assert.That(vertex_corner.ControlNetPoint.DistanceTo(new Point3d(box_size, box_size, box_size)), Is.LessThan(1e-6));
-      Assert.That(edge_corner.RelativeVertexTo, Is.EqualTo(vertex_corner));
-      edge_corner.ReverseComponentDirection();
+      if (power % 2 == (power < 6 ? 1 : 0))
+      {
+        edge_corner.ReverseComponentDirection();
+      }
+      Assert.That(edge_corner.RelativeVertexFrom, Is.EqualTo(vertex_corner));
       for (int i = 0; i < vertex_max.EdgeCount; i++)
       {
-        Console.WriteLine(vertex_max.EdgeAt(i));
+        Assert.That(vertex_max.EdgeAt(i), Is.Not.EqualTo(edge_corner));
       }
-      Assert.That(vertex_max.EdgeAt(power == 2U ? 3 : 2), Is.EqualTo(edge_corner));
+      for (int i = 0; i < vertex_corner.EdgeCount; i++)
+      {
+        Console.WriteLine(vertex_corner.EdgeAt(i));
+      }
+      Assert.That(vertex_corner.EdgeAt(2), Is.EqualTo(edge_corner));
       BindingFlags binding_flags = BindingFlags.NonPublic | BindingFlags.Instance;
       MethodInfo edge_cptr_method = edge_max.GetType().GetMethod("ConstSubDComponentPtr", binding_flags);
       SubDComponent.SubDComponentPtr edge_cptr = (SubDComponent.SubDComponentPtr)edge_cptr_method.Invoke(edge_max, null);
@@ -262,8 +293,6 @@ namespace NetSDKTests
       Line expected = new Line(box.Vertices.Find(vid_max).ControlNetPoint, new Vector3d(0.0, 1.0, 0.0));
       if (power == 2u)
         expected = new Line(expected.To, expected.From);
-      Console.WriteLine(box.Vertices.Find(vid_max).ControlNetPoint);
-      Console.WriteLine(emax_cnetline);
       Assert.That((emax_cnetline.From - expected.From).IsTiny(), Is.True);
       Assert.That((emax_cnetline.To - expected.To).IsTiny(), Is.True);
       edge_max.ReverseComponentDirection();
@@ -274,6 +303,10 @@ namespace NetSDKTests
     [Test]
     [TestCase(2U)]
     [TestCase(3U)]
+    [TestCase(4U)]
+    [TestCase(5U)]
+    [TestCase(6U)]
+    [TestCase(7U)]
     [TestCase(8U)]
     [TestCase(9U)]
     public void TestBigSubDIndexingDirectSubDFromBox(uint power)
@@ -304,8 +337,9 @@ namespace NetSDKTests
       Assert.That(vertex_max.ControlNetPoint.DistanceTo(new Point3d(box_size, box_size, box_size)), Is.LessThan(1e-6));
 
       Assert.That(edge_max.ComponentDirection, Is.False);
-      Assert.That(edge_max.RelativeVertexTo, Is.EqualTo(vertex_max));
+      Assert.That(edge_max.RelativeVertexTo.Id, Is.EqualTo(vid_max - two_pow_x));
       Assert.That(edge_max.RelativeVertexFrom.Id, Is.EqualTo(vid_max - two_pow_x - 1U));
+      Assert.That(edge_max.RelativeVertexTo.EdgeAt(1).RelativeVertexTo, Is.EqualTo(vertex_max));
       Assert.That(edge_max.RelativeFaceRight.ReverseComponentDirection(), Is.EqualTo(face_max));
 
       BindingFlags binding_flags = BindingFlags.NonPublic | BindingFlags.Instance;
