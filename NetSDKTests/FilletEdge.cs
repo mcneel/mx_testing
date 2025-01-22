@@ -41,9 +41,9 @@ namespace NetSDKTests
             Brep[] filleted = Fillet(box, edges, r0, r1, bt, rt, Is.Not.Null);
             Assert.That(filleted.Length, Is.EqualTo(1));
             Assert.That(filleted[0].IsValid, Is.True);
-            if (bt == BlendType.Blend)
+            if (bt != BlendType.Chamfer)
             {
-              // Blend uses setback corners with 6 surfaces per corner
+              // Blend and Fillet use setback corners with 6 surfaces per corner
               Assert.That(filleted[0].Faces.Count, Is.EqualTo(66)); // 6 faces, 12 edges and 6*8 corners 
             }
             else
