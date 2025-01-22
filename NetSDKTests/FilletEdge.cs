@@ -16,7 +16,8 @@ namespace NetSDKTests
 
     Brep[] Fillet(Brep box, IEnumerable<int> edges, IEnumerable<double> r0, IEnumerable<double> r1, BlendType bt, RailType rt, IResolveConstraint a)
     {
-      Brep[] result = Brep.CreateFilletEdges(box, edges, r0, r1, bt, rt, 1e-3);
+      bool setback = bt != BlendType.Chamfer;
+      Brep[] result = Brep.CreateFilletEdges(box, edges, r0, r1, bt, rt, setback, 1e-3, Math.PI/180);
       Assert.That(result, a);
       return result;
     }
