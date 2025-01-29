@@ -11,7 +11,7 @@
   <Import Condition="'$(InRhino)' == 'True'" Project="$(RhinoCSDLLPropsFile)" />
 
   <PropertyGroup>
-    <TargetFrameworks>net48;net7.0-windows</TargetFrameworks>
+    <TargetFrameworks>net48;net9.0-windows</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>999</WarningLevel>
     <IsPackable>false</IsPackable>
