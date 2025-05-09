@@ -19,8 +19,8 @@
 
     <Nullable>disable</Nullable>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
-    <SignAssembly>False</SignAssembly>
-    <AssemblyOriginatorKeyFile>MxTesting.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>../MxTesting.snk</AssemblyOriginatorKeyFile>
     <NoWarn>NU1701</NoWarn>
 
     <OutputPath>bin\$(Configuration)\</OutputPath>
@@ -44,7 +44,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
     <PackageReference Include="NUnit" Version="3.14.0" />
-    <PackageReference Include="Rhino.Testing" Version="8.0.23-beta" />
+    <PackageReference Include="Rhino.Testing" Version="8.0.24-beta" />
   </ItemGroup>
 
   <Choose>
