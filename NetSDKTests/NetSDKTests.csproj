@@ -44,7 +44,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
     <PackageReference Include="NUnit" Version="3.14.0" />
-    <PackageReference Include="Rhino.Testing" Version="8.0.24-beta" />
+    <PackageReference Include="Rhino.Testing" Version="9.0.4-beta" />
   </ItemGroup>
 
   <Choose>
