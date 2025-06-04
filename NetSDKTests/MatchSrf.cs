@@ -234,5 +234,62 @@ namespace NetSDKTests
         Assert.AreEqual(C0.Kappa(1), minCurvature.Kappa(1));
       }
     }
+
+    [Test]
+    public void TestAverageMatch()
+    {
+      PlaneSurface p0 = new PlaneSurface(Plane.WorldXY, new Interval(0, 0.9), new Interval(-.5, .5));
+      PlaneSurface p1 = new PlaneSurface(Plane.WorldXY, new Interval(1.1, 2), new Interval(-.5, .5));
+      NurbsSurface s0 = p0.ToNurbsSurface(); s0.IncreaseDegreeU(3); s0.IncreaseDegreeV(3);
+      NurbsSurface s1 = p1.ToNurbsSurface(); s1.IncreaseDegreeU(3); s1.IncreaseDegreeV(3);
+
+      bool u0Reverse = false;
+      bool v0Reverse = false;
+      bool u1Reverse = false;
+      bool v1Reverse = false;
+
+      if (u0Reverse) s0.Reverse(0);
+      if (v0Reverse) s0.Reverse(1);
+      if (u1Reverse) s1.Reverse(0);
+      if (v1Reverse) s1.Reverse(1);
+
+      IsoStatus edgeIso = u0Reverse ? IsoStatus.West : IsoStatus.East;
+      IsoStatus otherIso = u1Reverse ? IsoStatus.East : IsoStatus.West;
+
+
+      Brep b0 = s0.ToBrep(), b1 = s1.ToBrep();
+      BrepEdge edge  = b0.Trims.Where(t => t.IsoStatus == edgeIso) .Select(t => t.Edge).FirstOrDefault();
+      BrepEdge other = b1.Trims.Where(t => t.IsoStatus == otherIso).Select(t => t.Edge).FirstOrDefault();
+
+      var settings = new BrepEdge.MatchSrfSettings(Continuity.C0_continuous, Continuity.C0_continuous);
+      settings.Average = true;
+      settings.ReverseMatchDirection = true;
+
+      bool rc = edge.Match(other, settings, out Brep matched, out Brep target);
+      Assert.That(rc, Is.True);
+      Assert.That(matched, Is.Not.Null);
+      Assert.That(target, Is.Not.Null);
+      Assert.That(matched.IsValid, Is.True);
+      Assert.That(target.IsValid, Is.True);
+
+      BrepEdge matchedEdge = matched.Trims.Where(t => t.IsoStatus == edgeIso).Select(t => t.Edge).FirstOrDefault();
+      BrepEdge otherEdge    = target.Trims.Where(t => t.IsoStatus == otherIso).Select(t => t.Edge).FirstOrDefault();
+
+      Assert.That(matchedEdge, Is.Not.Null);
+      Assert.That(otherEdge, Is.Not.Null);
+
+      const int N = 11;
+      for (int i = 0; i < N; ++i)
+      {
+        double fr = (double)i / (N - 1);
+        Point3d onEdge = matchedEdge.PointAt(matchedEdge.Domain.ParameterAt(fr));
+        bool ok = otherEdge.ClosestPoint(onEdge, out double t);
+        Assert.That(ok, Is.True);
+        Point3d onTarget = otherEdge.PointAt(t);
+        double dist = onEdge.DistanceTo(onTarget);
+        Assert.AreEqual(0, dist, RhinoMath.ZeroTolerance);
+        Assert.AreEqual(1, onEdge.X, RhinoMath.ZeroTolerance);
+      } 
+    }
   }
 }
