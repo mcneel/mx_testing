@@ -33,10 +33,10 @@ namespace NetSDKTests
 
       BrepEdge east = b.Trims.Where(t => t.IsoStatus == IsoStatus.East).Select(t => t.Edge).FirstOrDefault();
       Assert.That(east, Is.Not.Null);
-      BrepEdge.MatchSrfSettings settings = new BrepEdge.MatchSrfSettings(Continuity.C0_continuous, Continuity.C0_continuous);
+      MatchSrfSettings settings = new MatchSrfSettings(Continuity.C0_continuous, Continuity.C0_continuous);
       settings.MatchClosestPoints = true;
   
-      bool rc = east.Match(crv, settings, out Brep matched, out _);
+      bool rc = Brep.CreateFromMatch(east, crv, settings, out Brep matched, out _);
       Assert.That(rc, Is.True);
       Assert.That(matched, Is.Not.Null);
       Assert.That(matched.IsValid, Is.True);
@@ -73,9 +73,9 @@ namespace NetSDKTests
       BrepEdge north = b1.Trims.Where(t => t.IsoStatus == IsoStatus.North).Select(t => t.Edge).FirstOrDefault();
       Assert.That(west, Is.Not.Null);
       Assert.That(north, Is.Not.Null);
-      var settings = new BrepEdge.MatchSrfSettings(Continuity.C1_continuous, Continuity.C0_continuous);
+      var settings = new MatchSrfSettings(Continuity.C1_continuous, Continuity.C0_continuous);
       settings.ReverseMatchDirection = true;
-      bool rc = west.Match(north, settings, out Brep matched, out _);
+      bool rc = Brep.CreateFromMatch(west, north, settings, out Brep matched, out _);
       Assert.That(rc, Is.True);
 
       Assert.That(matched, Is.Not.Null);
@@ -131,10 +131,10 @@ namespace NetSDKTests
 
       BrepEdge east = b.Trims.Where(t => t.IsoStatus == IsoStatus.East).Select(t => t.Edge).FirstOrDefault();
       Assert.That(east, Is.Not.Null);
-      BrepEdge.MatchSrfSettings settings = new BrepEdge.MatchSrfSettings(Continuity.C0_continuous, Continuity.C0_continuous);
+      MatchSrfSettings settings = new MatchSrfSettings(Continuity.C0_continuous, Continuity.C0_continuous);
       settings.MatchClosestPoints = true;
 
-      bool rc = east.Match(halves, settings, out Brep matched, out _);
+      bool rc = Brep.CreateFromMatch(east, halves, settings, out Brep matched, out _);
       Assert.That(rc, Is.True);
       Assert.That(matched, Is.Not.Null);
       Assert.That(matched.IsValid, Is.True);
@@ -176,8 +176,8 @@ namespace NetSDKTests
       BrepEdge target0 = b10.Trims.Where(t => t.IsoStatus == IsoStatus.North).Select(t => t.Edge).FirstOrDefault();
       BrepEdge target1 = b11.Trims.Where(t => t.IsoStatus == IsoStatus.North).Select(t => t.Edge).FirstOrDefault();
 
-      var settings = new BrepEdge.MatchSrfSettings(Continuity.C2_continuous, Continuity.C0_continuous);
-      bool ok = toMatch.Match(new Curve[] { target0, target1 }, settings, out Brep matched, out _);
+      var settings = new MatchSrfSettings(Continuity.C2_continuous, Continuity.C0_continuous);
+      bool ok = Brep.CreateFromMatch(toMatch, new Curve[] { target0, target1 }, settings, out Brep matched, out _);
       Assert.That(ok, Is.True);
       Assert.That(matched, Is.Not.Null);
       Assert.That(matched.IsValid, Is.True);
@@ -261,11 +261,11 @@ namespace NetSDKTests
       BrepEdge edge  = b0.Trims.Where(t => t.IsoStatus == edgeIso) .Select(t => t.Edge).FirstOrDefault();
       BrepEdge other = b1.Trims.Where(t => t.IsoStatus == otherIso).Select(t => t.Edge).FirstOrDefault();
 
-      var settings = new BrepEdge.MatchSrfSettings(Continuity.C0_continuous, Continuity.C0_continuous);
+      var settings = new MatchSrfSettings(Continuity.C0_continuous, Continuity.C0_continuous);
       settings.Average = true;
       settings.ReverseMatchDirection = true;
 
-      bool rc = edge.Match(other, settings, out Brep matched, out Brep target);
+      bool rc = Brep.CreateFromMatch(edge, other, settings, out Brep matched, out Brep target);
       Assert.That(rc, Is.True);
       Assert.That(matched, Is.Not.Null);
       Assert.That(target, Is.Not.Null);
