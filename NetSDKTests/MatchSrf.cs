@@ -13,7 +13,7 @@ namespace NetSDKTests
 {
   [TestFixture]
   public class MatchSrf : RhinoTestFixture
-  {    
+  {
     [Test]
     public void TesteEdgeToCurveMatch()
     {
@@ -35,7 +35,7 @@ namespace NetSDKTests
       Assert.That(east, Is.Not.Null);
       MatchSrfSettings settings = new MatchSrfSettings(Continuity.C0_continuous, Continuity.C0_continuous);
       settings.MatchClosestPoints = true;
-  
+
       bool rc = Brep.CreateFromMatch(east, crv, settings, out Brep matched, out _);
       Assert.That(rc, Is.True);
       Assert.That(matched, Is.Not.Null);
@@ -45,7 +45,7 @@ namespace NetSDKTests
       Assert.That(matchedEdge, Is.Not.Null);
 
       const int N = 11;
-      for(int i = 0; i < N; ++i)
+      for (int i = 0; i < N; ++i)
       {
         double fr = (double)i / (N - 1);
         double t = matchedEdge.Domain.ParameterAt(fr);
@@ -58,7 +58,7 @@ namespace NetSDKTests
       }
     }
 
-    
+
     [Test]
     public void TestEdgeTangentMatch()
     {
@@ -69,7 +69,7 @@ namespace NetSDKTests
       ns1.IncreaseDegreeU(3); ns1.IncreaseDegreeV(3);
 
       Brep b0 = ns0.ToBrep(), b1 = ns1.ToBrep();
-      BrepEdge west  = b0.Trims.Where(t => t.IsoStatus == IsoStatus.West).Select(t => t.Edge).FirstOrDefault(); 
+      BrepEdge west = b0.Trims.Where(t => t.IsoStatus == IsoStatus.West).Select(t => t.Edge).FirstOrDefault();
       BrepEdge north = b1.Trims.Where(t => t.IsoStatus == IsoStatus.North).Select(t => t.Edge).FirstOrDefault();
       Assert.That(west, Is.Not.Null);
       Assert.That(north, Is.Not.Null);
@@ -83,7 +83,7 @@ namespace NetSDKTests
 
       BrepEdge m0 = matched.Trims.Where(t => t.IsoStatus == IsoStatus.West).Select(t => t.Edge).FirstOrDefault();
       const int N = 11;
-      for(int i = 0; i < N; ++i)
+      for (int i = 0; i < N; ++i)
       {
         double fr = (double)i / (N - 1);
         double s = m0.Domain.ParameterAt(fr);
@@ -117,10 +117,10 @@ namespace NetSDKTests
 
       Curve curve = Curve.CreateInterpolatedCurve(new[]
       {
-        new Point3d(2, -2, 0),
-        new Point3d(1.5, 0, 0),
-        new Point3d(2, 2, 0)
-      }, 3);
+          new Point3d(2, -2, 0),
+          new Point3d(1.5, 0, 0),
+          new Point3d(2, 2, 0)
+        }, 3);
 
       Curve[] halves = curve.Split(curve.Domain.Mid);
 
@@ -238,6 +238,7 @@ namespace NetSDKTests
     [Test]
     public void TestAverageMatch()
     {
+      
       PlaneSurface p0 = new PlaneSurface(Plane.WorldXY, new Interval(0, 0.9), new Interval(-.5, .5));
       PlaneSurface p1 = new PlaneSurface(Plane.WorldXY, new Interval(1.1, 2), new Interval(-.5, .5));
       NurbsSurface s0 = p0.ToNurbsSurface(); s0.IncreaseDegreeU(3); s0.IncreaseDegreeV(3);
@@ -253,13 +254,9 @@ namespace NetSDKTests
       if (u1Reverse) s1.Reverse(0);
       if (v1Reverse) s1.Reverse(1);
 
-      IsoStatus edgeIso = u0Reverse ? IsoStatus.West : IsoStatus.East;
-      IsoStatus otherIso = u1Reverse ? IsoStatus.East : IsoStatus.West;
-
-
-      Brep b0 = s0.ToBrep(), b1 = s1.ToBrep();
-      BrepEdge edge  = b0.Trims.Where(t => t.IsoStatus == edgeIso) .Select(t => t.Edge).FirstOrDefault();
-      BrepEdge other = b1.Trims.Where(t => t.IsoStatus == otherIso).Select(t => t.Edge).FirstOrDefault();
+      Brep b0 = s0.ToBrep(), b1 = s1.ToBrep();      
+      BrepEdge edge = u0Reverse ? b0.Trims.Where(t => t.IsoStatus == IsoStatus.West).Select(t => t.Edge).FirstOrDefault() : b0.Trims.Where(t => t.IsoStatus == IsoStatus.East).Select(t => t.Edge).FirstOrDefault();
+      BrepEdge other = u1Reverse ? b1.Trims.Where(t => t.IsoStatus == IsoStatus.East).Select(t => t.Edge).FirstOrDefault() : b1.Trims.Where(t => t.IsoStatus == IsoStatus.West).Select(t => t.Edge).FirstOrDefault();
 
       var settings = new MatchSrfSettings(Continuity.C0_continuous, Continuity.C0_continuous);
       settings.Average = true;
@@ -272,8 +269,8 @@ namespace NetSDKTests
       Assert.That(matched.IsValid, Is.True);
       Assert.That(target.IsValid, Is.True);
 
-      BrepEdge matchedEdge = matched.Trims.Where(t => t.IsoStatus == edgeIso).Select(t => t.Edge).FirstOrDefault();
-      BrepEdge otherEdge    = target.Trims.Where(t => t.IsoStatus == otherIso).Select(t => t.Edge).FirstOrDefault();
+      BrepEdge matchedEdge = u0Reverse ? matched.Trims.Where(t => t.IsoStatus == IsoStatus.West).Select(t => t.Edge).FirstOrDefault() : matched.Trims.Where(t => t.IsoStatus == IsoStatus.East).Select(t => t.Edge).FirstOrDefault();
+      BrepEdge otherEdge = u1Reverse ? target.Trims.Where(t => t.IsoStatus == IsoStatus.East).Select(t => t.Edge).FirstOrDefault() : target.Trims.Where(t => t.IsoStatus == IsoStatus.West).Select(t => t.Edge).FirstOrDefault();
 
       Assert.That(matchedEdge, Is.Not.Null);
       Assert.That(otherEdge, Is.Not.Null);
@@ -289,7 +286,7 @@ namespace NetSDKTests
         double dist = onEdge.DistanceTo(onTarget);
         Assert.AreEqual(0, dist, RhinoMath.ZeroTolerance);
         Assert.AreEqual(1, onEdge.X, RhinoMath.ZeroTolerance);
-      } 
+      }
     }
   }
 }
