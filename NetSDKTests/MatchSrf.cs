@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Rhino;
 using Rhino.FileIO;
 using Rhino.Geometry;
@@ -54,7 +55,7 @@ namespace NetSDKTests
         Point3d onCrv = crv.PointAt(t);
 
         double dist = onEdge.DistanceTo(onCrv);
-        Assert.AreEqual(0, dist, 1e-3);
+        ClassicAssert.AreEqual(0, dist, 1e-3);
       }
     }
 
@@ -92,7 +93,7 @@ namespace NetSDKTests
         Assert.That(north.ClosestPoint(onEdge, out double t), Is.True);
         Point3d onTarget = north.PointAt(t);
         double dist = onTarget.DistanceTo(onEdge);
-        Assert.AreEqual(0, dist, 1e-3);
+        ClassicAssert.AreEqual(0, dist, 1e-3);
 
         BrepTrim t0 = m0.Brep.Trims[m0.TrimIndices()[0]];
         Point3d uv = t0.PointAt(t0.Domain.ParameterAt(fr));
@@ -152,7 +153,7 @@ namespace NetSDKTests
         Point3d onCrv = curve.PointAt(t);
 
         double dist = onEdge.DistanceTo(onCrv);
-        Assert.AreEqual(0, dist, 1e-3);
+        ClassicAssert.AreEqual(0, dist, 1e-3);
       }
     }
 
@@ -226,12 +227,12 @@ namespace NetSDKTests
           }
         }
 
-        Assert.AreEqual(0, minDist, 1e-3);
+        ClassicAssert.AreEqual(0, minDist, 1e-3);
         int parallel = minNormal.IsParallelTo(N0);
         Assert.That(parallel, Is.Not.EqualTo(0));
 
-        Assert.AreEqual(C0.Kappa(0), minCurvature.Kappa(0));
-        Assert.AreEqual(C0.Kappa(1), minCurvature.Kappa(1));
+        ClassicAssert.AreEqual(C0.Kappa(0), minCurvature.Kappa(0));
+        ClassicAssert.AreEqual(C0.Kappa(1), minCurvature.Kappa(1));
       }
     }
 
@@ -284,8 +285,8 @@ namespace NetSDKTests
         Assert.That(ok, Is.True);
         Point3d onTarget = otherEdge.PointAt(t);
         double dist = onEdge.DistanceTo(onTarget);
-        Assert.AreEqual(0, dist, RhinoMath.ZeroTolerance);
-        Assert.AreEqual(1, onEdge.X, RhinoMath.ZeroTolerance);
+        ClassicAssert.AreEqual(0, dist, RhinoMath.ZeroTolerance);
+        ClassicAssert.AreEqual(1, onEdge.X, RhinoMath.ZeroTolerance);
       }
     }
   }

@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 using System.Collections.Generic;
 
 using NUnit.Framework;
+using Rhino.Runtime;
+using System.Runtime.InteropServices;
 
 namespace MxTests
 {
@@ -67,6 +69,10 @@ namespace MxTests
 
     public override void OneTimeSetup()
     {
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) &&
+        System.Diagnostics.Process.GetCurrentProcess().ProcessName.Equals("Rhinoceros", StringComparison.OrdinalIgnoreCase))
+        return;
+        
       base.OneTimeSetup();
 
       // your custom setup
@@ -92,6 +98,9 @@ namespace MxTests
         string testFolder = mdir.Location;
         if (!Path.IsPathRooted(testFolder))
         {
+          if (Path.DirectorySeparatorChar == '/')
+            testFolder = testFolder.Replace('\\', '/');
+            
           testFolder = Path.Combine(Settings.SettingsDir, testFolder);
           testFolder = Path.GetFullPath(testFolder);
         }

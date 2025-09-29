@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using NUnit.Framework;
 using Rhino.Testing.Fixtures;
 
 namespace NetSDKTests
@@ -8,6 +10,8 @@ namespace NetSDKTests
   {
     public override void OneTimeSetup()
     {
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && Process.GetCurrentProcess().ProcessName.Equals("Rhinoceros"))
+        return;
       base.OneTimeSetup();
     }
 

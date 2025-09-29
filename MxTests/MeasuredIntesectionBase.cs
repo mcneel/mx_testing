@@ -35,7 +35,7 @@ namespace MxTests
             Assert.IsTrue(rv, "Return value of intersection function was false.");
             Assert.IsEmpty(log_text, "Textlog of function must be empty");
 
-            NUnit.Framework.Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} curves but expected {expected.Count}.");
+            Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} curves but expected {expected.Count}.");
 
             for (int i = 0; i < expected.Count; i++)
             {

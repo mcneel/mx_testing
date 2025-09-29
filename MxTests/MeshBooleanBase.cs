@@ -72,16 +72,16 @@ namespace MxTests
 
       internal override void CheckAssertions(object file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
       {
-        NUnit.Framework.Assert.IsTrue(rv, $"Return result of {FuncName} function was not Success, or function returned 'null'.");
-        NUnit.Framework.Assert.IsEmpty(log_text ?? string.Empty, $"Textlog of function must be empty, but was: '{log_text}'");
+        Assert.IsTrue(rv, $"Return result of {FuncName} function was not Success, or function returned 'null'.");
+        Assert.IsEmpty(log_text ?? string.Empty, $"Textlog of function must be empty, but was: '{log_text}'");
 
-        NUnit.Framework.Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} meshes but expected {expected.Count}.");
+        Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} meshes but expected {expected.Count}.");
 
         for (int i = 0; i < expected.Count; i++)
         {
-          NUnit.Framework.Assert.AreEqual(expected[i].Measurement, result_ordered[i].Measurement, Math.Max(expected[i].Measurement * 10e-8, ((File3dm)file).Settings.ModelAbsoluteTolerance));
+          Assert.AreEqual(expected[i].Measurement, result_ordered[i].Measurement, Math.Max(expected[i].Measurement * 10e-8, ((File3dm)file).Settings.ModelAbsoluteTolerance));
           
-          if (expected[i].Closed.HasValue) NUnit.Framework.Assert.AreEqual(expected[i].Closed.Value, result_ordered[i].Closed.Value,
+          if (expected[i].Closed.HasValue) Assert.AreEqual(expected[i].Closed.Value, result_ordered[i].Closed.Value,
               $"Mesh of area {expected[i].Measurement} was not {(expected[i].Closed.Value ? "closed" : "open")} as expected.");
         }
 

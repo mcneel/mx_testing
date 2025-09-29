@@ -136,7 +136,7 @@ namespace MxTests
     {
       for (int i = 0; i < expected.Count; i++)
       {
-        if (expected[i].TextInfo != null) NUnit.Framework.Assert.AreEqual(expected[i].TextInfo, result_ordered[i].TextInfo,
+        if (expected[i].TextInfo != null) Assert.AreEqual(expected[i].TextInfo, result_ordered[i].TextInfo,
             $"Expected different geometry description:");
       }
     }

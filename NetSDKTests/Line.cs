@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Rhino.Geometry;
 using Rhino;
+using NUnit.Framework.Legacy;
 
 namespace NetSDKTests
 {
@@ -18,19 +19,19 @@ namespace NetSDKTests
       // co-linear lines touching head-to-tail
       Line l0 = new Line(0, 0, 0, 10, 0, 0);
       Line l1 = new Line(10, 0, 0, 20, 0, 0);
-      Assert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
+      ClassicAssert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
 
       // co-linear lines touching tail-to-tail
       l1 = new Line(20, 0, 0, 10, 0, 0);
-      Assert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
+      ClassicAssert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
 
       // co-linear lines touching tail-to-head
       l0 = new Line(10, 0, 0, 0, 0, 0);
-      Assert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
+      ClassicAssert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
 
       // co-linear lines touching head-to-head
       l1 = new Line(10, 0, 0, 20, 0, 0);
-      Assert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
+      ClassicAssert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
     }
 
     [Test]
@@ -39,9 +40,9 @@ namespace NetSDKTests
       Line l0 = new Line(0, 0, 0, 10, 0, 0);
       Line l1 = new Line(5, 0, 0, 5, 10, 0);
 
-      Assert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
+      ClassicAssert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
       l1 = new Line(5, 10, 0, 5, 0, 0);
-      Assert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
+      ClassicAssert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
     }
 
     [Test]
@@ -49,7 +50,7 @@ namespace NetSDKTests
     {
       Line l0 = new Line(0, 0, 0, 10, 0, 0);
       Line l1 = new Line(5, -5, 0, 5, 5, 0);
-      Assert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
+      ClassicAssert.AreEqual(0.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
     }
 
     [Test]
@@ -58,10 +59,10 @@ namespace NetSDKTests
       Line l0 = new Line(0, 0, 0, 10, 0, 0);
       Line l1 = new Line(11, 1, 0, 11, 10, 0);
 
-      Assert.AreEqual(Math.Sqrt(2.0), l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
+      ClassicAssert.AreEqual(Math.Sqrt(2.0), l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
 
       l1 = new Line(5, 1, 0, 5, 10, 0);
-      Assert.AreEqual(1.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
+      ClassicAssert.AreEqual(1.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
     }
 
     [Test]
@@ -70,7 +71,7 @@ namespace NetSDKTests
       Line l0 = new Line(0, 0, 0, 10, 0, 0);
       Line l1 = new Line(11, 0, 0, 20, 0, 0);
 
-      Assert.AreEqual(1.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
+      ClassicAssert.AreEqual(1.0, l0.MinimumDistanceTo(l1), RhinoMath.ZeroTolerance);
     }
 
     [Test]
@@ -92,7 +93,7 @@ namespace NetSDKTests
       bool intersect = Rhino.Geometry.Intersect.Intersection.LineLine(A, B, out double a, out double b);
       Assert.That(intersect, Is.False);
 
-      Assert.AreEqual(25.4, A.MinimumDistanceTo(B), RhinoMath.SqrtEpsilon);
+      ClassicAssert.AreEqual(25.4, A.MinimumDistanceTo(B), RhinoMath.SqrtEpsilon);
     }
   }
 }

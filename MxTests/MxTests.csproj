@@ -11,16 +11,20 @@
   <Import Condition="'$(InRhino)' == 'True'" Project="$(RhinoCSDLLPropsFile)" />
 
   <PropertyGroup>
-    <TargetFrameworks>net48;net9.0-windows</TargetFrameworks>
+    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform(windows))">net9.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform(windows))">net48;net9.0-windows</TargetFrameworks>
+    <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform(windows))">win-x64</RuntimeIdentifier>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>999</WarningLevel>
     <IsPackable>false</IsPackable>
 
     <Nullable>disable</Nullable>
-    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <SignAssembly>False</SignAssembly>
     <AssemblyOriginatorKeyFile>MxTesting.snk</AssemblyOriginatorKeyFile>
     <NoWarn>NU1701</NoWarn>
+    <LangVersion Condition="$(TargetFramework) == 'net48'">10</LangVersion>
 
     <OutputPath>bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
@@ -41,10 +45,14 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
-    <PackageReference Include="NUnit" Version="3.14.0" />
-    <PackageReference Include="Rhino.Testing" Version="8.0.23-beta" />
+    <PackageReference Include="NUnit" Version="4.4.0" />
+    <PackageReference Include="Rhino.Testing" Version="9.0.4-beta" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="NUnit.Framework.Legacy.ClassicAssert" Alias="Assert" />
+  </ItemGroup>
+  
   <Choose>
     <When Condition="'$(InRhino)' == 'True'">
       <ItemGroup>
@@ -70,6 +78,11 @@
   <!-- modify the testing config file if we're building inside the Rhino build. -->
   <Target Name="WriteRhinoSystemDirectory" Condition="'$(InRhino)' == 'True'" AfterTargets="CopyConfigXml">
     <XmlPoke XmlInputPath="$(OutputPath)/Rhino.Testing.Configs.xml" Value="$(RhinoOutputDir)" Query="/Settings/RhinoSystemDirectory" />
+    <WriteLinesToFile
+      File="$(OutputPath)/Rhino.Testing.Configs.xml"
+      Lines="$([System.Text.RegularExpressions.Regex]::Replace($([System.IO.File]::ReadAllText('$(OutputPath)/Rhino.Testing.Configs.xml')), '\.\.\\\.\.\\\.\.\\\.\.\\', './'))"
+      Overwrite="true"
+      Condition="$([MSBuild]::IsOSPlatform(osx))" />
   </Target>
 
   <!-- give some feedback -->

@@ -76,15 +76,15 @@ namespace MxTests
 
       internal override void CheckAssertions(object file, List<ResultMetrics> expected, List<ResultMetrics> result_ordered, bool rv, string log_text)
       {
-        NUnit.Framework.Assert.IsTrue(rv, "Return value of Mesh.Split() function was false.");
-        NUnit.Framework.Assert.IsEmpty(log_text, "Textlog of function must be empty");
+        Assert.IsTrue(rv, "Return value of Mesh.Split() function was false.");
+        Assert.IsEmpty(log_text, "Textlog of function must be empty");
 
-        NUnit.Framework.Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} splits but expected {expected.Count}.");
+        Assert.AreEqual(expected.Count, result_ordered.Count, $"Got {result_ordered.Count} splits but expected {expected.Count}.");
 
         for (int i = 0; i < expected.Count; i++)
         {
-          NUnit.Framework.Assert.AreEqual(expected[i].Measurement, result_ordered[i].Measurement, Math.Max(expected[i].Measurement * 10e-8, ((File3dm)file).Settings.ModelAbsoluteTolerance));
-          if (expected[i].Closed.HasValue) NUnit.Framework.Assert.AreEqual(expected[i].Closed.Value, result_ordered[i].Closed.Value,
+          Assert.AreEqual(expected[i].Measurement, result_ordered[i].Measurement, Math.Max(expected[i].Measurement * 10e-8, ((File3dm)file).Settings.ModelAbsoluteTolerance));
+          if (expected[i].Closed.HasValue) Assert.AreEqual(expected[i].Closed.Value, result_ordered[i].Closed.Value,
               $"Mesh of area {expected[i].Measurement} was not {(expected[i].Closed.Value ? "closed" : "open")} as expected.");
         }
       }
