@@ -45,6 +45,7 @@ namespace NetSDKTests
       var bts = new[] { BlendType.Fillet, BlendType.Chamfer, BlendType.Blend };
       var rts = new[] { RailType.RollingBall, RailType.DistanceBetweenRails, RailType.DistanceFromEdge };
 
+      int failed = 0;
       foreach(var bt in bts)
       {
         foreach(var rt in rts)
@@ -66,10 +67,14 @@ namespace NetSDKTests
           Assert.That(filleted, Is.Not.Null);
           Assert.That(filleted.IsValid, Is.True);
 
-          // 6 faces, 12 edges and 8 corners makes 26 faces
-          Assert.That(filleted.Faces.Count, Is.EqualTo(26));
+          // 6 faces, 12 edges and 8 corners makes 26 faces (chamfered) or 3x8 corners makes 42 faces
+          if (bt == BlendType.Chamfer)
+            Assert.That(filleted.Faces.Count, Is.EqualTo(26));
+          else
+            Assert.That(filleted.Faces.Count, Is.EqualTo(42));
         }
       }
+      Assert.That(failed, Is.EqualTo(0));
     }
   }
 }
