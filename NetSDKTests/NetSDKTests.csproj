@@ -19,6 +19,8 @@
     <WarningLevel>999</WarningLevel>
     <IsPackable>false</IsPackable>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
+    <!-- Uncomment if you need to debug native code on mac by running the test executable directly -->
+    <!-- <EnableNUnitRunner>true</EnableNUnitRunner> -->
 
     <Nullable>disable</Nullable>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -74,7 +76,15 @@
 
   <!-- modify the testing config file if we're building inside the Rhino build. -->
   <Target Name="WriteRhinoSystemDirectory" Condition="'$(InRhino)' == 'True'" AfterTargets="CopyConfigXml">
-    <XmlPoke XmlInputPath="$(OutputPath)/Rhino.Testing.Configs.xml" Value="$(RhinoOutputDir)" Query="/Settings/RhinoSystemDirectory" />
+    <Exec Command="$(RhinoRootDir)/build/mac/getderiveddata/getderiveddata.sh" ConsoleToMSBuild="true" Condition="$([MSBuild]::IsOSPlatform(osx))">
+      <Output TaskParameter="ConsoleOutput" PropertyName="RhinoDir" />
+    </Exec>
+    <PropertyGroup>
+      <RhinoDir Condition="$([MSBuild]::IsOSPlatform(osx))">$(RhinoDir)Build/Products/$(Configuration)/Rhinoceros.app</RhinoDir>
+      <RhinoDir Condition="$(RhinoDir) == ''">$(RhinoOutputDir)</RhinoDir>
+    </PropertyGroup>
+        
+    <XmlPoke XmlInputPath="$(OutputPath)/Rhino.Testing.Configs.xml" Value="$(RhinoDir)" Query="/Settings/RhinoSystemDirectory" />
   </Target>
 
   <!-- give some feedback -->
