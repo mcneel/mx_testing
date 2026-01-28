@@ -11,8 +11,8 @@
   <Import Condition="'$(InRhino)' == 'True'" Project="$(RhinoCSDLLPropsFile)" />
 
   <PropertyGroup>
-    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform(windows))">net9.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform(windows))">net48;net9.0-windows</TargetFrameworks>
+    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform(windows))">net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform(windows))">net48;net10.0-windows</TargetFrameworks>
     <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform(windows))">win-x64</RuntimeIdentifier>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -56,6 +56,8 @@
     <When Condition="'$(InRhino)' == 'True'">
       <ItemGroup>
         <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj" Private="False" PrivateAssets="all" />
+        <!-- Exclude references from Rhino.Testing dependency -->
+        <PackageReference Include="Grasshopper" Version="9.0.26027.12305-wip" ExcludeAssets="all" />
       </ItemGroup>
     </When>
     <Otherwise>
