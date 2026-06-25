@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace MxTests
@@ -282,6 +283,152 @@ namespace MxTests
       rc = rc.Trim();
 
       return rc;
+    }
+
+    // ===== Oracle regeneration =====
+    // Opt-in tooling: re-measures a model exactly as the test does and rewrites its Notes
+    // oracle. Never runs during normal asserts; driven by the [Explicit] Regenerate() tests
+    // and gated on the MX_REGEN environment variable.
+
+    internal enum RegenFields { Preserve, Area, Closed, Full }
+
+    internal static RegenFields RegenFieldsFromEnv()
+    {
+      switch (System.Environment.GetEnvironmentVariable("MX_REGEN_FIELDS")?.Trim().ToUpperInvariant())
+      {
+        case "AREA": return RegenFields.Area;
+        case "CLOSED": return RegenFields.Closed;
+        case "FULL": return RegenFields.Full;
+        default: return RegenFields.Preserve;
+      }
+    }
+
+    /// <summary>True if <paramref name="filename"/> matches the comma-separated MX_REGEN substring list.</summary>
+    internal static bool RegenSelected(string filename)
+    {
+      var sel = System.Environment.GetEnvironmentVariable("MX_REGEN");
+      if (string.IsNullOrWhiteSpace(sel)) return false;
+      return sel.Split(',')
+          .Select(s => s.Trim())
+          .Where(s => s.Length > 0)
+          .Any(s => filename.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) >= 0);
+    }
+
+    static string[] Toks(string line) => line.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+
+    /// <summary>
+    /// Re-runs the operation for one model and rewrites its Notes oracle from the actual result.
+    /// Returns false (no-op) unless the file name matches MX_REGEN. By default the regenerated
+    /// oracle keeps exactly the fields the current one asserts (MX_REGEN_FIELDS=CLOSED or FULL
+    /// widens it, AREA narrows it to area-only). MX_REGEN_DRYRUN=1 prints without writing.
+    /// </summary>
+    internal bool RegenerateOracle(string filepath, string notesIncipit, bool twoGroups)
+    {
+      string filename = Path.GetFileName(filepath);
+      if (!RegenSelected(filename)) return false;
+
+      bool dryRun = System.Environment.GetEnvironmentVariable("MX_REGEN_DRYRUN") == "1";
+      RegenFields policy = RegenFieldsFromEnv();
+
+      using (var file = File3dm.Read(filepath))
+      {
+        string oldNotes = file.Notes.Notes ?? string.Empty;
+
+        // Split existing notes into incipit / comment / oracle lines.
+        string incipit;
+        var commentLines = new List<string>();
+        var oracleLines = new List<string>();
+        using (var tr = new StringReader(oldNotes))
+        {
+          incipit = tr.ReadLine();
+          string line;
+          while ((line = tr.ReadLine()) != null)
+          {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            if (line.TrimStart().StartsWith("#", StringComparison.InvariantCulture)) { commentLines.Add(line); continue; }
+            oracleLines.Add(line);
+          }
+        }
+        if (string.IsNullOrWhiteSpace(incipit) ||
+            !incipit.Trim().StartsWith(notesIncipit, StringComparison.InvariantCultureIgnoreCase))
+          incipit = notesIncipit;
+
+        // Which fields does the current oracle assert? Read explicit tokens rather than parsed
+        // metrics (the positional parser sets Overlap=false off a trailing description bracket).
+        bool oldHasClosed = oracleLines.Any(l => { var t = Toks(l); return t.Length > 1 && (t[1].Equals("CLOSED", StringComparison.InvariantCultureIgnoreCase) || t[1].Equals("OPEN", StringComparison.InvariantCultureIgnoreCase)); });
+        bool oldHasOverlap = oracleLines.Any(l => { var t = Toks(l); return t.Length > 2 && (t[2].StartsWith("OVERLAP", StringComparison.InvariantCultureIgnoreCase) || t[2].StartsWith("PERFORAT", StringComparison.InvariantCultureIgnoreCase)); });
+        bool oldHasText = oracleLines.Any(l => l.Contains("["));
+
+        // Run the operation exactly as the test does.
+        ExtractInputsFromFile(file, twoGroups, out double tol, out var inputs, out var second);
+        bool rv = OperateCommandOnGeometry(inputs, second, tol, out List<ResultMetrics> returned, out string log);
+        if (!rv || returned == null)
+        {
+          Assert.Fail($"[regen] '{filename}': operation did not succeed (rv={rv}); cannot regenerate. Log: {log}");
+          return false;
+        }
+
+        bool canClosed = returned.Any(r => r.Closed.HasValue);
+        bool canOverlap = returned.Any(r => r.Overlap.HasValue);
+        bool canText = returned.Any(r => r.TextInfo != null);
+
+        bool wantClosed, wantOverlap, wantText;
+        switch (policy)
+        {
+          case RegenFields.Area: wantClosed = wantOverlap = wantText = false; break;
+          case RegenFields.Closed: wantClosed = canClosed; wantOverlap = oldHasOverlap && canOverlap; wantText = oldHasText && canText; break;
+          case RegenFields.Full: wantClosed = canClosed; wantOverlap = canOverlap; wantText = canText; break;
+          default: wantClosed = oldHasClosed && canClosed; wantOverlap = oldHasOverlap && canOverlap; wantText = oldHasText && canText; break;
+        }
+
+        var sb = new StringBuilder();
+        sb.Append(incipit.Trim()).Append('\n');
+        foreach (var c in commentLines) sb.Append(c).Append('\n');
+        foreach (var m in returned) sb.Append(FormatOracleLine(m, wantClosed, wantOverlap, wantText)).Append('\n');
+        string newNotes = sb.ToString();
+
+        string report =
+          $"===== REGEN {filename}  [{policy}{(dryRun ? ", DRY-RUN" : "")}]  ({returned.Count} result(s)) =====\n" +
+          "----- OLD -----\n" + oldNotes.TrimEnd() + "\n" +
+          "----- NEW -----\n" + newNotes.TrimEnd() + "\n\n";
+        TestContext.Progress.WriteLine(report);
+        string logPath = System.Environment.GetEnvironmentVariable("MX_REGEN_LOG");
+        if (string.IsNullOrWhiteSpace(logPath)) logPath = Path.Combine(Path.GetTempPath(), "mx_regen_report.txt");
+        try { File.AppendAllText(logPath, report); } catch { /* report file is best-effort */ }
+
+        if (!dryRun)
+        {
+          file.Notes.Notes = newNotes;
+          if (!file.Write(filepath, new File3dmWriteOptions()))
+            Assert.Fail($"[regen] failed to write '{filepath}'.");
+        }
+        return true;
+      }
+    }
+
+    /// <summary>Inverse of <see cref="ExtractExpectedValues"/>: one oracle line from an actual result.</summary>
+    internal virtual string FormatOracleLine(ResultMetrics m, bool wantClosed, bool wantOverlap, bool wantText)
+    {
+      var parts = new List<string> { m.Measurement.ToString("R", CultureInfo.InvariantCulture) };
+      // The parser reads Closed at token[1] and Overlap at token[2], so any later field
+      // (overlap or description) needs the closed token to hold index 1.
+      if (wantClosed || wantOverlap || wantText)
+        parts.Add((m.Closed ?? false) ? "CLOSED" : "OPEN");
+      if (wantOverlap)
+        parts.Add((m.Overlap ?? false) ? "OVERLAP" : "PERFORATING");
+      if (wantText)
+      {
+        string d = RawDescription(m);
+        if (!string.IsNullOrEmpty(d)) parts.Add("[" + d + "]");
+      }
+      return string.Join(" ", parts);
+    }
+
+    internal virtual string RawDescription(ResultMetrics m)
+    {
+      string raw = (m.Mesh is Mesh mesh) ? HostUtils.DescribeGeometry(mesh) : m.TextInfo;
+      if (string.IsNullOrEmpty(raw)) return null;
+      return raw.Replace("\r", " ").Replace("\n", " ").Replace("\t", " ").Trim();
     }
   }
 }

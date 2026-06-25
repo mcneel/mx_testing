@@ -19,7 +19,15 @@ namespace MxTests
       base.Run(filename, filepath);
 
       WindingsImplementation.Instance.Model(Path.Combine(filepath, filename));
-    } 
+    }
+
+    [Test, Explicit]
+    public void Regenerate()
+    {
+      int n = 0;
+      foreach (var path in g_test_models) if (WindingsImplementation.Instance.RegenerateOracle(path, "WINDING DIRECTION", false)) n++;
+      if (n == 0) Assert.Ignore($"No models matched MX_REGEN='{Environment.GetEnvironmentVariable("MX_REGEN")}'.");
+    }
 
     internal class WindingsImplementation
     : MeasuredMeshIntersectionsBase
@@ -34,6 +42,10 @@ namespace MxTests
       internal override double ToleranceCoefficient => Intersection.MeshIntersectionsTolerancesCoefficient;
 
       public override string IncipitString => "WINDING DIRECTION";
+
+      // Windings oracle is just the winding-direction vector per intersection polyline.
+      internal override string FormatOracleLine(ResultMetrics m, bool wantClosed, bool wantOverlap, bool wantText)
+        => m.TextInfo ?? "";
 
       public virtual void Model(string filepath)
       {

@@ -20,6 +20,14 @@ namespace MxTests
       SurfaceIntersectImplementation.Instance.Model(Path.Combine(filepath, filename));
     }
 
+    [Test, Explicit]
+    public void Regenerate()
+    {
+      int n = 0;
+      foreach (var path in g_test_models) if (SurfaceIntersectImplementation.Instance.RegenerateOracle(path, "MEASURED INTERSECTION", false)) n++;
+      if (n == 0) Assert.Ignore($"No models matched MX_REGEN='{Environment.GetEnvironmentVariable("MX_REGEN")}'.");
+    }
+
     internal class SurfaceIntersectImplementation
     : MeasuredSurfaceIntersectionsBase
     {

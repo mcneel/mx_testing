@@ -19,6 +19,15 @@ namespace MxTests
       (new MeshBooleanIntersectionImplementation()).Model(Path.Combine(filepath, filename), true);
     }
 
+    [Test, Explicit]
+    public void Regenerate()
+    {
+      var impl = new MeshBooleanIntersectionImplementation();
+      int n = 0;
+      foreach (var path in g_test_models) if (impl.RegenerateOracle(path, "AREA", true)) n++;
+      if (n == 0) Assert.Ignore($"No models matched MX_REGEN='{Environment.GetEnvironmentVariable("MX_REGEN")}'.");
+    }
+
     class MeshBooleanIntersectionImplementation
     : MeshBooleanBase.MeshBooleanBaseImplementation
     {

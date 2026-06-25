@@ -20,6 +20,15 @@ namespace MxTests
       (new MeshBooleanUnionImplementation()).Model(Path.Combine(filepath, filename), false);
     }
 
+    [Test, Explicit]
+    public void Regenerate()
+    {
+      var impl = new MeshBooleanUnionImplementation();
+      int n = 0;
+      foreach (var path in g_test_models) if (impl.RegenerateOracle(path, "AREA", false)) n++;
+      if (n == 0) Assert.Ignore($"No models matched MX_REGEN='{Environment.GetEnvironmentVariable("MX_REGEN")}'.");
+    }
+
     class MeshBooleanUnionImplementation
     : MeshBooleanBase.MeshBooleanBaseImplementation
     {
