@@ -242,6 +242,233 @@ namespace MxTests
       MinorImplmentations.CheckWindingInRotatedCurve(angleX, angleY);
     }
 
+    #region CreateFromIterativeCleanup (Mesh.CreateFromIterativeCleanup / RequireIterativeCleanup)
+    // These exercise MX::TessellationArray::CleanUpWithTolerance, the tolerance-based vertex welding
+    // ("join near vertices" + single->double precision mend) that the mesh boolean engine uses for
+    // preprocessing. Public entry points: Mesh.CreateFromIterativeCleanup (does the work, returning
+    // one mesh per input or null when there is nothing to do) and Mesh.RequireIterativeCleanup
+    // (assesses only). Inputs are built in code, so no model files are needed.
+
+    [Test]
+    public void CreateFromIterativeCleanupSnapsNearCoincidentVerticesWithinMesh()
+    {
+      SetupFixture.Prerequisites();
+
+      const double tol = 1e-2;
+      using (Mesh box = BuildUnweldedBox(5e-4))
+      {
+        // 24 vertices arranged in 8 clusters of 3; within each cluster the copies are distinct but
+        // closer to each other than the tolerance, so cleanup is needed.
+        Assert.That(box.Vertices.Count, Is.EqualTo(24));
+        int distinctBefore = DistinctPositionCount(box, 1e-9);
+        Assert.That(distinctBefore, Is.EqualTo(24));
+        Assert.That(Mesh.RequireIterativeCleanup(new[] { box }, tol), Is.True);
+
+        Mesh[] cleaned = Mesh.CreateFromIterativeCleanup(new[] { box }, tol);
+
+        Assert.That(cleaned, Is.Not.Null);
+        Assert.That(cleaned, Has.Length.EqualTo(1));
+        Assert.That(cleaned[0], Is.Not.Null);
+        // Cleanup snaps the near-coincident corner copies onto each other (it makes vertices
+        // coincide for boolean preprocessing; it does not topologically weld the mesh), so the
+        // number of distinct vertex positions drops.
+        Assert.That(DistinctPositionCount(cleaned[0], 1e-9), Is.LessThan(distinctBefore));
+
+        foreach (var c in cleaned) c?.Dispose();
+      }
+    }
+
+    [Test]
+    public void CreateFromIterativeCleanupNoChangeReturnsNull()
+    {
+      SetupFixture.Prerequisites();
+
+      const double tol = 1e-6;
+      using (Mesh box = Mesh.CreateFromBox(new BoundingBox(new Point3d(0, 0, 0), new Point3d(1, 1, 1)), 1, 1, 1))
+      {
+        // A pristine, already-welded box has nothing to clean at this tolerance.
+        Assert.That(box.IsClosed, Is.True);
+        Assert.That(Mesh.RequireIterativeCleanup(new[] { box }, tol), Is.False);
+        // The "nothing done" path returns null (and must not leak the assessment wraps).
+        Assert.That(Mesh.CreateFromIterativeCleanup(new[] { box }, tol), Is.Null);
+      }
+    }
+
+    [TestCase(1e-1, 1e-3, false)] // seam gap (0.1) larger than tolerance (0.001): no weld
+    [TestCase(1e-3, 1e-1, true)]  // seam gap (0.001) smaller than tolerance (0.1): weld
+    public void CreateFromIterativeCleanupRespectsTolerance(double gap, double tol, bool expectWeld)
+    {
+      SetupFixture.Prerequisites();
+
+      using (Mesh m = BuildTwoAdjacentQuadsWithSeamGap(gap, doublePrecision: false))
+      {
+        bool requires = Mesh.RequireIterativeCleanup(new[] { m }, tol);
+        Mesh[] cleaned = Mesh.CreateFromIterativeCleanup(new[] { m }, tol);
+
+        Assert.That(requires, Is.EqualTo(expectWeld));
+        if (expectWeld)
+        {
+          Assert.That(cleaned, Is.Not.Null);
+          Assert.That(cleaned, Has.Length.EqualTo(1));
+          Assert.That(cleaned[0], Is.Not.Null);
+        }
+        else
+        {
+          Assert.That(cleaned, Is.Null);
+        }
+
+        if (cleaned != null) foreach (var c in cleaned) c?.Dispose();
+      }
+    }
+
+    [Test]
+    public void CreateFromIterativeCleanupWeldsVerticesAcrossMeshArray()
+    {
+      SetupFixture.Prerequisites();
+
+      const double gap = 1e-3;
+      const double tol = 1e-2;
+      // Two stacked unit boxes; the top box's bottom face sits `gap` above the bottom box's top face.
+      using (Mesh bottom = Mesh.CreateFromBox(new BoundingBox(new Point3d(0, 0, 0), new Point3d(1, 1, 1)), 1, 1, 1))
+      using (Mesh top = Mesh.CreateFromBox(new BoundingBox(new Point3d(0, 0, 1 + gap), new Point3d(1, 1, 2 + gap)), 1, 1, 1))
+      {
+        // Before: the four shared corners are gap apart, so none coincide.
+        Assert.That(CountCoincidentPairs(bottom, top, 1e-9), Is.EqualTo(0));
+        Assert.That(Mesh.RequireIterativeCleanup(new[] { bottom, top }, tol), Is.True);
+
+        Mesh[] cleaned = Mesh.CreateFromIterativeCleanup(new[] { bottom, top }, tol);
+
+        Assert.That(cleaned, Is.Not.Null);
+        Assert.That(cleaned, Has.Length.EqualTo(2));
+        // Unchanged inputs come back as null (the anchor mesh does not move); at least the snapped
+        // mesh must be present. Resolve nulls back to the original input for the comparison.
+        Assert.That(cleaned[0] != null || cleaned[1] != null, Is.True);
+        Mesh out0 = cleaned[0] ?? bottom;
+        Mesh out1 = cleaned[1] ?? top;
+        // After: the four shared corners now coincide exactly across the two meshes.
+        Assert.That(CountCoincidentPairs(out0, out1, 1e-9), Is.GreaterThanOrEqualTo(4));
+
+        foreach (var c in cleaned) c?.Dispose();
+      }
+    }
+
+    [Test]
+    public void CreateFromIterativeCleanupMendsSinglePrecisionCoincidence()
+    {
+      SetupFixture.Prerequisites();
+
+      // Two seam vertices whose double-precision positions differ by 1e-8 but whose single-precision
+      // (float) representations are identical. The "mend double->single" step welds them even though
+      // the tolerance (1e-12) is far below the double-precision gap -- a pure tolerance test would not.
+      const double gap = 1e-8;
+      const double tol = 1e-12;
+      using (Mesh m = BuildTwoAdjacentQuadsWithSeamGap(gap, doublePrecision: true))
+      {
+        // Self-check the construction: doubles diverge by ~gap, but the floats coincide.
+        Point3d pa = m.Vertices.Point3dAt(1); // quad1 shared corner (1,0,0)
+        Point3d pb = m.Vertices.Point3dAt(4); // quad2 duplicate of it, offset by gap along x
+        Assert.That(pa.DistanceTo(pb), Is.GreaterThan(tol).And.LessThan(1e-6),
+          "precondition: the two vertices must diverge in double precision");
+        Assert.That(new Point3f((float)pa.X, (float)pa.Y, (float)pa.Z),
+          Is.EqualTo(new Point3f((float)pb.X, (float)pb.Y, (float)pb.Z)),
+          "precondition: the two vertices must coincide in single precision");
+
+        // The mend detects the coincidence despite tol << gap.
+        Assert.That(Mesh.RequireIterativeCleanup(new[] { m }, tol), Is.True);
+
+        Mesh[] cleaned = Mesh.CreateFromIterativeCleanup(new[] { m }, tol);
+        Assert.That(cleaned, Is.Not.Null);
+        Assert.That(cleaned, Has.Length.EqualTo(1));
+        Assert.That(cleaned[0], Is.Not.Null);
+
+        foreach (var c in cleaned) c?.Dispose();
+      }
+    }
+
+    static Mesh BuildUnweldedBox(double jitterBase)
+    {
+      // 8 logical corners of the unit cube.
+      Point3d[] c =
+      {
+        new Point3d(0, 0, 0), new Point3d(1, 0, 0), new Point3d(1, 1, 0), new Point3d(0, 1, 0),
+        new Point3d(0, 0, 1), new Point3d(1, 0, 1), new Point3d(1, 1, 1), new Point3d(0, 1, 1),
+      };
+      // 6 quad faces by corner index, outward CCW winding.
+      int[][] faces =
+      {
+        new[] { 0, 3, 2, 1 }, // bottom (-z)
+        new[] { 4, 5, 6, 7 }, // top (+z)
+        new[] { 0, 1, 5, 4 }, // front (-y)
+        new[] { 1, 2, 6, 5 }, // right (+x)
+        new[] { 2, 3, 7, 6 }, // back (+y)
+        new[] { 3, 0, 4, 7 }, // left (-x)
+      };
+
+      var m = new Mesh();
+      for (int f = 0; f < faces.Length; f++)
+      {
+        // Each face owns its 4 vertices, nudged by a small per-face offset so the copies of a shared
+        // corner are distinct in single precision yet well within the weld tolerance.
+        var off = new Vector3d((f + 1) * jitterBase, 0, 0);
+        int b = m.Vertices.Count;
+        for (int k = 0; k < 4; k++)
+          m.Vertices.Add(c[faces[f][k]] + off);
+        m.Faces.AddFace(b, b + 1, b + 2, b + 3);
+      }
+      m.Normals.ComputeNormals();
+      return m;
+    }
+
+    static Mesh BuildTwoAdjacentQuadsWithSeamGap(double gap, bool doublePrecision)
+    {
+      var m = new Mesh();
+      if (doublePrecision) m.Vertices.UseDoublePrecisionVertices = true;
+
+      // Quad 1 spans x in [0, 1]; its right edge (1,0,0)-(1,1,0) is the seam.
+      m.Vertices.Add(new Point3d(0, 0, 0)); // 0
+      m.Vertices.Add(new Point3d(1, 0, 0)); // 1  seam corner P1
+      m.Vertices.Add(new Point3d(1, 1, 0)); // 2  seam corner P2
+      m.Vertices.Add(new Point3d(0, 1, 0)); // 3
+      m.Faces.AddFace(0, 1, 2, 3);
+
+      // Quad 2 spans x in [1, 2]; its left edge duplicates the seam but offset by `gap` along x (a
+      // coordinate of magnitude ~1, so a sub-ULP gap keeps the single-precision values identical).
+      var off = new Vector3d(gap, 0, 0);
+      m.Vertices.Add(new Point3d(1, 0, 0) + off); // 4  duplicate of P1
+      m.Vertices.Add(new Point3d(2, 0, 0));       // 5
+      m.Vertices.Add(new Point3d(2, 1, 0));       // 6
+      m.Vertices.Add(new Point3d(1, 1, 0) + off); // 7  duplicate of P2
+      m.Faces.AddFace(4, 5, 6, 7);
+
+      m.Normals.ComputeNormals();
+      return m;
+    }
+
+    static int CountCoincidentPairs(Mesh a, Mesh b, double eps)
+    {
+      Point3d[] pa = a.Vertices.ToPoint3dArray();
+      Point3d[] pb = b.Vertices.ToPoint3dArray();
+      int count = 0;
+      foreach (Point3d x in pa)
+        foreach (Point3d y in pb)
+          if (x.DistanceTo(y) < eps) count++;
+      return count;
+    }
+
+    static int DistinctPositionCount(Mesh m, double eps)
+    {
+      var reps = new List<Point3d>();
+      foreach (Point3d p in m.Vertices.ToPoint3dArray())
+      {
+        bool found = false;
+        foreach (Point3d r in reps)
+          if (p.DistanceTo(r) < eps) { found = true; break; }
+        if (!found) reps.Add(p);
+      }
+      return reps.Count;
+    }
+    #endregion
+
     internal static class MinorImplmentations
     {
       public static double IntersectionMeshRay(
