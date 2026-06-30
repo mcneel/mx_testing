@@ -469,6 +469,136 @@ namespace MxTests
     }
     #endregion
 
+    #region CreateBoolean* input-to-output index map (RH-94152)
+    // Exercise the int[][] inputMap out-parameter on Mesh.CreateBooleanUnion/Difference/
+    // Intersection/Split: for each output mesh it lists the indices of the input meshes that
+    // contributed faces to it. For the two-set ops the index space is flat-concatenated
+    // (firstSet at 0..n0-1, secondSet at n0..n0+n1-1). Inputs are closed boxes built in code.
+
+    static Mesh BoolBox(double x0, double y0, double z0, double x1, double y1, double z1)
+    {
+      return Mesh.CreateFromBox(new BoundingBox(new Point3d(x0, y0, z0), new Point3d(x1, y1, z1)), 1, 1, 1);
+    }
+
+    static MeshBooleanOptions BoolOpts() => new MeshBooleanOptions { Tolerance = 0.001 };
+
+    // Asserts the map is parallel to the results and every row is a non-empty subset of the inputs,
+    // and returns the rows as sets for further membership checks (order-independent).
+    static List<HashSet<int>> CheckedMapRows(Mesh[] results, int[][] inputMap, int inputCount)
+    {
+      Assert.That(results, Is.Not.Null);
+      Assert.That(inputMap, Is.Not.Null);
+      Assert.That(inputMap.Length, Is.EqualTo(results.Length), "one map row per output mesh");
+      var rows = new List<HashSet<int>>();
+      foreach (int[] row in inputMap)
+      {
+        Assert.That(row, Is.Not.Null);
+        Assert.That(row.Length, Is.GreaterThan(0), "every output traces to at least one input");
+        foreach (int v in row)
+          Assert.That(v, Is.InRange(0, inputCount - 1), "input index in range");
+        rows.Add(new HashSet<int>(row));
+      }
+      return rows;
+    }
+
+    [Test]
+    public void CreateBooleanUnionInputMapDisjoint()
+    {
+      SetupFixture.Prerequisites();
+      using (Mesh a = BoolBox(0, 0, 0, 1, 1, 1))
+      using (Mesh b = BoolBox(3, 0, 0, 4, 1, 1)) // disjoint from a
+      {
+        Mesh[] res = Mesh.CreateBooleanUnion(new[] { a, b }, BoolOpts(), out _, out int[][] map);
+        var rows = CheckedMapRows(res, map, 2);
+        // Each disjoint input survives as its own output, tracing to exactly one input.
+        Assert.That(rows.All(r => r.Count == 1), Is.True);
+        Assert.That(new HashSet<int>(rows.SelectMany(r => r)).SetEquals(new[] { 0, 1 }), Is.True);
+        if (res != null) foreach (var m in res) m?.Dispose();
+      }
+    }
+
+    [Test]
+    public void CreateBooleanUnionInputMapOverlap()
+    {
+      SetupFixture.Prerequisites();
+      using (Mesh a = BoolBox(0, 0, 0, 2, 2, 2))
+      using (Mesh b = BoolBox(1, 1, 1, 3, 3, 3)) // overlaps a
+      {
+        Mesh[] res = Mesh.CreateBooleanUnion(new[] { a, b }, BoolOpts(), out _, out int[][] map);
+        var rows = CheckedMapRows(res, map, 2);
+        Assert.That(res.Length, Is.EqualTo(1), "overlapping union merges to one mesh");
+        Assert.That(rows[0].SetEquals(new[] { 0, 1 }), Is.True);
+        if (res != null) foreach (var m in res) m?.Dispose();
+      }
+    }
+
+    [Test]
+    public void CreateBooleanDifferenceInputMap()
+    {
+      SetupFixture.Prerequisites();
+      using (Mesh a = BoolBox(0, 0, 0, 2, 2, 2))
+      using (Mesh b = BoolBox(1, 1, 1, 3, 3, 3)) // overlaps a; flat index for b is n0 + 0 = 1
+      {
+        Mesh[] res = Mesh.CreateBooleanDifference(new[] { a }, new[] { b }, BoolOpts(), out _, out int[][] map);
+        var rows = CheckedMapRows(res, map, 2);
+        // The minuend (0) contributed to every output; the tool (1) cut at least one piece.
+        Assert.That(rows.All(r => r.Contains(0)), Is.True);
+        Assert.That(rows.Any(r => r.Contains(1)), Is.True);
+        if (res != null) foreach (var m in res) m?.Dispose();
+      }
+    }
+
+    [Test]
+    public void CreateBooleanIntersectionInputMap()
+    {
+      SetupFixture.Prerequisites();
+      using (Mesh a = BoolBox(0, 0, 0, 2, 2, 2))
+      using (Mesh b = BoolBox(1, 1, 1, 3, 3, 3))
+      {
+        Mesh[] res = Mesh.CreateBooleanIntersection(new[] { a }, new[] { b }, BoolOpts(), out _, out int[][] map);
+        var rows = CheckedMapRows(res, map, 2);
+        // An intersection output genuinely involves both operands (flat indices 0 and n0+0=1).
+        Assert.That(rows.All(r => r.SetEquals(new[] { 0, 1 })), Is.True);
+        if (res != null) foreach (var m in res) m?.Dispose();
+      }
+    }
+
+    [Test]
+    public void CreateBooleanSplitInputMap()
+    {
+      SetupFixture.Prerequisites();
+      using (Mesh a = BoolBox(0, 0, 0, 2, 2, 2))
+      using (Mesh b = BoolBox(1, 1, 1, 3, 3, 3))
+      {
+        Mesh[] res = Mesh.CreateBooleanSplit(new[] { a }, new[] { b }, BoolOpts(), out _, out int[][] map);
+        var rows = CheckedMapRows(res, map, 2);
+        // The mesh-to-split is 0; the splitter is at flat index n0+0 = 1; together they cover both.
+        Assert.That(new HashSet<int>(rows.SelectMany(r => r)).SetEquals(new[] { 0, 1 }), Is.True);
+        if (res != null) foreach (var m in res) m?.Dispose();
+      }
+    }
+
+    [Test]
+    public void CreateBooleanDifferenceInputMapFlatConcatenationOffset()
+    {
+      SetupFixture.Prerequisites();
+      // firstSet = {A (0), B (1)}; secondSet = {C (2)}. C overlaps only B, so the second set's
+      // index must be offset by n0 = 2 to reach 2 in the flat-concatenated space.
+      using (Mesh A = BoolBox(0, 0, 0, 1, 1, 1))
+      using (Mesh B = BoolBox(10, 0, 0, 12, 2, 2))
+      using (Mesh C = BoolBox(11, 1, 1, 13, 3, 3)) // overlaps B only
+      {
+        Mesh[] res = Mesh.CreateBooleanDifference(new[] { A, B }, new[] { C }, BoolOpts(), out _, out int[][] map);
+        var rows = CheckedMapRows(res, map, 3);
+        // A is untouched -> some output maps to exactly {0}. B is cut by C (flat index 2) -> some
+        // output contains both 1 and 2, proving secondSet indices are offset by n0 = 2.
+        Assert.That(rows.Any(r => r.SetEquals(new[] { 0 })), Is.True, "A survives untouched as {0}");
+        Assert.That(rows.Any(r => r.Contains(1) && r.Contains(2)), Is.True, "B cut by C at flat index 2");
+        if (res != null) foreach (var m in res) m?.Dispose();
+      }
+    }
+    #endregion
+
     internal static class MinorImplmentations
     {
       public static double IntersectionMeshRay(
