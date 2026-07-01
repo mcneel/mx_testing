@@ -23,6 +23,24 @@ namespace MxTests
     //Mesh, etc
     internal abstract Type TargetType { get; }
 
+    // Opt-in geometric probe (set MX_NAKED): for each model, count the naked-edge loops and total
+    // naked-edge length over the result meshes. This compares the actual geometric output across code
+    // paths (e.g. default triangle tree vs MX_USE_FACE_TREE) independently of the tolerance-based area
+    // oracle - a dropped/!split face shows up as a changed loop count or naked length even when areas
+    // are only marginally off. Lines go to MX_NAKED_LOG (default %TEMP%\mx_naked.txt). Off by default.
+    internal static readonly bool g_naked =
+      !string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable("MX_NAKED"));
+
+    internal static void EmitNaked(string filename, int meshes, int loops, double nakedLen)
+    {
+      if (!g_naked) return;
+      string line = $"[MXNAKED]\t{filename}\tmeshes={meshes}\tloops={loops}\tnakedlen={nakedLen.ToString("F6", CultureInfo.InvariantCulture)}";
+      try { TestContext.Progress.WriteLine(line); } catch { /* progress stream is best-effort */ }
+      string logPath = System.Environment.GetEnvironmentVariable("MX_NAKED_LOG");
+      if (string.IsNullOrWhiteSpace(logPath)) logPath = Path.Combine(Path.GetTempPath(), "mx_naked.txt");
+      try { File.AppendAllText(logPath, line + System.Environment.NewLine); } catch { /* log file is best-effort */ }
+    }
+
     internal void ParseAndExecuteNotes(string filepath, string notesIncipit, bool twoGroups)
     {
       string filename = Path.GetFileName(filepath);
@@ -80,6 +98,20 @@ namespace MxTests
       bool rv = OperateCommandOnGeometry(
         inputMeshes, secondMeshesGroup, final_tolerance,
         out List<ResultMetrics> returned, out string log_text);
+
+      if (g_naked)
+      {
+        int meshes = 0, loops = 0; double nakedLen = 0.0;
+        if (returned != null)
+          foreach (var r in returned)
+            if (r != null && r.Mesh is Mesh m)
+            {
+              meshes++;
+              var ne = m.GetNakedEdges();
+              if (ne != null) { loops += ne.Length; foreach (var pl in ne) nakedLen += pl.Length; }
+            }
+        EmitNaked(Path.GetFileName(filepath), meshes, loops, nakedLen);
+      }
 
       try
       {
