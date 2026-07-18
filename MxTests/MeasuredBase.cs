@@ -322,7 +322,7 @@ namespace MxTests
     // oracle. Never runs during normal asserts; driven by the [Explicit] Regenerate() tests
     // and gated on the MX_REGEN environment variable.
 
-    internal enum RegenFields { Preserve, Area, Closed, Full }
+    internal enum RegenFields { Preserve, Area, Closed, Full, NoText }
 
     internal static RegenFields RegenFieldsFromEnv()
     {
@@ -331,6 +331,11 @@ namespace MxTests
         case "AREA": return RegenFields.Area;
         case "CLOSED": return RegenFields.Closed;
         case "FULL": return RegenFields.Full;
+        // NOTEXT = keep exactly the fields the current oracle asserts EXCEPT the [description] text. Used to
+        // make an oracle path-agnostic: the mesh's exact vertex/face tessellation legitimately differs between
+        // the Original and Tentative boolean engines, so the description can't match both -- but area/closed
+        // (the geometric invariants) do. Drops only the tessellation-specific text, keeps area+closed(+overlap).
+        case "NOTEXT": return RegenFields.NoText;
         default: return RegenFields.Preserve;
       }
     }
@@ -410,6 +415,7 @@ namespace MxTests
           case RegenFields.Area: wantClosed = wantOverlap = wantText = false; break;
           case RegenFields.Closed: wantClosed = canClosed; wantOverlap = oldHasOverlap && canOverlap; wantText = oldHasText && canText; break;
           case RegenFields.Full: wantClosed = canClosed; wantOverlap = canOverlap; wantText = canText; break;
+          case RegenFields.NoText: wantClosed = oldHasClosed && canClosed; wantOverlap = oldHasOverlap && canOverlap; wantText = false; break;
           default: wantClosed = oldHasClosed && canClosed; wantOverlap = oldHasOverlap && canOverlap; wantText = oldHasText && canText; break;
         }
 
