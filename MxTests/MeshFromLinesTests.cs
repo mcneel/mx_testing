@@ -180,27 +180,22 @@ namespace MxTests
       }
     }
 
-    [TestCase(0.0)]
-    [TestCase(0.31)]
-    [TestCase(1.10)]
-    [TestCase(2.70)]
-    public void LShapedPrismFromItsEdges(double rotation)
+    [Test]
+    public void LShapedPrismFromItsEdges([Range(0, SweepCases - 1)] int seed)
     {
       SetupFixture.Prerequisites();
       // RH-97201. Six sides and two L-shaped ends, so a maximum valence of four can only
-      // reach the sides and six is needed for the ends as well. The rotations take the
-      // sides away from the axes, where a wrong reading is easiest to get away with.
+      // reach the sides and six is needed for the ends as well. The sweep takes the sides
+      // away from the axes, where a wrong reading is easiest to get away with.
       var profile = new[] {
         new Point2d(0, 0), new Point2d(2, 0), new Point2d(2, 1),
         new Point2d(1, 1), new Point2d(1, 2), new Point2d(0, 2) };
 
-      var xform = Transform.Rotation(rotation, new Vector3d(1, 2, 3), new Point3d(-4, 5, 6));
-
       var corners = new List<Point3d>();
       foreach (Point2d p in profile)
       {
-        corners.Add(xform * new Point3d(p.X, p.Y, 0));
-        corners.Add(xform * new Point3d(p.X, p.Y, 1));
+        corners.Add(new Point3d(p.X, p.Y, 0));
+        corners.Add(new Point3d(p.X, p.Y, 1));
       }
 
       var pairs = new List<int>();
@@ -211,25 +206,25 @@ namespace MxTests
         pairs.AddRange(new[] { 2 * i + 1, 2 * j + 1 });  // top
         pairs.AddRange(new[] { 2 * i, 2 * i + 1 });      // side
       }
-      Curve[] lines = EdgeLines(corners, pairs.ToArray());
+      Curve[] lines = SweptEdgeLines(seed, corners, pairs.ToArray());
 
       // A quad cannot cap the six-sided profile, so only the six sides are meshed.
       using (Mesh sides = Mesh.CreateFromLines(lines, 4, 1e-6))
       {
-        Assert.That(sides, Is.Not.Null);
-        Assert.That(sides.Faces.QuadCount, Is.EqualTo(6));
-        Assert.That(sides.Faces.TriangleCount, Is.EqualTo(0));
-        Assert.That(sides.IsClosed, Is.False);
-        Assert.That(MeshArea(sides), Is.EqualTo(8.0).Within(1e-9));
+        Assert.That(sides, Is.Not.Null, $"seed {seed}");
+        Assert.That(sides.Faces.QuadCount, Is.EqualTo(6), $"seed {seed}");
+        Assert.That(sides.Faces.TriangleCount, Is.EqualTo(0), $"seed {seed}");
+        Assert.That(sides.IsClosed, Is.False, $"seed {seed}");
+        Assert.That(MeshArea(sides), Is.EqualTo(8.0).Within(1e-9), $"seed {seed}");
       }
 
       // Room for the caps: sides (8) plus both L-shaped ends (3 each).
       using (Mesh solid = Mesh.CreateFromLines(lines, 6, 1e-6))
       {
-        Assert.That(solid, Is.Not.Null);
-        Assert.That(solid.IsClosed, Is.True);
-        Assert.That(solid.Ngons.Count, Is.EqualTo(2)); // the two L-shaped ends
-        Assert.That(MeshArea(solid), Is.EqualTo(14.0).Within(1e-9));
+        Assert.That(solid, Is.Not.Null, $"seed {seed}");
+        Assert.That(solid.IsClosed, Is.True, $"seed {seed}");
+        Assert.That(solid.Ngons.Count, Is.EqualTo(2), $"seed {seed}"); // the two L-shaped ends
+        Assert.That(MeshArea(solid), Is.EqualTo(14.0).Within(1e-9), $"seed {seed}");
       }
     }
   }
