@@ -180,33 +180,75 @@ namespace MxTests
       }
     }
 
-    [Test]
-    public void LShapedPrismFromItsEdges([Range(0, SweepCases - 1)] int seed)
+    // An L-shaped prism: a six-sided profile carried one unit in Z.
+    static readonly Point2d[] LPrismProfile = {
+      new Point2d(0, 0), new Point2d(2, 0), new Point2d(2, 1),
+      new Point2d(1, 1), new Point2d(1, 2), new Point2d(0, 2) };
+
+    static List<Point3d> LPrismCorners(Transform xform)
     {
-      SetupFixture.Prerequisites();
-      // RH-97201. Six sides and two L-shaped ends, so a maximum valence of four can only
-      // reach the sides and six is needed for the ends as well. The sweep takes the sides
-      // away from the axes, where a wrong reading is easiest to get away with.
-      var profile = new[] {
-        new Point2d(0, 0), new Point2d(2, 0), new Point2d(2, 1),
-        new Point2d(1, 1), new Point2d(1, 2), new Point2d(0, 2) };
-
       var corners = new List<Point3d>();
-      foreach (Point2d p in profile)
+      foreach (Point2d p in LPrismProfile)
       {
-        corners.Add(new Point3d(p.X, p.Y, 0));
-        corners.Add(new Point3d(p.X, p.Y, 1));
+        corners.Add(xform * new Point3d(p.X, p.Y, 0));
+        corners.Add(xform * new Point3d(p.X, p.Y, 1));
       }
+      return corners;
+    }
 
+    static int[] LPrismPairs()
+    {
       var pairs = new List<int>();
-      for (int i = 0; i < profile.Length; i++)
+      for (int i = 0; i < LPrismProfile.Length; i++)
       {
-        int j = (i + 1) % profile.Length;
+        int j = (i + 1) % LPrismProfile.Length;
         pairs.AddRange(new[] { 2 * i, 2 * j });          // bottom
         pairs.AddRange(new[] { 2 * i + 1, 2 * j + 1 });  // top
         pairs.AddRange(new[] { 2 * i, 2 * i + 1 });      // side
       }
-      Curve[] lines = SweptEdgeLines(seed, corners, pairs.ToArray());
+      return pairs.ToArray();
+    }
+
+    [TestCase(45.0)]
+    [TestCase(135.0)]
+    [TestCase(225.0)]
+    [TestCase(315.0)]
+    public void LShapedPrismAtTiedAngles(double degrees)
+    {
+      SetupFixture.Prerequisites();
+      // RH-97282. At these angles about Z the profile edges land on the diagonals the sweep
+      // measures against, so candidate edges tie exactly and the walk in the plane of a face
+      // has to break the tie. The random sweep in LShapedPrismFromItsEdges cannot reach an
+      // exact tie, so these angles are named here. Rotating instead by a hundredth of a
+      // degree either side, or moving the result, hid the answer by spoiling the tie.
+      Curve[] lines = EdgeLines(
+        LPrismCorners(Transform.Rotation(degrees * Math.PI / 180.0, new Vector3d(0, 0, 1), Point3d.Origin)),
+        LPrismPairs());
+
+      using (Mesh sides = Mesh.CreateFromLines(lines, 4, 1e-6))
+      {
+        Assert.That(sides, Is.Not.Null, $"{degrees} degrees");
+        Assert.That(sides.Faces.QuadCount, Is.EqualTo(6), $"{degrees} degrees");
+        Assert.That(MeshArea(sides), Is.EqualTo(8.0).Within(1e-9), $"{degrees} degrees");
+      }
+
+      using (Mesh solid = Mesh.CreateFromLines(lines, 6, 1e-6))
+      {
+        Assert.That(solid, Is.Not.Null, $"{degrees} degrees");
+        Assert.That(solid.IsClosed, Is.True, $"{degrees} degrees");
+        Assert.That(solid.Ngons.Count, Is.EqualTo(2), $"{degrees} degrees");
+        Assert.That(MeshArea(solid), Is.EqualTo(14.0).Within(1e-9), $"{degrees} degrees");
+      }
+    }
+
+    [Test]
+    public void LShapedPrismFromItsEdges([Range(0, SweepCases - 1)] int seed)
+    {
+      SetupFixture.Prerequisites();
+      // RH-97201, RH-97281. Six sides and two L-shaped ends, so a maximum valence of four can
+      // only reach the sides and six is needed for the ends as well. The sweep takes the sides
+      // away from the axes, where a wrong reading is easiest to get away with.
+      Curve[] lines = SweptEdgeLines(seed, LPrismCorners(Transform.Identity), LPrismPairs());
 
       // A quad cannot cap the six-sided profile, so only the six sides are meshed.
       using (Mesh sides = Mesh.CreateFromLines(lines, 4, 1e-6))
