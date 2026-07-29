@@ -33,6 +33,9 @@
 	<ModelDirectory Fixture="Windings" Location="..\..\..\..\models\Windings\" Enabled="true" />
 	<ModelDirectory Fixture="Windings" Location="..\..\..\..\private_models\models\Windings\" Optional="true" Enabled="true" />
 
+    <ModelDirectory Fixture="MeshFromLines" Location="..\..\..\..\models\MeshFromLines\" Enabled="true" />
+    <ModelDirectory Fixture="MeshFromLines" Location="..\..\..\..\private_models\models\MeshFromLines\" Optional="true" Enabled="true" />
+
     <ModelDirectory Fixture="SurfaceIntersect" Location="..\..\..\..\models\SurfaceIntersect\" Enabled="true" />
     <ModelDirectory Fixture="SurfaceIntersect" Location="..\..\..\..\private_models\models\SurfaceIntersect\" Optional="true" Enabled="true" />
   </ModelDirectories>
