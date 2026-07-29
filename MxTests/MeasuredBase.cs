@@ -437,7 +437,16 @@ namespace MxTests
         if (!dryRun)
         {
           file.Notes.Notes = newNotes;
-          if (!file.Write(filepath, new File3dmWriteOptions()))
+          // Written back as a Rhino 6 file rather than the WIP version the writer defaults to,
+          // so a regenerated model stays openable by the Rhinos these samples come from.
+          // Adding SaveUserData = false shrinks a line-heavy model by around six times, since
+          // the writer otherwise hangs the five mesh modifiers (displacement, edge softening,
+          // thickening, curve piping, shut lining) off every object, 1.5 KB apiece of nothing
+          // on geometry that cannot carry them. It is off here because it strips ALL user data,
+          // document and per-object alike, and not every model can spare it. Reinstate it while
+          // regenerating a model that holds nothing but geometry:
+          //   new File3dmWriteOptions { Version = 6, SaveUserData = false }
+          if (!file.Write(filepath, new File3dmWriteOptions { Version = 6 }))
             Assert.Fail($"[regen] failed to write '{filepath}'.");
         }
         return true;
