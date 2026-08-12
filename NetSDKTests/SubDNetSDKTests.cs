@@ -2,6 +2,7 @@ using NUnit.Framework;
 using Rhino.Geometry;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace NetSDKTests
 {
@@ -736,6 +737,88 @@ namespace NetSDKTests
       Line after = edge.ControlNetLine;
       Assert.That((after.From - line.From).IsTiny(), Is.True);
       Assert.That((after.To - line.To).IsTiny(), Is.True);
+    }
+
+    #endregion
+
+    #region Expert path, reached by reflection
+
+    // ON_SubDEdge::SetSharpnessForExperts writes sharpness straight onto an edge and skips
+    // the neighbor and vertex updates that SubD.SetEdgeSharpness performs. It is interop
+    // only, deliberately not public RhinoCommon API, so this test reaches it by reflection.
+    //
+    // What it documents is the hazard: after the expert write, the edge reports the new
+    // sharpness but the cached subdivision and surface points are stale, and stay stale
+    // until they are explicitly cleared. That is exactly why SubDEdge.Sharpness routes
+    // through the parent SubD instead of calling this.
+
+    static void SetSharpnessForExperts(SubDEdge edge, SubDEdgeSharpness sharpness)
+    {
+      const BindingFlags instance_flags = BindingFlags.NonPublic | BindingFlags.Instance;
+      const BindingFlags static_flags = BindingFlags.NonPublic | BindingFlags.Static;
+
+      // The edge's native pointer. Note this is an IntPtr: casting it to int truncates on
+      // 64-bit, which is where SubD components actually live.
+      MethodInfo non_const_pointer = typeof(SubDEdge).GetMethod("NonConstPointer", instance_flags);
+      Assert.That(non_const_pointer, Is.Not.Null, "SubDEdge.NonConstPointer not found");
+      IntPtr ptr_edge = (IntPtr)non_const_pointer.Invoke(edge, null);
+      Assert.That(ptr_edge, Is.Not.EqualTo(IntPtr.Zero));
+
+      // UnsafeNativeMethods is internal and has no namespace; get it out of the assembly a
+      // public type lives in rather than hardcoding an assembly identity.
+      Type unsafe_native_methods = typeof(SubD).Assembly.GetType("UnsafeNativeMethods");
+      Assert.That(unsafe_native_methods, Is.Not.Null, "UnsafeNativeMethods not found");
+
+      MethodInfo setter = unsafe_native_methods.GetMethod("ON_SubDEdge_SetSharpnessForExperts", static_flags);
+      Assert.That(setter, Is.Not.Null, "ON_SubDEdge_SetSharpnessForExperts not found");
+
+      // SubDEdgeSharpness is a blittable struct passed by value, so it goes through
+      // reflection as a boxed argument with no pointer of its own.
+      setter.Invoke(null, new object[] { ptr_edge, sharpness });
+    }
+
+    [Test]
+    public void ExpertSharpnessWriteLeavesCachedPointsStale()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+      box.UpdateSurfaceMeshCache(true);
+
+      SubDEdge edge = box.Edges.First(e => e.FaceCount == 2);
+      SubDVertex vertex = edge.VertexFrom;
+      Point3d before = vertex.SurfacePoint();
+      uint errors_before = SubD.ErrorCount;
+
+      var sharpness = new SubDEdgeSharpness(0.5, 1.5);
+      SetSharpnessForExperts(edge, sharpness);
+
+      // The edge data itself did change.
+      Assert.That(edge.Sharpness, Is.EqualTo(sharpness));
+      Assert.That(edge.IsSharp, Is.True);
+
+      // ...but nothing invalidated the cache, so the surface point is still the old one.
+      Assert.That(vertex.SurfacePoint().DistanceTo(before), Is.LessThan(kTol),
+        "the expert write should not have invalidated any cached point");
+
+      // Clearing the neighborhood and rebuilding is what makes the change visible. Rank 1
+      // is not always enough, which is why ClearSavedSubdivisionPoints takes a flag.
+      vertex.ClearSavedSubdivisionPoints(true);
+      edge.ClearSavedSubdivisionPoints(true);
+      box.UpdateSurfaceMeshCache(false);
+
+      Assert.That(vertex.SurfacePoint().DistanceTo(before), Is.GreaterThan(kTol),
+        "after clearing the cache the sharpened surface point should have moved");
+
+      // The supported path gets there without the manual cache handling.
+      SubD other = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+      other.UpdateSurfaceMeshCache(true);
+      SubDEdge other_edge = other.Edges.First(e => e.Id == edge.Id);
+      Point3d other_before = other_edge.VertexFrom.SurfacePoint();
+      other_edge.Sharpness = sharpness;
+      other.UpdateSurfaceMeshCache(false);
+      Assert.That(other_edge.VertexFrom.SurfacePoint().DistanceTo(other_before), Is.GreaterThan(kTol));
+
+      // Neither route should have tripped an internal error.
+      Assert.That(SubD.ErrorCount, Is.EqualTo(errors_before));
     }
 
     #endregion
