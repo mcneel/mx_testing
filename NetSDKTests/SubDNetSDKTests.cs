@@ -525,8 +525,7 @@ namespace NetSDKTests
         // makes them usable directly with SubD.Faces.Add.
         var edges = chain.Edges;
         Assert.That(edges.All(e => null != e), Is.True);
-        for (int i = 0; i + 1 < edges.Length; i++)
-          Assert.That(edges[i].VertexTo, Is.EqualTo(edges[i + 1].VertexFrom));
+        AssertChainIsConnected(edges);
       }
     }
 
@@ -546,8 +545,7 @@ namespace NetSDKTests
       Assert.That(chains.Length, Is.EqualTo(1));
       Assert.That(chains[0].Length, Is.EqualTo(loop.Length));
       // Sorted chains are connected end to end.
-      for (int i = 0; i + 1 < chains[0].Length; i++)
-        Assert.That(chains[0][i].VertexTo, Is.EqualTo(chains[0][i + 1].VertexFrom));
+      AssertChainIsConnected(chains[0]);
 
       Assert.That(SubDEdgeChain.SortEdgesIntoEdgeChains(box, new SubDEdge[0]), Is.Empty);
       Assert.That(() => SubDEdgeChain.SortEdgesIntoEdgeChains(null, loop),
@@ -563,6 +561,18 @@ namespace NetSDKTests
       for (int i = 0; i < loop.Length; i++)
         loop[i] = face.EdgeAt(i);
       return loop;
+    }
+
+    // Consecutive chain edges meet end to start, in the direction the chain runs through
+    // them. This has to use the Relative accessors: VertexFrom and VertexTo ignore
+    // ComponentDirection and so only line up on chains that happen to run forwards.
+    static void AssertChainIsConnected(SubDEdge[] edges, string context = null)
+    {
+      for (int i = 0; i + 1 < edges.Length; i++)
+      {
+        Assert.That(edges[i].RelativeVertexTo, Is.EqualTo(edges[i + 1].RelativeVertexFrom),
+          context ?? "chain edge " + i + " should meet edge " + (i + 1));
+      }
     }
 
     static uint[] EdgeIds(SubDEdgeChain chain)
@@ -650,13 +660,15 @@ namespace NetSDKTests
 
         // Consecutive chain edges meet at a shared vertex.
         var edges = chain.Edges;
-        Assert.That(edges[0].VertexTo, Is.EqualTo(edges[1].VertexFrom));
+        AssertChainIsConnected(edges);
 
         // An edge that does not touch either end of the chain cannot be appended, so the
         // chain is left as it was.
+        uint chain_start = edges[0].RelativeVertexFrom.Id;
+        uint chain_end = edges[edges.Length - 1].RelativeVertexTo.Id;
         SubDEdge disconnected = box.Edges.First(e =>
-          e.VertexFrom.Id != edges[0].VertexFrom.Id && e.VertexFrom.Id != edges[1].VertexTo.Id &&
-          e.VertexTo.Id != edges[0].VertexFrom.Id && e.VertexTo.Id != edges[1].VertexTo.Id);
+          e.VertexFrom.Id != chain_start && e.VertexFrom.Id != chain_end &&
+          e.VertexTo.Id != chain_start && e.VertexTo.Id != chain_end);
         uint before = chain.EdgeCount;
         Assert.That(chain.AddEdge(disconnected), Is.EqualTo(0));
         Assert.That(chain.EdgeCount, Is.EqualTo(before));
@@ -776,40 +788,50 @@ namespace NetSDKTests
       }
     }
 
+    // Note: the ChainDirection and SubDChainType values are deliberately looped over here
+    // rather than passed as [TestCase] arguments. NUnit resolves attribute arguments while
+    // building the test, before the fixture has set up assembly resolution, so a RhinoCommon
+    // enum in a [TestCase] fails with FileNotFoundException on RhinoCommon.
     [Test]
-    [TestCase(ChainDirection.Next)]
-    [TestCase(ChainDirection.Previous)]
-    [TestCase(ChainDirection.Both)]
-    public void ChainGrowsInEachDirection(ChainDirection direction)
+    public void ChainGrowsInEachDirection()
     {
-      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
-      using (var chain = new SubDEdgeChain(box, box.Edges.First()))
+      var directions = new[] { ChainDirection.Next, ChainDirection.Previous, ChainDirection.Both };
+      foreach (var direction in directions)
       {
-        uint added = chain.AddAllNeighbors(direction, SubDChainType.MixedTag);
-        Assert.That(added, Is.GreaterThan(0), "a smooth box grid should chain in any direction");
-        Assert.That(chain.EdgeCount, Is.EqualTo(1 + added));
+        SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+        using (var chain = new SubDEdgeChain(box, box.Edges.First()))
+        {
+          uint added = chain.AddAllNeighbors(direction, SubDChainType.MixedTag);
+          Assert.That(added, Is.GreaterThan(0), direction + ": a smooth box grid should chain in any direction");
+          Assert.That(chain.EdgeCount, Is.EqualTo(1 + added), direction.ToString());
+        }
       }
     }
 
     [Test]
-    [TestCase(SubDChainType.MixedTag)]
-    [TestCase(SubDChainType.EqualEdgeTag)]
-    [TestCase(SubDChainType.EqualEdgeAndVertexTag)]
-    [TestCase(SubDChainType.EqualEdgeTagAndOrdinary)]
-    public void ChainTypeConstrainsGrowth(SubDChainType chainType)
+    public void ChainTypeConstrainsGrowth()
     {
-      // A creased box has crease edges and corner vertices, so the stricter chain types
-      // have something to refuse.
-      SubD box = UnitBox(SubDEdgeSharpness.CreaseValue, 4);
-      using (var chain = new SubDEdgeChain(box, box.Edges.First()))
+      var types = new[]
       {
-        uint added = chain.AddAllNeighbors(ChainDirection.Both, chainType);
-        Assert.That(chain.EdgeCount, Is.EqualTo(1 + added));
+        SubDChainType.MixedTag,
+        SubDChainType.EqualEdgeTag,
+        SubDChainType.EqualEdgeAndVertexTag,
+        SubDChainType.EqualEdgeTagAndOrdinary
+      };
 
-        // Whatever the constraint, the result is still a connected chain.
-        var edges = chain.Edges;
-        for (int i = 0; i + 1 < edges.Length; i++)
-          Assert.That(edges[i].VertexTo, Is.EqualTo(edges[i + 1].VertexFrom));
+      foreach (var chainType in types)
+      {
+        // A creased box has crease edges and corner vertices, so the stricter chain types
+        // have something to refuse.
+        SubD box = UnitBox(SubDEdgeSharpness.CreaseValue, 4);
+        using (var chain = new SubDEdgeChain(box, box.Edges.First()))
+        {
+          uint added = chain.AddAllNeighbors(ChainDirection.Both, chainType);
+          Assert.That(chain.EdgeCount, Is.EqualTo(1 + added), chainType.ToString());
+
+          // Whatever the constraint, the result is still a connected chain.
+          AssertChainIsConnected(chain.Edges, chainType.ToString());
+        }
       }
     }
 
