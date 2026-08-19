@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Rhino.Geometry;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -553,6 +554,310 @@ namespace NetSDKTests
         Throws.TypeOf<ArgumentNullException>());
       Assert.That(() => SubDEdgeChain.SortEdgesIntoEdgeChains(box, null),
         Throws.TypeOf<ArgumentNullException>());
+    }
+
+    // Returns the edges bounding one face, in boundary order.
+    static SubDEdge[] FaceLoop(SubDFace face)
+    {
+      var loop = new SubDEdge[face.EdgeCount];
+      for (int i = 0; i < loop.Length; i++)
+        loop[i] = face.EdgeAt(i);
+      return loop;
+    }
+
+    static uint[] EdgeIds(SubDEdgeChain chain)
+    {
+      var edges = chain.Edges;
+      var ids = new uint[edges.Length];
+      for (int i = 0; i < edges.Length; i++)
+        ids[i] = edges[i].Id;
+      return ids;
+    }
+
+    [Test]
+    public void BeginRestartsTheChain()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+      SubDEdge first = box.Edges.First();
+      SubDEdge other = box.Edges.First(e => e.Id != first.Id);
+
+      using (var chain = new SubDEdgeChain(box, first))
+      {
+        chain.AddAllNeighbors(ChainDirection.Both, SubDChainType.MixedTag);
+        Assert.That(chain.EdgeCount, Is.GreaterThan(1));
+
+        // Begin clears whatever was there and restarts from one edge.
+        Assert.That(chain.Begin(other), Is.EqualTo(1));
+        Assert.That(chain.EdgeCount, Is.EqualTo(1));
+        Assert.That(chain.EdgeAt(0), Is.EqualTo(other));
+
+        Assert.That(() => chain.Begin(null), Throws.TypeOf<ArgumentNullException>());
+      }
+    }
+
+    [Test]
+    public void AddOneNeighborGrowsOneStepAtATime()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+
+      using (var chain = new SubDEdgeChain(box, box.Edges.First()))
+      {
+        // One end at a time: at most one edge per call.
+        uint added = chain.AddOneNeighbor(ChainDirection.Next, SubDChainType.MixedTag);
+        Assert.That(added, Is.LessThanOrEqualTo(1));
+        Assert.That(chain.EdgeCount, Is.EqualTo(1 + added));
+
+        // Both ends at once: at most two.
+        uint before = chain.EdgeCount;
+        uint added_both = chain.AddOneNeighbor(ChainDirection.Both, SubDChainType.MixedTag);
+        Assert.That(added_both, Is.LessThanOrEqualTo(2));
+        Assert.That(chain.EdgeCount, Is.EqualTo(before + added_both));
+
+        // Growing one step at a time never reaches further than growing all the way.
+        uint stepwise = chain.EdgeCount;
+        chain.AddAllNeighbors(ChainDirection.Both, SubDChainType.MixedTag);
+        Assert.That(chain.EdgeCount, Is.GreaterThanOrEqualTo(stepwise));
+
+        // Once it cannot grow any further, adding more is a no-op.
+        Assert.That(chain.AddAllNeighbors(ChainDirection.Both, SubDChainType.MixedTag), Is.EqualTo(0));
+        Assert.That(chain.AddOneNeighbor(ChainDirection.Both, SubDChainType.MixedTag), Is.EqualTo(0));
+      }
+    }
+
+    [Test]
+    public void AddEdgeAppendsConnectedEdges()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+      SubDEdge[] loop = FaceLoop(box.Faces.First());
+
+      // AddEdge cannot start a chain: on an empty one it does nothing.
+      using (var empty = new SubDEdgeChain(box))
+      {
+        Assert.That(empty.AddEdge(loop[0]), Is.EqualTo(0));
+        Assert.That(empty.EdgeCount, Is.EqualTo(0));
+      }
+
+      using (var chain = new SubDEdgeChain(box, loop[0]))
+      {
+        // Building a chain by hand, edge by edge, along a face boundary. AddEdge returns
+        // how many edges it added, not the resulting length.
+        Assert.That(chain.AddEdge(loop[1]), Is.EqualTo(1));
+        Assert.That(chain.EdgeCount, Is.EqualTo(2));
+
+        // The same edge twice is refused.
+        Assert.That(chain.AddEdge(loop[1]), Is.EqualTo(0));
+        Assert.That(chain.EdgeCount, Is.EqualTo(2));
+
+        // Consecutive chain edges meet at a shared vertex.
+        var edges = chain.Edges;
+        Assert.That(edges[0].VertexTo, Is.EqualTo(edges[1].VertexFrom));
+
+        // An edge that does not touch either end of the chain cannot be appended, so the
+        // chain is left as it was.
+        SubDEdge disconnected = box.Edges.First(e =>
+          e.VertexFrom.Id != edges[0].VertexFrom.Id && e.VertexFrom.Id != edges[1].VertexTo.Id &&
+          e.VertexTo.Id != edges[0].VertexFrom.Id && e.VertexTo.Id != edges[1].VertexTo.Id);
+        uint before = chain.EdgeCount;
+        Assert.That(chain.AddEdge(disconnected), Is.EqualTo(0));
+        Assert.That(chain.EdgeCount, Is.EqualTo(before));
+      }
+    }
+
+    [Test]
+    public void TrimToRangeKeepsTheRunBetweenTwoEdges()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+
+      using (var chain = new SubDEdgeChain(box, box.Edges.First()))
+      {
+        chain.AddAllNeighbors(ChainDirection.Both, SubDChainType.MixedTag);
+        uint before = chain.EdgeCount;
+        Assert.That(before, Is.GreaterThan(3));
+
+        // Trimming to a single edge keeps that edge and drops everything else. Note this
+        // is the opposite of what the underlying ON_SubDEdgeChain::RemoveEdges name
+        // suggests: the range given is what survives.
+        SubDEdge keep = chain.EdgeAt(1);
+        uint removed = chain.TrimToRange(keep, keep);
+        Assert.That(removed, Is.EqualTo(before - 1));
+        Assert.That(chain.EdgeCount, Is.EqualTo(1));
+        Assert.That(chain.EdgeAt(0).Id, Is.EqualTo(keep.Id));
+      }
+
+      using (var chain = new SubDEdgeChain(box, box.Edges.First()))
+      {
+        chain.AddAllNeighbors(ChainDirection.Both, SubDChainType.MixedTag);
+        uint before = chain.EdgeCount;
+
+        // Null means "keep the current end", so null for both trims nothing at all.
+        Assert.That(chain.TrimToRange(null, null), Is.EqualTo(0));
+        Assert.That(chain.EdgeCount, Is.EqualTo(before));
+
+        // Dropping just the tail: keep from the current start up to the second edge.
+        SubDEdge second = chain.EdgeAt(1);
+        Assert.That(chain.TrimToRange(null, second), Is.EqualTo(before - 2));
+        Assert.That(chain.EdgeCount, Is.EqualTo(2));
+
+        // Clear is how you actually empty a chain.
+        chain.Clear();
+        Assert.That(chain.EdgeCount, Is.EqualTo(0));
+      }
+    }
+
+    [Test]
+    public void ReverseFlipsOrderAndIsAnInvolution()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+      SubDEdge[] loop = FaceLoop(box.Faces.First());
+
+      // An open chain of three edges, so reversing cannot be confused with rotating a
+      // closed loop.
+      using (var chain = new SubDEdgeChain(box, loop[0]))
+      {
+        Assert.That(chain.AddEdge(loop[1]), Is.EqualTo(1));
+        Assert.That(chain.AddEdge(loop[2]), Is.EqualTo(1));
+        Assert.That(chain.EdgeCount, Is.EqualTo(3));
+        Assert.That(chain.IsClosedLoop, Is.False);
+
+        uint[] forward = EdgeIds(chain);
+        var forward_directions = chain.Edges.Select(e => e.ComponentDirection).ToArray();
+
+        chain.Reverse();
+        uint[] backward = EdgeIds(chain);
+        Assert.That(backward, Is.EqualTo(forward.Reverse().ToArray()));
+
+        // Reversing the chain also reverses how it traverses each edge.
+        var backward_directions = chain.Edges.Select(e => e.ComponentDirection).ToArray();
+        for (int i = 0; i < forward.Length; i++)
+          Assert.That(backward_directions[i], Is.Not.EqualTo(forward_directions[forward.Length - 1 - i]));
+
+        // Reversing twice gets back to the start.
+        chain.Reverse();
+        Assert.That(EdgeIds(chain), Is.EqualTo(forward));
+      }
+    }
+
+    [Test]
+    public void FaceBoundaryIsAClosedLoop()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+      SubDFace face = box.Faces.First();
+      SubDEdge[] loop = FaceLoop(face);
+
+      using (var chain = new SubDEdgeChain(box, loop[0]))
+      {
+        for (int i = 1; i < loop.Length; i++)
+          Assert.That(chain.AddEdge(loop[i]), Is.EqualTo(1), "face boundary edges should chain");
+
+        Assert.That(chain.EdgeCount, Is.EqualTo((uint)loop.Length));
+        Assert.That(chain.IsClosedLoop, Is.True);
+
+        // A closed loop of N edges has N vertices, not N+1, so index N is past the end.
+        for (int i = 0; i < loop.Length; i++)
+          Assert.That(chain.VertexAt(i), Is.Not.Null);
+
+        // Whether this particular loop counts as convex is a geometry question, so only
+        // the relationship between the two overloads is asserted: strictly convex is a
+        // stronger condition than convex.
+        if (chain.IsConvexLoop(true))
+          Assert.That(chain.IsConvexLoop(false), Is.True);
+      }
+    }
+
+    [Test]
+    public void OpenChainIsNeverAConvexLoop()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+      using (var chain = new SubDEdgeChain(box, box.Edges.First()))
+      {
+        Assert.That(chain.IsClosedLoop, Is.False);
+        Assert.That(chain.IsConvexLoop(false), Is.False);
+        Assert.That(chain.IsConvexLoop(true), Is.False);
+      }
+    }
+
+    [Test]
+    [TestCase(ChainDirection.Next)]
+    [TestCase(ChainDirection.Previous)]
+    [TestCase(ChainDirection.Both)]
+    public void ChainGrowsInEachDirection(ChainDirection direction)
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+      using (var chain = new SubDEdgeChain(box, box.Edges.First()))
+      {
+        uint added = chain.AddAllNeighbors(direction, SubDChainType.MixedTag);
+        Assert.That(added, Is.GreaterThan(0), "a smooth box grid should chain in any direction");
+        Assert.That(chain.EdgeCount, Is.EqualTo(1 + added));
+      }
+    }
+
+    [Test]
+    [TestCase(SubDChainType.MixedTag)]
+    [TestCase(SubDChainType.EqualEdgeTag)]
+    [TestCase(SubDChainType.EqualEdgeAndVertexTag)]
+    [TestCase(SubDChainType.EqualEdgeTagAndOrdinary)]
+    public void ChainTypeConstrainsGrowth(SubDChainType chainType)
+    {
+      // A creased box has crease edges and corner vertices, so the stricter chain types
+      // have something to refuse.
+      SubD box = UnitBox(SubDEdgeSharpness.CreaseValue, 4);
+      using (var chain = new SubDEdgeChain(box, box.Edges.First()))
+      {
+        uint added = chain.AddAllNeighbors(ChainDirection.Both, chainType);
+        Assert.That(chain.EdgeCount, Is.EqualTo(1 + added));
+
+        // Whatever the constraint, the result is still a connected chain.
+        var edges = chain.Edges;
+        for (int i = 0; i + 1 < edges.Length; i++)
+          Assert.That(edges[i].VertexTo, Is.EqualTo(edges[i + 1].VertexFrom));
+      }
+    }
+
+    [Test]
+    public void ChainSurvivesRepeatedDispose()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 1);
+      var chain = new SubDEdgeChain(box, box.Edges.First());
+      Assert.That(chain.EdgeCount, Is.EqualTo(1));
+      chain.Dispose();
+      // Disposing twice must not throw or double free.
+      Assert.That(() => chain.Dispose(), Throws.Nothing);
+    }
+
+    [Test]
+    public void SortEdgesIntoChainsSplitsDisconnectedRuns()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+
+      // Two face boundaries far enough apart to have no shared vertex give two chains.
+      SubDFace[] faces = box.Faces.ToArray();
+      SubDEdge[] first = FaceLoop(faces[0]);
+      SubDEdge[] second = FaceLoop(faces[faces.Length - 1]);
+
+      var ids = new HashSet<uint>();
+      foreach (var e in first) ids.Add(e.Id);
+      bool disjoint = second.All(e => !ids.Contains(e.Id));
+
+      var input = new List<SubDEdge>(first);
+      input.AddRange(second);
+      var chains = SubDEdgeChain.SortEdgesIntoEdgeChains(box, input);
+
+      Assert.That(chains, Is.Not.Null);
+      if (disjoint)
+        Assert.That(chains.Length, Is.GreaterThanOrEqualTo(2));
+
+      // Every input edge lands in exactly one chain, and no chain is empty.
+      int total = 0;
+      foreach (var c in chains)
+      {
+        Assert.That(c.Length, Is.GreaterThan(0));
+        total += c.Length;
+      }
+      Assert.That(total, Is.EqualTo(input.Count));
+
+      // A null entry in the input is an error, not a silently dropped edge.
+      Assert.That(() => SubDEdgeChain.SortEdgesIntoEdgeChains(box, new SubDEdge[] { first[0], null }),
+        Throws.TypeOf<ArgumentException>());
     }
 
     [Test]
