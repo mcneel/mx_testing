@@ -788,23 +788,61 @@ namespace NetSDKTests
       }
     }
 
-    // Note: the ChainDirection and SubDChainType values are deliberately looped over here
-    // rather than passed as [TestCase] arguments. NUnit resolves attribute arguments while
-    // building the test, before the fixture has set up assembly resolution, so a RhinoCommon
-    // enum in a [TestCase] fails with FileNotFoundException on RhinoCommon.
+    // Note: the ChainDirection and SubDChainType values are deliberately looped over inside
+    // these tests rather than passed as [TestCase] arguments. NUnit resolves attribute
+    // arguments while building the test, before the fixture has set up assembly resolution,
+    // so a RhinoCommon enum in a [TestCase] fails with FileNotFoundException on RhinoCommon.
+
+    // A chain seeded with Begin holds its edge in natural orientation, so Previous extends
+    // past VertexFrom and Next extends past VertexTo.
     [Test]
     public void ChainGrowsInEachDirection()
     {
-      var directions = new[] { ChainDirection.Next, ChainDirection.Previous, ChainDirection.Both };
-      foreach (var direction in directions)
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+
+      // An edge with an ordinary, valence 4 vertex at both ends. Chaining stops at
+      // extraordinary vertices, so an edge touching a box corner cannot grow that way and
+      // would say nothing about whether the direction argument is honoured.
+      SubDEdge interior = box.Edges.First(e =>
+        e.VertexFrom.EdgeCount == 4 && e.VertexTo.EdgeCount == 4);
+
+      uint next, previous, both;
+      using (var chain = new SubDEdgeChain(box, interior))
+        next = chain.AddAllNeighbors(ChainDirection.Next, SubDChainType.MixedTag);
+      using (var chain = new SubDEdgeChain(box, interior))
+        previous = chain.AddAllNeighbors(ChainDirection.Previous, SubDChainType.MixedTag);
+      using (var chain = new SubDEdgeChain(box, interior))
+        both = chain.AddAllNeighbors(ChainDirection.Both, SubDChainType.MixedTag);
+
+      Assert.That(next, Is.GreaterThan(0), "Next");
+      Assert.That(previous, Is.GreaterThan(0), "Previous");
+
+      // Growing both ends reaches at least as far as either end alone, and never further
+      // than the two of them combined. It can be less than the sum, because a chain that
+      // closes into a loop stops once it meets itself.
+      Assert.That(both, Is.GreaterThanOrEqualTo(Math.Max(next, previous)));
+      Assert.That(both, Is.LessThanOrEqualTo(next + previous));
+    }
+
+    [Test]
+    public void ChainStopsAtExtraordinaryVertices()
+    {
+      SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
+
+      // The eight corners of a SubD box are valence 3, so there is no unique way to carry
+      // a chain through them. Take an edge with a corner behind it and an ordinary vertex
+      // ahead of it: it can only grow forwards.
+      SubDEdge at_corner = box.Edges.First(e =>
+        e.VertexFrom.EdgeCount == 3 && e.VertexTo.EdgeCount == 4);
+
+      using (var chain = new SubDEdgeChain(box, at_corner))
       {
-        SubD box = UnitBox(SubDEdgeSharpness.SmoothValue, 4);
-        using (var chain = new SubDEdgeChain(box, box.Edges.First()))
-        {
-          uint added = chain.AddAllNeighbors(direction, SubDChainType.MixedTag);
-          Assert.That(added, Is.GreaterThan(0), direction + ": a smooth box grid should chain in any direction");
-          Assert.That(chain.EdgeCount, Is.EqualTo(1 + added), direction.ToString());
-        }
+        Assert.That(chain.AddAllNeighbors(ChainDirection.Previous, SubDChainType.MixedTag),
+          Is.EqualTo(0), "a chain cannot pass through a valence 3 vertex");
+        Assert.That(chain.EdgeCount, Is.EqualTo(1));
+
+        Assert.That(chain.AddAllNeighbors(ChainDirection.Next, SubDChainType.MixedTag),
+          Is.GreaterThan(0), "the other end is ordinary, so the chain grows there");
       }
     }
 
