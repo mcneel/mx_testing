@@ -383,6 +383,115 @@ namespace NetSDKTests
         "There is no curvature at an extraordinary vertex.");
     }
 
+    /// <summary>
+    /// SurfaceCurvature.CreateFromSubD is the SubD counterpart of
+    /// CreateFromSurface. It exists so a consumer that needs a SurfaceCurvature
+    /// does not have to build a proxy brep first, and it carries the principal
+    /// directions as well as the two curvature values.
+    /// </summary>
+    [Test]
+    public void SurfaceCurvatureFromSubDMatchesTheCurvatureValues()
+    {
+      var subd = MakeMeshBoxSubD();
+
+      // Somewhere ordinary, and somewhere inside an extraordinary corner quad.
+      var samples = new List<Point3d>
+      {
+        new Point3d(0.0, 0.0, 12.0),
+        new Point3d(5.25, 4.7, -4.80)
+      };
+
+      foreach (var sample in samples)
+      {
+        Assert.That(subd.ClosestPoint(sample, out var closest, out var parameter), Is.True);
+        Assert.That(subd.EvaluateCurvature(parameter, out var point, out var normal, out var k1, out var k2), Is.True,
+          $"EvaluateCurvature failed at {sample}.");
+
+        using (var curvature = SurfaceCurvature.CreateFromSubD(subd, parameter))
+        {
+          Assert.That(curvature, Is.Not.Null, $"CreateFromSubD failed at {sample}.");
+
+          Assert.That(curvature.Kappa(0), Is.EqualTo(k1).Within(Tol), "kappa1 disagrees.");
+          Assert.That(curvature.Kappa(1), Is.EqualTo(k2).Within(Tol), "kappa2 disagrees.");
+          Assert.That(curvature.Gaussian, Is.EqualTo(k1 * k2).Within(Tol));
+          Assert.That(curvature.Mean, Is.EqualTo(0.5 * (k1 + k2)).Within(Tol));
+
+          // The metadata CreateFromSurface fills in is filled in here too.
+          Assert.That(curvature.Point.DistanceTo(point), Is.LessThan(Tol), "Point disagrees.");
+          Assert.That(curvature.Point.DistanceTo(closest), Is.LessThan(Tol));
+          Assert.That((curvature.Normal - normal).Length, Is.LessThan(Tol), "Normal disagrees.");
+          Assert.That(curvature.UVPoint.X, Is.EqualTo(parameter.FaceCornerParameters.X).Within(Tol));
+          Assert.That(curvature.UVPoint.Y, Is.EqualTo(parameter.FaceCornerParameters.Y).Within(Tol));
+
+          // The principal directions are unit vectors in the tangent plane.
+          for (int i = 0; i < 2; i++)
+          {
+            var dir = curvature.Direction(i);
+            Assert.That(dir.IsValid, Is.True, $"Direction {i} is not set.");
+            Assert.That(dir.Length, Is.EqualTo(1.0).Within(1e-6), $"Direction {i} is not a unit vector.");
+            Assert.That(dir * curvature.Normal, Is.EqualTo(0.0).Within(1e-6),
+              $"Direction {i} is not in the tangent plane.");
+          }
+        }
+      }
+    }
+
+    /// <summary>
+    /// The overload on SubD is a thin wrapper, but it is the one a caller
+    /// reaches for, so check it agrees.
+    /// </summary>
+    [Test]
+    public void EvaluateCurvatureOverloadMatchesCreateFromSubD()
+    {
+      var subd = MakeMeshBoxSubD();
+      Assert.That(subd.ClosestPoint(new Point3d(5.25, 4.7, -4.80), out _, out var parameter), Is.True);
+
+      Assert.That(subd.EvaluateCurvature(parameter, out SurfaceCurvature curvature), Is.True);
+      using (curvature)
+      {
+        Assert.That(curvature, Is.Not.Null);
+        Assert.That(subd.EvaluateCurvature(parameter, out _, out _, out var k1, out var k2), Is.True);
+        Assert.That(curvature.Kappa(0), Is.EqualTo(k1).Within(Tol));
+        Assert.That(curvature.Kappa(1), Is.EqualTo(k2).Within(Tol));
+      }
+    }
+
+    [Test]
+    public void SurfaceCurvatureFromSubDIsNullAtAnExtraordinaryVertex()
+    {
+      var subd = MakeMeshBoxSubD();
+
+      SubDComponentParameter atVertex = SubDComponentParameter.Unset;
+      foreach (var face in subd.Faces)
+      {
+        for (int i = 0; i < face.EdgeCount; i++)
+        {
+          if (4 != face.VertexAt(i).EdgeCount)
+          {
+            atVertex = SubDComponentParameter.CreateFaceParameter(
+              face.Id, face.EdgeCount, i, 0.0, 0.0);
+            break;
+          }
+        }
+        if (atVertex.IsSet)
+          break;
+      }
+      Assert.That(atVertex.IsSet, Is.True);
+
+      Assert.That(SurfaceCurvature.CreateFromSubD(subd, atVertex), Is.Null,
+        "A SubD has no curvature exactly on an extraordinary vertex.");
+      Assert.That(subd.EvaluateCurvature(atVertex, out SurfaceCurvature curvature), Is.False);
+      Assert.That(curvature, Is.Null);
+    }
+
+    [Test]
+    public void SurfaceCurvatureFromSubDRejectsBadInput()
+    {
+      var subd = MakeMeshBoxSubD();
+      Assert.That(SurfaceCurvature.CreateFromSubD(null, SubDComponentParameter.Unset), Is.Null);
+      Assert.That(SurfaceCurvature.CreateFromSubD(subd, SubDComponentParameter.Unset), Is.Null);
+    }
+
     [Test]
     public void EvaluateRejectsUnsetParameter()
     {
