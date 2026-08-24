@@ -44,9 +44,14 @@ namespace NetSDKTests
     // -----------------------------------------------------------------------
 
     /// <summary>
-    /// The closest point to this sample lands at (3/8,3/8) inside the corner quad
-    /// of a 3 valent box corner. No bicubic patch covers that corner quad, and
+    /// The closest point to this sample lands inside the corner quad of a 3
+    /// valent box corner. No bicubic patch covers that corner quad, and
     /// evaluating the returned parameter used to fail outright.
+    ///
+    /// The seed is the grid point at (3/8,3/8), which is the answer the reported
+    /// case returned when refinement could not run in an extraordinary corner
+    /// quad. Refinement runs there now, so the result sits a little off the grid
+    /// value and is strictly closer to the sample.
     /// </summary>
     [Test]
     public void ClosestPointInExtraordinaryCornerIsEvaluable()
@@ -60,8 +65,10 @@ namespace NetSDKTests
 
       // Interior of a corner quad, not one of the four special points.
       var st = parameter.FaceCornerParameters;
-      Assert.That(st.X, Is.EqualTo(0.375).Within(Tol), "Unexpected corner s.");
-      Assert.That(st.Y, Is.EqualTo(0.375).Within(Tol), "Unexpected corner t.");
+      Assert.That(st.X, Is.EqualTo(0.375).Within(0.05), "Unexpected corner s.");
+      Assert.That(st.Y, Is.EqualTo(0.375).Within(0.05), "Unexpected corner t.");
+      Assert.That(st.X, Is.GreaterThan(0.0).And.LessThan(0.5));
+      Assert.That(st.Y, Is.GreaterThan(0.0).And.LessThan(0.5));
 
       // The corner really is extraordinary.
       var face = subd.Faces.Find(parameter.ComponentId);
@@ -75,6 +82,13 @@ namespace NetSDKTests
         "Evaluate failed at the parameter ClosestPoint returned.");
       Assert.That(evaluated.DistanceTo(closest), Is.EqualTo(0.0).Within(Tol),
         "Evaluate did not reproduce the closest point.");
+
+      // Strictly better than the grid point it started from.
+      var seed = SubDComponentParameter.CreateFaceParameter(
+        parameter.ComponentId, face.EdgeCount, parameter.FaceCornerIndex, 0.375, 0.375);
+      Assert.That(subd.Evaluate(seed, out var seedPoint), Is.True);
+      Assert.That(closest.DistanceTo(sample), Is.LessThan(seedPoint.DistanceTo(sample)),
+        "Refinement should improve on the grid seed.");
     }
 
     /// <summary>
@@ -193,7 +207,6 @@ namespace NetSDKTests
     // SubD_ClosestPoint.DISABLED_GetClosestPointsAgreesWithGetClosestPointOnABigSubD
     // in src4/opennurbs/tests/ontest_subd_closestpoint.cpp.
     [Test]
-    [Ignore("Known: batch and single closest point disagree near extraordinary vertices. See RH-47312.")]
     public void ClosestPointsMatchesClosestPoint()
     {
       var subd = MakeMeshBoxSubD();
@@ -297,13 +310,13 @@ namespace NetSDKTests
     }
 
     /// <summary>
-    /// The remaining limitation, pinned so it is recorded rather than
-    /// rediscovered: inside the corner quad of an extraordinary vertex the point
-    /// is available but the derivatives are not. Same root cause as RH-90100 and
-    /// RH-90127.
+    /// Inside the corner quad of an extraordinary vertex no single bicubic patch
+    /// covers the parameter, so the evaluator subdivides the quad until one
+    /// does. The point, the tangent plane and the curvature are all available
+    /// there. This is the case reported in RH-47312.
     /// </summary>
     [Test]
-    public void ExtraordinaryCornerHasPointButNoDerivatives()
+    public void ExtraordinaryCornerHasPointFrameAndCurvature()
     {
       var subd = MakeMeshBoxSubD();
 
@@ -315,10 +328,59 @@ namespace NetSDKTests
       Assert.That(subd.Evaluate(parameter, out var point), Is.True, "The point should be available.");
       Assert.That(point.IsValid, Is.True);
 
-      Assert.That(subd.Evaluate(parameter, out _, out _, out _, out _), Is.False,
-        "Derivatives are not available in an extraordinary corner quad.");
-      Assert.That(subd.EvaluateCurvature(parameter, out _, out _, out _, out _), Is.False,
-        "Curvature is not available in an extraordinary corner quad.");
+      Assert.That(subd.Evaluate(parameter, out var p2, out var ds, out var dt, out var normal), Is.True,
+        "Derivatives are available in an extraordinary corner quad.");
+      Assert.That(p2.DistanceTo(point), Is.LessThan(Tol));
+      Assert.That(ds.Length, Is.GreaterThan(1.0));
+      Assert.That(dt.Length, Is.GreaterThan(1.0));
+      Assert.That(normal.IsUnitVector, Is.True);
+      // (ds, dt, normal) is right handed.
+      Assert.That(Vector3d.CrossProduct(ds, dt) * normal, Is.GreaterThan(0.0));
+
+      Assert.That(subd.EvaluateCurvature(parameter, out _, out _, out var k1, out var k2), Is.True,
+        "Curvature is available in an extraordinary corner quad.");
+      Assert.That(double.IsNaN(k1), Is.False, "Principal curvature k1 should be a number.");
+      Assert.That(double.IsNaN(k2), Is.False, "Principal curvature k2 should be a number.");
+    }
+
+    /// <summary>
+    /// At an extraordinary vertex itself the limit surface is C1 but generally
+    /// not C2. The tangent plane is there; the curvature is not, and asking for
+    /// it fails rather than returning a fabricated zero.
+    /// </summary>
+    [Test]
+    public void ExtraordinaryVertexHasFrameButNoCurvature()
+    {
+      var subd = MakeMeshBoxSubD();
+
+      // A corner of the box is a 3 valent, and so extraordinary, vertex.
+      SubDComponentParameter atVertex = SubDComponentParameter.Unset;
+      foreach (var face in subd.Faces)
+      {
+        for (int i = 0; i < face.EdgeCount; i++)
+        {
+          if (4 != face.VertexAt(i).EdgeCount)
+          {
+            atVertex = SubDComponentParameter.CreateFaceParameter(
+              face.Id, face.EdgeCount, i, 0.0, 0.0);
+            break;
+          }
+        }
+        if (atVertex.IsSet)
+          break;
+      }
+      Assert.That(atVertex.IsSet, Is.True, "The mesh box should have an extraordinary vertex.");
+
+      Assert.That(subd.Evaluate(atVertex, out var point), Is.True);
+      Assert.That(point.IsValid, Is.True);
+      Assert.That(subd.Evaluate(atVertex, out _, out var ds, out var dt, out var normal), Is.True,
+        "The tangent plane is available at an extraordinary vertex.");
+      Assert.That(ds.Length, Is.GreaterThan(0.0));
+      Assert.That(dt.Length, Is.GreaterThan(0.0));
+      Assert.That(normal.IsUnitVector, Is.True);
+
+      Assert.That(subd.EvaluateCurvature(atVertex, out _, out _, out _, out _), Is.False,
+        "There is no curvature at an extraordinary vertex.");
     }
 
     [Test]
