@@ -90,7 +90,22 @@ namespace MxTests
       if (!s_settings.Enabled) Assert.Ignore("All tests are ignored");
     }
 
+    static readonly string[] s_3dmExtension = new string[] { ".3dm" };
+
     internal static void ScanFolders(string fixture, List<string> testModels)
+    {
+      ScanFolders(fixture, testModels, s_3dmExtension);
+    }
+
+    /// <summary>
+    /// Collects the test models of one fixture from every <see cref="ModelDirectory"/> declared for it.
+    /// </summary>
+    /// <param name="fixture">Name of the fixture class, matched against the Fixture attribute.</param>
+    /// <param name="testModels">Receives the full paths of the models found.</param>
+    /// <param name="extensions">File extensions to pick up, dot included, matched case-insensitively.
+    /// Matching happens in managed code rather than through a search pattern, because on Windows a
+    /// three-letter pattern such as "*.stp" also matches longer extensions like ".stpbak".</param>
+    internal static void ScanFolders(string fixture, List<string> testModels, string[] extensions)
     {
       foreach (ModelDirectory mdir in s_settings.ModelDirectories
                                                 .Where(md => md.Fixture.Equals(fixture, StringComparison.InvariantCultureIgnoreCase)))
@@ -108,15 +123,17 @@ namespace MxTests
         if (Directory.Exists(testFolder))
         {
           testModels.AddRange(
-            Directory.GetFiles(testFolder, @"*.3dm", SearchOption.AllDirectories)
+            Directory.EnumerateFiles(testFolder, "*", SearchOption.AllDirectories)
                      .Where(f =>
                      {
                        string fname = Path.GetFileName(f);
 
+                       bool isWanted = extensions.Any(
+                         e => Path.GetExtension(fname).Equals(e, StringComparison.InvariantCultureIgnoreCase));
                        bool isCommentedOut = fname.StartsWith("#", StringComparison.InvariantCultureIgnoreCase);
                        bool isBackup = fname.EndsWith("bak", StringComparison.InvariantCultureIgnoreCase);
 
-                       return !isCommentedOut && !isBackup;
+                       return isWanted && !isCommentedOut && !isBackup;
                      })
             );
         }

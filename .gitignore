@@ -32,3 +32,9 @@
 # Git
 hooks/
 lfs/
+
+# STEP test assemblies: hundreds of megabytes each, kept on disk but never committed.
+# Their .expected.txt baselines are tiny and are committed.
+models/STEPfile-large/*
+!models/STEPfile-large/*.expected.txt
+!models/STEPfile-large/readme.md

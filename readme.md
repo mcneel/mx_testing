@@ -100,6 +100,81 @@ AREAS
 
 When the model is placed in a watched directory, the testing system will automatically load the file, perform splits, and check that the areas and properties match the specifications.
 
+#### To add a new STEP import test: ####
+STEP tests work like the ones above, except that the input is a `.stp` / `.step` file rather than a `.3dm`, so the expected values cannot live in the model's Notes. They live in a sidecar text file instead, named after the model:
+
+```
+as1-ac-214.stp
+as1-ac-214.stp.expected.txt
+```
+
+1. Drop the STEP file in `models\STEPfile\`, the verified folder (see the `StepImport` entries in `MxTests.Rhino.Testing.Configs.xml`). Subfolders are scanned too, so `models\STEPfile\AP214\` and any other grouping you like both work.
+1. Generate its baseline: run the `StepImport.Regenerate` test (it is `[Explicit]`, so it only runs when selected) with the environment variable `MX_STEP_REGEN` set to a substring of the file name, or to `*` for every model in the folder.
+1. **Read the generated file before committing it.** Regeneration records whatever Rhino currently produces; it is your job to confirm that is right.
+1. Trim the file down to the values you actually want to pin. Only the keys present are asserted, so a model can be held loosely or tightly.
+
+The sidecar looks like this:
+```
+STEP IMPORT
+# This is a comment
+# You can link to discourse and YT here: https://discourse.mcneel.com/...
+# RH-12345
+
+units Millimeters
+objects 18
+instances 3
+blockdefs 3
+layers 4
+breps 18
+solids 15
+invalid 0
+area 128944.9427
+volume 61233.882
+bbox -50,-30,0 to 210,84.5,60
+```
+
+Available keys:
+
+| Key | Meaning |
+| --- | --- |
+| `units` | Unit system the model was imported into. Always `Millimeters`: the test pins the document's units so baselines mean the same thing on every machine. |
+| `objects` | Top level objects in the document. A block instance counts as one. |
+| `instances` | Top level block instances. |
+| `blockdefs` | Block definitions in the document. |
+| `layers` | Layers in the document. |
+| `breps`, `extrusions`, `surfaces`, `meshes`, `subds`, `curves`, `points`, `other` | Counts of leaf geometry, that is, after block instances are expanded. An assembly that arrives nested measures the same as the same assembly arriving flat. |
+| `solids` | Leaf geometry that is a closed solid. |
+| `invalid` | Leaf geometry that fails `IsValid`. Normally `0`. |
+| `area` | Total area of the leaf surfaces, breps and meshes. |
+| `volume` | Total volume of the leaf solids. |
+| `bbox` | Bounding box of everything, as `minX,minY,minZ to maxX,maxY,maxZ`. |
+
+Counts are compared exactly. `area`, `volume` and each `bbox` coordinate are compared within `max(|expected| * 1e-8, 1e-6)`; both terms can be overridden with `MX_STEP_RELTOL` and `MX_STEP_ABSTOL`.
+
+The `#` (skip) and `!` (expected to fail) file name prefixes work exactly as they do for the `.3dm` tests. When a test fails unexpectedly, whatever was imported is saved beside the model as `#name.3dm` so it can be opened.
+
+**The three folders.** STEP models are split the same way the mesh boolean suites are split, one fixture per folder:
+
+| Folder | Fixture | Runs by default | Holds |
+| --- | --- | --- | --- |
+| `models\STEPfile\` | `StepImport` | yes | The verified models. Everything here imports correctly and is expected to keep doing so. |
+| `models\STEPfile-future\` | `StepImportFuture` | no, `[Explicit]` | Models that do not import correctly yet. Their baselines say what the import *should* produce. |
+| `models\STEPfile-large\` | `StepImportLarge` | no, `[Explicit]` | Assemblies of hundreds of megabytes. |
+
+`StepImportFuture` is the counterpart of the `-future` folders next to the mesh suites, and it is meant to be run on purpose - select it in Test Explorer, or use `--filter "FullyQualifiedName~StepImportFuture"`. A model that comes up green there has been fixed: move it and its `.expected.txt` into `models\STEPfile\` so that it starts guarding the fix. Because its baselines describe the wanted result rather than the current one, regenerating one replaces the goal with the bug; use `MX_STEP_REGEN_DRYRUN=1` to look without writing.
+
+`StepImportLarge` is kept out of a normal run because a single one of its models can take minutes and gigabytes of memory. Those models are not committed either - `models\STEPfile-large\` is git-ignored apart from the baselines - and the fixture simply finds nothing and stays quiet when they are absent. New baselines there default to counts and bounding box, with no mass properties, because computing area and volume over a full vehicle assembly costs far more than the import does. Regenerate one with `MX_STEP_REGEN_FIELDS=ALL` if the extra confidence is worth the wait.
+
+**Regeneration environment variables:**
+
+| Variable | Effect |
+| --- | --- |
+| `MX_STEP_REGEN` | Comma separated substrings of file names to regenerate; `*` means all. Nothing happens without it. |
+| `MX_STEP_REGEN_FIELDS` | `ALL` writes every key, `COUNTS` writes everything but area and volume. Unset keeps the keys the existing sidecar already declares, and uses the fixture default for a new one. |
+| `MX_STEP_REGEN_DRYRUN` | `1` reports the before/after without writing anything. |
+| `MX_STEP_REGEN_LOG` | Where the before/after report is appended. Defaults to `%TEMP%\mx_step_regen_report.txt`. |
+| `MX_STEP_LOG` | Where each run's measurements and import time are appended. Defaults to `%TEMP%\mx_step.txt`. |
+
 
 ### Notes on inner mechanics ###
 
