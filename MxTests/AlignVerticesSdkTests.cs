@@ -476,6 +476,32 @@ namespace MxTests
       Assert.That(moved, Is.EqualTo(MovedCount(before, meshes)));
       return moved;
     }
+
+    [Test]
+    public void AveragingAlsoMergesCoincidentDuplicates()
+    {
+      SetupFixture.Prerequisites();
+
+      var mesh = ThreeTrianglesSharingCorners();
+
+      mesh.Vertices.Align(12.0, true);
+      mesh.Compact();
+
+      TestContext.WriteLine("after: V=" + mesh.Vertices.Count + " F=" + mesh.Faces.Count + " " + Faces(mesh));
+      for (int i = 0; i < mesh.Vertices.Count; i++)
+        TestContext.WriteLine("  v" + i + " = " + mesh.Vertices.Point3dAt(i));
+
+      Assert.That(mesh.Faces.Count, Is.EqualTo(2),
+        "the third triangle merges onto the others and must collapse");
+      Assert.That(mesh.Vertices.Count, Is.EqualTo(6));
+      Assert.That(mesh.IsValid, Is.True);
+
+      foreach (int merged in new[] { 2, 5 })
+      {
+        Assert.That(mesh.Vertices.Point3dAt(merged).X, Is.EqualTo(15.5).Within(Epsilon));
+        Assert.That(mesh.Vertices.Point3dAt(merged).Y, Is.EqualTo(-12.5).Within(Epsilon));
+      }
+    }
     [Test]
     public void NullMeshesAreRejected()
     {
