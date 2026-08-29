@@ -456,6 +456,23 @@ namespace NetSDKTests
       }
     }
 
+    /// <summary>
+    /// A parameter sitting exactly on an extraordinary vertex. Every corner of a
+    /// SubD box is 3 valent.
+    /// </summary>
+    static SubDComponentParameter FirstExtraordinaryVertexParameter(SubD subd)
+    {
+      foreach (var face in subd.Faces)
+      {
+        for (int i = 0; i < face.EdgeCount; i++)
+        {
+          if (4 != face.VertexAt(i).EdgeCount)
+            return SubDComponentParameter.CreateFaceParameter(face.Id, face.EdgeCount, i, 0.0, 0.0);
+        }
+      }
+      return SubDComponentParameter.Unset;
+    }
+
     [Test]
     public void SurfaceCurvatureFromSubDIsNullAtAnExtraordinaryVertex()
     {
@@ -482,6 +499,99 @@ namespace NetSDKTests
         "A SubD has no curvature exactly on an extraordinary vertex.");
       Assert.That(subd.EvaluateCurvature(atVertex, out SurfaceCurvature curvature), Is.False);
       Assert.That(curvature, Is.Null);
+    }
+
+    /// <summary>
+    /// A SubD limit surface has no curvature exactly on an extraordinary vertex.
+    /// SectorAverage reports the average of the curvature immediately around it
+    /// instead of nothing, which is what Grasshopper2 needed a proxy brep for.
+    /// </summary>
+    [Test]
+    public void SectorAverageGivesACurvatureAtAnExtraordinaryVertex()
+    {
+      var subd = MakeMeshBoxSubD();
+      var atVertex = FirstExtraordinaryVertexParameter(subd);
+      Assert.That(atVertex.IsSet, Is.True);
+
+      // The default still reports nothing.
+      Assert.That(SurfaceCurvature.CreateFromSubD(subd, atVertex), Is.Null);
+      Assert.That(
+        SurfaceCurvature.CreateFromSubD(subd, atVertex, SubD.ExtraordinaryVertexCurvature.None),
+        Is.Null);
+
+      using (var curvature = SurfaceCurvature.CreateFromSubD(
+        subd, atVertex, SubD.ExtraordinaryVertexCurvature.SectorAverage))
+      {
+        Assert.That(curvature, Is.Not.Null, "SectorAverage should produce a curvature.");
+        Assert.That(double.IsNaN(curvature.Gaussian), Is.False);
+        Assert.That(double.IsNaN(curvature.Mean), Is.False);
+
+        // A box corner bulges outward, so both principal curvatures share a sign.
+        Assert.That(curvature.Gaussian, Is.GreaterThan(0.0),
+          "a convex corner has positive Gaussian curvature");
+
+        // Point and normal are the vertex's own and are exact.
+        Assert.That(subd.Evaluate(atVertex, out var point, out var normal), Is.True);
+        Assert.That(curvature.Point.DistanceTo(point), Is.LessThan(Tol));
+        Assert.That((curvature.Normal - normal).Length, Is.LessThan(Tol));
+
+        // An average has no single principal direction.
+        Assert.That(curvature.Direction(0).IsValid, Is.False);
+        Assert.That(curvature.Direction(1).IsValid, Is.False);
+      }
+    }
+
+    [Test]
+    public void SubDEvaluateCurvatureOverloadTakesTheStyle()
+    {
+      var subd = MakeMeshBoxSubD();
+      var atVertex = FirstExtraordinaryVertexParameter(subd);
+      Assert.That(atVertex.IsSet, Is.True);
+
+      Assert.That(subd.EvaluateCurvature(atVertex, out SurfaceCurvature none), Is.False);
+      Assert.That(none, Is.Null);
+
+      Assert.That(
+        subd.EvaluateCurvature(atVertex, SubD.ExtraordinaryVertexCurvature.SectorAverage, out var averaged),
+        Is.True);
+      using (averaged)
+      {
+        Assert.That(averaged, Is.Not.Null);
+        Assert.That(averaged.Gaussian, Is.GreaterThan(0.0));
+      }
+    }
+
+    /// <summary>
+    /// The style only ever applies exactly on an extraordinary vertex. Anywhere
+    /// else the two must agree exactly, including inside such a vertex's corner
+    /// quad, which is where the reported case lands.
+    /// </summary>
+    [Test]
+    public void SectorAverageChangesNothingAwayFromExtraordinaryVertices()
+    {
+      var subd = MakeMeshBoxSubD();
+
+      var samples = new List<Point3d>
+      {
+        new Point3d(0.0, 0.0, 12.0),
+        new Point3d(5.25, 4.7, -4.80)
+      };
+
+      foreach (var sample in samples)
+      {
+        Assert.That(subd.ClosestPoint(sample, out _, out var parameter), Is.True);
+        using (var plain = SurfaceCurvature.CreateFromSubD(subd, parameter))
+        using (var averaged = SurfaceCurvature.CreateFromSubD(
+          subd, parameter, SubD.ExtraordinaryVertexCurvature.SectorAverage))
+        {
+          Assert.That(plain, Is.Not.Null, $"plain failed at {sample}");
+          Assert.That(averaged, Is.Not.Null, $"averaged failed at {sample}");
+          Assert.That(averaged.Kappa(0), Is.EqualTo(plain.Kappa(0)));
+          Assert.That(averaged.Kappa(1), Is.EqualTo(plain.Kappa(1)));
+          Assert.That(averaged.Direction(0).IsValid, Is.True,
+            "the principal directions are real away from the vertex");
+        }
+      }
     }
 
     [Test]
