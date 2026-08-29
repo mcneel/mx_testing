@@ -23,6 +23,61 @@ namespace MxTests
       AlignVerticesImplementation.Instance.Model(Path.Combine(filepath, filename));
     }
 
+    // The three models below mix kinds of geometry, and which object moves depends on the order
+    // the objects are handed to the aligner: the first one searches first and keeps its place.
+    // Their expected layers record what the engine produces for document order.
+    [Test, Explicit]
+    public void RewriteMixedGeometryOracles()
+    {
+      string dir = Path.GetDirectoryName(g_test_models.First());
+
+      foreach (var name in new[] { "mesh_polyline.3dm", "subd_polyline.3dm", "subd_two.3dm" })
+      {
+        string path = Path.Combine(dir, name);
+
+        using (var file = File3dm.Read(path))
+        {
+          double distance = 0.0;
+          bool average = false, onlyNaked = false;
+
+          foreach (var line in file.Notes.Notes.Split(new[] { (char)13, (char)10 }, StringSplitOptions.RemoveEmptyEntries))
+          {
+            int equals = line.IndexOf('=');
+            if (equals < 0) continue;
+
+            string key = line.Substring(0, equals).Trim(), value = line.Substring(equals + 1).Trim();
+            if (key.Equals("DistanceToAdjust", StringComparison.InvariantCultureIgnoreCase)) distance = double.Parse(value, CultureInfo.InvariantCulture);
+            else if (key.Equals("AverageVertices", StringComparison.InvariantCultureIgnoreCase)) average = bool.Parse(value);
+            else if (key.Equals("OnlyNaked", StringComparison.InvariantCultureIgnoreCase)) onlyNaked = bool.Parse(value);
+          }
+
+          var a = file.AllLayers.First(l => l.Name.Equals("A", StringComparison.InvariantCultureIgnoreCase));
+          var b = file.AllLayers.First(l => l.Name.Equals("B", StringComparison.InvariantCultureIgnoreCase));
+
+          var inputs = file.Objects
+            .Where(o => o.Attributes.LayerIndex == a.Index && (o.Geometry is Mesh || o.Geometry is SubD || o.Geometry is Curve))
+            .Select(o => o.Geometry.Duplicate())
+            .ToList();
+
+          int moved = Aligner.AlignVertices(inputs, distance, onlyNaked, average);
+
+          foreach (var stale in file.Objects.Where(o => o.Attributes.LayerIndex == b.Index).Select(o => o.Id).ToList())
+            file.Objects.Delete(stale);
+
+          foreach (var result in inputs)
+          {
+            var attributes = new ObjectAttributes { LayerIndex = b.Index };
+            if (result is Mesh m) file.Objects.AddMesh(m, attributes);
+            else if (result is SubD s) file.Objects.AddSubD(s, attributes);
+            else if (result is Curve c) file.Objects.AddCurve(c, attributes);
+          }
+
+          file.Write(path, 8);
+          TestContext.WriteLine($"rewrote {name}, {moved} vertices moved");
+        }
+      }
+    }
+
     [Test, Explicit]
     public void RewriteSelectVerticesOracles()
     {
@@ -76,6 +131,24 @@ namespace MxTests
         new[] { "COMPARE", "", "DistanceToAdjust = 0.1", "OnlyNaked = False", "AverageVertices = True" },
         new[] { Grid3x3(0.0), Triangle(1, 1, 0.05, 5, 5, 0, 5, 6, 0) },
         new[] { Grid3x3(0.025), Triangle(1, 1, 0.025, 5, 5, 0, 5, 6, 0) });
+
+      // Three vertices in a row, 1.25 apart, with a distance of 1.875: the ends are out of reach
+      // of each other, so only one of the two pairs can merge. The first mesh claims the middle
+      // one and keeps it, because a target already claimed is only given up to a nearer one.
+      Write(Path.Combine(dir, "mesh_contested_vertex.3dm"),
+        new[] { "COMPARE", "", "DistanceToAdjust = 1.875", "AverageVertices = False", "OnlyNaked = False" },
+        new[]
+        {
+          Triangle(0.00, 0, 0,  0.00, -10, 0,  -3.00, -10, 0),
+          Triangle(1.25, 0, 0,  1.25,  10, 0,   4.25,  10, 0),
+          Triangle(2.50, 0, 0,  2.50, -10, 5,   5.50, -10, 5),
+        },
+        new[]
+        {
+          Triangle(0.00, 0, 0,  0.00, -10, 0,  -3.00, -10, 0),
+          Triangle(0.00, 0, 0,  1.25,  10, 0,   4.25,  10, 0),
+          Triangle(2.50, 0, 0,  2.50, -10, 5,   5.50, -10, 5),
+        });
     }
 
     static Mesh Triangle(double ax, double ay, double az, double bx, double by, double bz, double cx, double cy, double cz)
@@ -88,12 +161,12 @@ namespace MxTests
       return mesh;
     }
 
-    static Mesh Grid3x3(double centreZ)
+    static Mesh Grid3x3(double interiorZ)
     {
       var mesh = new Mesh();
       for (int j = 0; j < 3; j++)
         for (int i = 0; i < 3; i++)
-          mesh.Vertices.Add(i, j, (i == 1 && j == 1) ? centreZ : 0.0);
+          mesh.Vertices.Add(i, j, (i == 1 && j == 1) ? interiorZ : 0.0);
 
       mesh.Faces.AddFace(0, 1, 4, 3);
       mesh.Faces.AddFace(1, 2, 5, 4);
@@ -206,45 +279,36 @@ namespace MxTests
 
       internal override bool OperateCommandOnGeometry(IEnumerable<object> inputGeometry, IEnumerable<object> expectedGeometry, double tolerance, out List<ResultMetrics> returned, out string textLog)
       {
-        var input = inputGeometry.ToList();
-        var expected = expectedGeometry.ToList();
+        var input = inputGeometry.Cast<GeometryBase>().Select(g => g.Duplicate()).ToList();
+        var expected = expectedGeometry.Cast<GeometryBase>().ToList();
 
         returned = new List<ResultMetrics>();
         var tl = new StringBuilder();
 
-        if (input.Any(g => g is SubD))
-          Assert.Ignore("Model aligns SubDs. MX_AlignVertices accepts them, but no SubD overload is exposed to RhinoCommon: "
-            + "RHC_MeshesVerticesAlign takes ON_Mesh only.");
+        foreach (var geometry in input)
+          if (!Aligner.SupportsGeometry(geometry))
+            Assert.Ignore($"Model contains {geometry.GetType().Name}, which vertex alignment does not support.");
 
-        if (input.Any(g => g is Curve))
-          Assert.Ignore("Model aligns curve control points. MX_AlignVertices accepts meshes, SubDs and point clouds only; "
-            + "there is no MX_3dPointSparseEnumerator for curves.");
+        if (input.Count != expected.Count)
+          throw new NotSupportedException($"Model has {input.Count} inputs but {expected.Count} expected objects.");
 
-        var meshes = input.Cast<Mesh>().Select(m => m.DuplicateMesh()).ToList();
-        var expected_meshes = expected.Cast<Mesh>().ToList();
-
-        if (meshes.Count != expected_meshes.Count)
-          throw new NotSupportedException($"Model has {meshes.Count} input meshes but {expected_meshes.Count} expected meshes.");
+        if (m_select_vertices != null && m_only_naked)
+          throw new NotSupportedException("SelectVertices and OnlyNaked cannot both be stated.");
 
         IEnumerable<IEnumerable<bool>> flags = null;
         if (m_select_vertices != null)
-          flags = meshes.Select(m => Enumerable.Range(0, m.Vertices.Count).Select(i => m_select_vertices.Contains(i)).ToList()).ToList();
+          flags = input.Select(g => Enumerable.Range(0, PointsOf(g).Count).Select(i => m_select_vertices.Contains(i)).ToList()).ToList();
 
-        if (m_select_vertices != null && m_only_naked)
-          throw new NotSupportedException("No overload takes both SelectVertices and OnlyNaked.");
-
-        int moved = m_select_vertices != null
-          ? MeshVertexList.Align(meshes, m_distance, m_average, flags)
-          : MeshVertexList.Align(meshes, m_distance, m_only_naked, m_average);
+        int moved = Aligner.AlignVertices(input, m_distance, m_only_naked, m_average, flags);
 
         tl.AppendLine($"Align(distance={m_distance.ToString(CultureInfo.InvariantCulture)}, average={m_average}, onlyNaked={m_only_naked}"
           + $", select={(m_select_vertices == null ? "all" : string.Join("+", m_select_vertices))}) moved {moved} vertices");
 
-        var wanted = expected_meshes.Select(Normalized).ToList();
+        var wanted = expected.Select(Normalized).ToList();
 
-        for (int i = 0; i < meshes.Count; i++)
+        for (int i = 0; i < input.Count; i++)
         {
-          Mesh got = Normalized(meshes[i]);
+          GeometryBase got = Normalized(input[i]);
 
           int best = -1;
           double worst = double.MaxValue;
@@ -257,20 +321,18 @@ namespace MxTests
             if (deviation < worst) { worst = deviation; best = j; }
           }
 
-          tl.AppendLine($"mesh {i}: aligned V={meshes[i].Vertices.Count} F={meshes[i].Faces.Count}"
-            + $", compared V={got.Vertices.Count} F={got.Faces.Count} against expected mesh "
-            + (best < 0 ? "(none of matching size)" : best.ToString(CultureInfo.InvariantCulture)));
+          string rewired = best < 0 ? null : FirstDifferentFace(got as Mesh, wanted[best] as Mesh);
 
-
-          string rewired = best < 0 ? null : FirstDifferentFace(got, wanted[best]);
+          tl.AppendLine($"{got.GetType().Name} {i}: {PointsOf(got).Count} points, compared against expected "
+            + (best < 0 ? "(nothing of matching kind and size)" : best.ToString(CultureInfo.InvariantCulture)));
 
           returned.Add(new ResultMetrics
           {
             Measurement = rewired == null ? worst : double.MaxValue,
-            Mesh = got,
+            Mesh = got as Mesh,
             TextInfo = best < 0
-              ? $"mesh {i}: got V={got.Vertices.Count} F={got.Faces.Count}, no expected mesh of that size remains"
-              : rewired ?? $"mesh {i}: V={got.Vertices.Count} F={got.Faces.Count}, worst vertex deviation {worst.ToString("G6", CultureInfo.InvariantCulture)}"
+              ? $"{got.GetType().Name} {i}: {PointsOf(got).Count} points, nothing of matching kind and size remains"
+              : rewired ?? $"{got.GetType().Name} {i}: {PointsOf(got).Count} points, worst deviation {worst.ToString("G6", CultureInfo.InvariantCulture)}"
           });
 
           if (best >= 0) wanted[best] = null;
@@ -280,10 +342,33 @@ namespace MxTests
         return moved >= 0;
       }
 
+      // The points vertex alignment can move, in the order the engine indexes them.
+      static List<Point3d> PointsOf(GeometryBase geometry)
+      {
+        if (geometry is Mesh mesh)
+          return Enumerable.Range(0, mesh.Vertices.Count).Select(i => mesh.Vertices.Point3dAt(i)).ToList();
+
+        if (geometry is PointCloud cloud)
+          return cloud.Select(item => item.Location).ToList();
+
+        if (geometry is SubD subd)
+          return subd.Vertices.Select(v => v.ControlNetPoint).ToList();
+
+        if (geometry is PolylineCurve polyline)
+          return Enumerable.Range(0, polyline.PointCount).Select(i => polyline.Point(i)).ToList();
+
+        if (geometry is LineCurve line)
+          return new List<Point3d> { line.Line.From, line.Line.To };
+
+        if (geometry is NurbsCurve nurbs)
+          return nurbs.Points.Select(cv => cv.Location).ToList();
+
+        throw new NotSupportedException($"No point list for {geometry.GetType().Name}.");
+      }
 
       static string FirstDifferentFace(Mesh got, Mesh want)
       {
-        if (got.Faces.Count != want.Faces.Count) return null;
+        if (got == null || want == null || got.Faces.Count != want.Faces.Count) return null;
 
         for (int k = 0; k < got.Faces.Count; k++)
         {
@@ -294,18 +379,28 @@ namespace MxTests
 
         return null;
       }
-      static double Deviation(Mesh got, Mesh want)
+
+      static double Deviation(GeometryBase got, GeometryBase want)
       {
-        if (got.Vertices.Count != want.Vertices.Count || got.Faces.Count != want.Faces.Count) return double.MaxValue;
+        if (got.GetType() != want.GetType()) return double.MaxValue;
+
+        List<Point3d> a = PointsOf(got), b = PointsOf(want);
+        if (a.Count != b.Count) return double.MaxValue;
+
+        if (got is Mesh gm && want is Mesh wm && gm.Faces.Count != wm.Faces.Count) return double.MaxValue;
 
         double worst = 0.0;
-        for (int v = 0; v < got.Vertices.Count; v++)
-          worst = Math.Max(worst, got.Vertices.Point3dAt(v).DistanceTo(want.Vertices.Point3dAt(v)));
+        for (int v = 0; v < a.Count; v++)
+          worst = Math.Max(worst, a[v].DistanceTo(b[v]));
         return worst;
       }
 
-      static Mesh Normalized(Mesh mesh)
+      // Aligning collapses mesh faces and can leave the vertices they referenced unused. Neither
+      // entry point compacts, so both sides are normalized the same way before comparing.
+      static GeometryBase Normalized(GeometryBase geometry)
       {
+        if (!(geometry is Mesh mesh)) return geometry;
+
         Mesh rc = mesh.DuplicateMesh();
         rc.Faces.CullDegenerateFaces();
         rc.Compact();
