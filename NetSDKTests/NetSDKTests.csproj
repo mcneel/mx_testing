@@ -34,6 +34,10 @@
   <ItemGroup Condition="'$(InRhino)' == 'False'">
     <!-- this test only works in the Rhino build, uses unpublished SDK functions. -->
     <Compile Remove="FilletEdgeVariableRadius.cs" />
+    <!-- the SubD surface parameter API (SubDComponentParameter, SubD.ClosestPoint,
+         SubD.Evaluate) is not in a released RhinoCommon yet. See RH-71098, RH-53383. -->
+    <Compile Remove="SubDComponentParameter.cs" />
+    <Compile Remove="SubDEvaluate.cs" />
   </ItemGroup>
 
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
