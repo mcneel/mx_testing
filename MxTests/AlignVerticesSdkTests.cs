@@ -502,6 +502,97 @@ namespace MxTests
         Assert.That(mesh.Vertices.Point3dAt(merged).Y, Is.EqualTo(-12.5).Within(Epsilon));
       }
     }
+
+    static Mesh[] ThreeInAChain()
+    {
+      return new[]
+      {
+        Triangle(new Point3d(0.0,   0, 0), new Point3d(0, 5, 0), new Point3d(0, 6, 0)),
+        Triangle(new Point3d(0.125, 0, 0), new Point3d(3, 5, 0), new Point3d(3, 6, 0)),
+        Triangle(new Point3d(0.25,  0, 0), new Point3d(6, 5, 0), new Point3d(6, 6, 0)),
+      };
+    }
+
+    [TestCase(false, 0.0,    0.0,    1)]
+    [TestCase(true,  0.0625, 0.0625, 2)]
+    public void AClaimedVertexIsNotStolenByAFartherTarget(bool average, double expectedA, double expectedB, int expectedMoved)
+    {
+      SetupFixture.Prerequisites();
+
+      var meshes = ThreeInAChain();
+      int moved = MeshVertexList.Align(meshes, 0.1875, average, null);
+
+      Assert.That(moved, Is.EqualTo(expectedMoved));
+      Assert.That(meshes[0].Vertices.Point3dAt(0).X, Is.EqualTo(expectedA).Within(Epsilon));
+      Assert.That(meshes[1].Vertices.Point3dAt(0).X, Is.EqualTo(expectedB).Within(Epsilon));
+      Assert.That(meshes[2].Vertices.Point3dAt(0).X, Is.EqualTo(0.25).Within(Epsilon),
+        "C is out of reach of A and never claimed anything, so it stays put");
+
+      Assert.That(meshes[0].Vertices.Point3dAt(0).DistanceTo(meshes[1].Vertices.Point3dAt(0)),
+        Is.LessThanOrEqualTo(Epsilon),
+        "A claimed B first and keeps it, so the two merge rather than being pulled apart");
+    }
+
+
+    [Test]
+    public void AlignerSupportsTheDocumentedGeometryKinds()
+    {
+      SetupFixture.Prerequisites();
+
+      var polyline = new PolylineCurve(new[] { new Point3d(0, 0, 0), new Point3d(1, 0, 0) });
+      var line = new LineCurve(new Point3d(0, 0, 0), new Point3d(1, 0, 0));
+       var arc = new ArcCurve(new Arc(new Point3d(0, 0, 0), new Point3d(1, 1, 0), new Point3d(2, 0, 0)));
+
+      Assert.That(Aligner.SupportsGeometry(Triangle(new Point3d(0, 0, 0), new Point3d(1, 0, 0), new Point3d(0, 1, 0))), Is.True);
+      Assert.That(Aligner.SupportsGeometry(new PointCloud(new[] { new Point3d(0, 0, 0) })), Is.True);
+      Assert.That(Aligner.SupportsGeometry(polyline), Is.True);
+      Assert.That(Aligner.SupportsGeometry(line), Is.True);
+      Assert.That(Aligner.SupportsGeometry(arc), Is.False, "an arc has no control points on the curve");
+      Assert.That(Aligner.SupportsGeometry(null), Is.False);
+    }
+
+    [Test]
+    public void AlignerMovesAPolylineOntoAMesh()
+    {
+      SetupFixture.Prerequisites();
+
+      var mesh = Triangle(new Point3d(0, 0, 0), new Point3d(1, 0, 0), new Point3d(0, 1, 0));
+      var polyline = new PolylineCurve(new[] { new Point3d(0, 0, 0.05), new Point3d(4, 0, 0), new Point3d(4, 4, 0) });
+
+      int moved = Aligner.AlignVertices(new GeometryBase[] { mesh, polyline }, 0.1, true, false);
+
+      Assert.That(moved, Is.EqualTo(1));
+      Assert.That(polyline.Point(0).DistanceTo(new Point3d(0, 0, 0)), Is.LessThanOrEqualTo(Epsilon),
+        "the polyline point is always eligible, so OnlyNaked does not exclude it");
+      Assert.That(polyline.Point(1).DistanceTo(new Point3d(4, 0, 0)), Is.LessThanOrEqualTo(Epsilon));
+    }
+
+    [Test]
+    public void AlignerAveragesAcrossGeometryKinds()
+    {
+      SetupFixture.Prerequisites();
+
+      var mesh = Triangle(new Point3d(0, 0, 0), new Point3d(1, 0, 0), new Point3d(0, 1, 0));
+      var cloud = new PointCloud(new[] { new Point3d(0, 0, 0.1) });
+
+      int moved = Aligner.AlignVertices(new GeometryBase[] { mesh, cloud }, 0.2, false, true);
+
+      Assert.That(moved, Is.EqualTo(2));
+      Assert.That(mesh.Vertices.Point3dAt(0).Z, Is.EqualTo(0.05).Within(Epsilon));
+      Assert.That(cloud[0].Location.Z, Is.EqualTo(0.05).Within(Epsilon));
+    }
+
+    [Test]
+    public void AlignerRejectsUnsupportedGeometry()
+    {
+      SetupFixture.Prerequisites();
+
+      var mesh = Triangle(new Point3d(0, 0, 0), new Point3d(1, 0, 0), new Point3d(0, 1, 0));
+      var arc = new ArcCurve(new Arc(new Point3d(0, 0, 0), new Point3d(1, 1, 0), new Point3d(2, 0, 0)));
+
+      Assert.Throws<ArgumentException>(() => Aligner.AlignVertices(new GeometryBase[] { mesh, arc }, 0.2, false, false));
+      Assert.Throws<ArgumentNullException>(() => Aligner.AlignVertices(null, 0.2, false, false));
+    }
     [Test]
     public void NullMeshesAreRejected()
     {
