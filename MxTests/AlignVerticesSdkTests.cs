@@ -593,6 +593,62 @@ namespace MxTests
       Assert.Throws<ArgumentException>(() => Aligner.AlignVertices(new GeometryBase[] { mesh, arc }, 0.2, false, false));
       Assert.Throws<ArgumentNullException>(() => Aligner.AlignVertices(null, 0.2, false, false));
     }
+
+    [Test]
+    public void SuggestDistanceFindsTheGapBetweenObjects()
+    {
+      SetupFixture.Prerequisites();
+
+      // two grids whose facing borders are 0.25 apart, well inside their own 1.0 spacing
+      var meshes = new GeometryBase[] { Grid3x3(0.0), Grid3x3(2.25) };
+
+      double suggested = Aligner.SuggestDistance(meshes);
+
+      Assert.That(suggested, Is.EqualTo(0.25).Within(Epsilon),
+        "the border vertices are nearer to the other grid than to their own neighbours");
+    }
+
+    [Test]
+    public void SuggestDistanceClosesTheGapItReports()
+    {
+      SetupFixture.Prerequisites();
+
+      var meshes = new[] { Grid3x3(0.0), Grid3x3(2.25) };
+      double suggested = Aligner.SuggestDistance(meshes);
+
+      int moved = Aligner.AlignVertices(meshes, suggested, false, false);
+
+      Assert.That(moved, Is.EqualTo(3), "the three facing border vertices join");
+      foreach (int border in new[] { 0, 3, 6 })
+        Assert.That(meshes[1].Vertices.Point3dAt(border).X, Is.EqualTo(2.0).Within(Epsilon));
+    }
+
+    [Test]
+    public void SuggestDistanceIsZeroWhenNothingIsShared()
+    {
+      SetupFixture.Prerequisites();
+
+      // far apart: every vertex is nearest to one of its own
+      var meshes = new GeometryBase[] { Grid3x3(0.0), Grid3x3(50.0) };
+
+      Assert.That(Aligner.SuggestDistance(meshes), Is.Zero);
+      Assert.Throws<ArgumentNullException>(() => Aligner.SuggestDistance(null));
+    }
+
+    [Test]
+    public void SuggestDistanceSpansGeometryKinds()
+    {
+      SetupFixture.Prerequisites();
+
+      // the polyline runs along the grid border, 0.25 above it, and both have 1.0 spacing of
+      // their own, so every facing point is nearer to the other object than to its neighbours
+      var grid = Grid3x3(0.0);
+      var polyline = new PolylineCurve(new[] { new Point3d(0, 0, 0.25), new Point3d(1, 0, 0.25), new Point3d(2, 0, 0.25) });
+
+      double suggested = Aligner.SuggestDistance(new GeometryBase[] { grid, polyline });
+
+      Assert.That(suggested, Is.EqualTo(0.25).Within(Epsilon));
+    }
     [Test]
     public void NullMeshesAreRejected()
     {

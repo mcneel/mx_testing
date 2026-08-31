@@ -107,6 +107,51 @@ namespace MxTests
       }
     }
 
+    // Three SubD triangles fanned on one vertex, two of whose corners are within reach of one
+    // another. Closing that gap collapses the middle triangle, and the two that remain have to
+    // stay joined along the edge that reaches the merged corner: the SubD may not fall into two
+    // pieces there. Its expected result follows the 'Results' layer convention, and the aligned
+    // SubD is what the engine produces, so it is written from the engine rather than by hand.
+    [Test, Explicit]
+    public void RewriteSubDSampleOracle()
+    {
+      string dir = Path.GetDirectoryName(g_test_models.First());
+      string path = Path.Combine(dir, "testing-sample-for-alignvertices-subd.3dm");
+
+      using (var file = File3dm.Read(path))
+      {
+        var results = file.AllLayers.First(l => l.Name.Equals("Results", StringComparison.InvariantCultureIgnoreCase));
+
+        const double distance = 12.0;
+
+        // SelectVertices is not stated: a SubD indexes its vertex flags by vertex id, so the
+        // indices the mesh sample uses mean nothing here.
+        file.Notes.Notes = string.Join(System.Environment.NewLine,
+          new[] { "COMPARE", "", $"DistanceToAdjust = {distance.ToString(CultureInfo.InvariantCulture)}", "AverageVertices = False" });
+
+        var inputs = file.Objects
+          .Where(o => o.Attributes.LayerIndex != results.Index && (o.Geometry is Mesh || o.Geometry is SubD || o.Geometry is Curve))
+          .Select(o => o.Geometry.Duplicate())
+          .ToList();
+
+        foreach (var stale in file.Objects.Where(o => o.Attributes.LayerIndex == results.Index).Select(o => o.Id).ToList())
+          file.Objects.Delete(stale);
+
+        int moved = Aligner.AlignVertices(inputs, distance, false, false);
+
+        foreach (var result in inputs)
+        {
+          var attributes = new ObjectAttributes { LayerIndex = results.Index };
+          if (result is Mesh m) file.Objects.AddMesh(m, attributes);
+          else if (result is SubD s) file.Objects.AddSubD(s, attributes);
+          else if (result is Curve c) file.Objects.AddCurve(c, attributes);
+        }
+
+        file.Write(path, 8);
+        TestContext.WriteLine($"rewrote testing-sample-for-alignvertices-subd.3dm, {moved} vertices moved");
+      }
+    }
+
     [Test, Explicit]
     public void CreateGeometryModels()
     {
