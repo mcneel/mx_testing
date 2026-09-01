@@ -1,0 +1,42 @@
+STEP EXPORT
+schema AP242
+export2dcurves false
+exportblack true
+splitclosedsurfaces false
+fileschema AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF { 1 0 10303 442 3 1 4 }
+srcunits Millimeters
+srcobjects 1
+srcinstances 0
+srcblockdefs 0
+srclayers 1
+srcbreps 1
+srcextrusions 0
+srcsurfaces 0
+srcmeshes 0
+srcsubds 0
+srccurves 0
+srcpoints 0
+srcother 0
+srcsolids 1
+srcinvalid 0
+srcarea 21106.058470956996
+srcvolume 78179.580695871424
+srcbbox -44,-7.1054273576010019E-15,-44 to 44,31,44
+units Millimeters
+objects 1
+instances 0
+blockdefs 0
+layers 1
+breps 1
+extrusions 0
+surfaces 0
+meshes 0
+subds 0
+curves 0
+points 0
+other 0
+solids 1
+invalid 0
+area 21106.058470155589
+volume 78179.5807023434
+bbox -44,-5.5511151231257827E-16,-44 to 44,31,44

@@ -1,0 +1,28 @@
+STEP IMPORT
+# 'invalid 1' below is deliberate and is NOT a statement that one bad brep is acceptable. It pins
+# the current defect so that a change is noticed: 2 means something got worse, 0 means the importer
+# was fixed and this baseline should be updated to 0.
+#
+# The offender, out of 2822 breps, as reported by the run:
+#   Brep centred at (0.086, 0.001, 1.526)
+#   brep.m_L[1] loop is not valid: end of brep.m_T[4]=(0.00280211, 0.0722747) and start of
+#   brep.m_T[5]=(0.00280482, 0.0722747) do not match.
+#
+# A 2.7e-6 gap in u between consecutive trims of one loop. Distinct from the failure the
+# NissanGT-R and Scania engine baselines record, which is an edge/vertex problem.
+units Millimeters
+objects 1
+instances 1
+blockdefs 84
+layers 1
+breps 2822
+extrusions 0
+surfaces 0
+meshes 0
+subds 0
+curves 0
+points 0
+other 0
+solids 2789
+invalid 1
+bbox -174.5595379610308,-25.659338260930461,-0.00090444235711461456 to 177.47175895602609,25.659338260930475,68.6017268586467

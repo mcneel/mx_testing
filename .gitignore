@@ -25,6 +25,7 @@
 **/bin/
 *.3dmbak
 *#*.3dm
+*#*.stp
 *.bak
 *.rhl
 *.tmp
@@ -35,6 +36,12 @@ lfs/
 
 # STEP test assemblies: hundreds of megabytes each, kept on disk but never committed.
 # Their .expected.txt baselines are tiny and are committed.
-models/STEPfile-large/*
-!models/STEPfile-large/*.expected.txt
-!models/STEPfile-large/readme.md
+# The folder is scanned with AllDirectories, so the models may be grouped in subfolders the way
+# models/STEPfile/AP214/ is. That is why this excludes recursively and then re-admits the
+# subfolders: a plain "models/STEPfile-large/*" stops git descending into them, and the
+# re-inclusions below never get a chance to match.
+models/STEPfile-large/**
+!models/STEPfile-large/**/
+!models/STEPfile-large/**/*.expected.txt
+!models/STEPfile-large/**/*.exported.txt
+!models/STEPfile-large/**/readme.md

@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.FileIO;
@@ -40,6 +40,16 @@ namespace MxTests
     internal int Other;
     internal int Solids;
     internal int Invalid;
+
+    /// <summary>
+    /// Why each invalid leaf failed, at most <see cref="MaxInvalidReports"/> of them. 'invalid 1'
+    /// on its own says a large assembly has one bad object somewhere among a few thousand and
+    /// leaves you no way to find it; this names the type and the validity log.
+    /// </summary>
+    internal readonly List<string> InvalidReports = new List<string>();
+
+    /// <summary>Enough to characterise the problem without flooding the log of a broken import.</summary>
+    internal const int MaxInvalidReports = 10;
 
     internal double Area;
     internal double Volume;
@@ -105,9 +115,19 @@ namespace MxTests
 
     internal static string PathFor(string modelPath) => modelPath + Suffix;
 
-    internal static StepOracleFile Read(string oraclePath)
+    /// <summary>Sidecar path for a model under a suffix other than the import one.</summary>
+    internal static string PathFor(string modelPath, string suffix) => modelPath + suffix;
+
+    internal static StepOracleFile Read(string oraclePath) => Read(oraclePath, Incipit, AllKeys);
+
+    /// <summary>
+    /// Parses one sidecar oracle. <paramref name="incipit"/> is the line it must open with and
+    /// <paramref name="knownKeys"/> the keys it may use, so that the export suite can reuse this
+    /// parser with its own vocabulary.
+    /// </summary>
+    internal static StepOracleFile Read(string oraclePath, string incipit, string[] knownKeys)
     {
-      var rc = new StepOracleFile();
+      var rc = new StepOracleFile { Incipit = incipit };
       bool incipitSeen = false;
 
       foreach (string raw in File.ReadAllLines(oraclePath))
@@ -119,9 +139,9 @@ namespace MxTests
 
         if (!incipitSeen)
         {
-          if (!line.StartsWith(Incipit, StringComparison.InvariantCultureIgnoreCase))
+          if (!line.StartsWith(incipit, StringComparison.InvariantCultureIgnoreCase))
             throw new NotSupportedException(
-              $"'{Path.GetFileName(oraclePath)}' must start with '{Incipit}', but starts with '{line}'.");
+              $"'{Path.GetFileName(oraclePath)}' must start with '{incipit}', but starts with '{line}'.");
           rc.Incipit = line;
           incipitSeen = true;
           continue;
@@ -135,15 +155,15 @@ namespace MxTests
         string key = line.Substring(0, split).Trim().ToLowerInvariant();
         string value = line.Substring(split + 1).Trim();
 
-        if (!AllKeys.Contains(key))
+        if (!knownKeys.Contains(key))
           throw new NotSupportedException(
-            $"'{Path.GetFileName(oraclePath)}': unknown key '{key}'. Known keys: {string.Join(", ", AllKeys)}.");
+            $"'{Path.GetFileName(oraclePath)}': unknown key '{key}'. Known keys: {string.Join(", ", knownKeys)}.");
 
         rc.Entries.Add(new KeyValuePair<string, string>(key, value));
       }
 
       if (!incipitSeen)
-        throw new NotSupportedException($"'{Path.GetFileName(oraclePath)}' is empty or has no '{Incipit}' line.");
+        throw new NotSupportedException($"'{Path.GetFileName(oraclePath)}' is empty or has no '{incipit}' line.");
 
       return rc;
     }
@@ -151,7 +171,18 @@ namespace MxTests
     /// <summary>Asserts the measured values against every key the oracle actually declares.</summary>
     internal static void Check(string filename, StepOracleFile oracle, StepMetrics actual)
     {
-      foreach (var entry in oracle.Entries)
+      Check(filename, oracle.Entries, actual);
+    }
+
+    /// <summary>
+    /// Asserts <paramref name="entries"/> against <paramref name="actual"/>. Taking the entries
+    /// rather than the whole file lets one caller assert one subset of a sidecar against one
+    /// measurement and another subset against another - which is what the export suite does with
+    /// its 'src'-prefixed keys.
+    /// </summary>
+    internal static void Check(string filename, IEnumerable<KeyValuePair<string, string>> entries, StepMetrics actual)
+    {
+      foreach (var entry in entries)
       {
         string key = entry.Key;
         string value = entry.Value;
@@ -192,6 +223,17 @@ namespace MxTests
             {
               double expected = ParseDouble(value, where);
               Assert.AreEqual(expected, actual.Volume, Delta(expected), where);
+            }
+            break;
+
+          case "invalid":
+            {
+              // The one count worth explaining when it differs: 'expected 0 but was 1' over a
+              // 2000-brep assembly is useless on its own.
+              string detail = actual.InvalidReports.Count == 0
+                ? string.Empty
+                : System.Environment.NewLine + string.Join(System.Environment.NewLine, actual.InvalidReports);
+              Assert.AreEqual(ParseInt(value, where), actual.Invalid, where + detail);
             }
             break;
 
@@ -270,10 +312,16 @@ namespace MxTests
 
     internal static string Write(StepOracleFile old, IEnumerable<string> keys, StepMetrics m)
     {
+      return Write(Incipit, old, keys.Select(k => Format(k, m)));
+    }
+
+    /// <summary>Assembles a sidecar from an incipit, the old file's comments and ready-made lines.</summary>
+    internal static string Write(string incipit, StepOracleFile old, IEnumerable<string> lines)
+    {
       var sb = new StringBuilder();
-      sb.Append(Incipit).Append('\n');
+      sb.Append(incipit).Append('\n');
       if (old != null) foreach (string c in old.Comments) sb.Append(c).Append('\n');
-      foreach (string k in keys) sb.Append(Format(k, m)).Append('\n');
+      foreach (string line in lines) sb.Append(line).Append('\n');
       return sb.ToString();
     }
   }
@@ -331,13 +379,19 @@ namespace MxTests
       var m = new StepMetrics
       {
         Units = doc.ModelUnitSystem.ToString(),
-        Objects = doc.Objects.Count,
         BlockDefs = doc.InstanceDefinitions.Count,
         Layers = doc.Layers.Count,
       };
 
+      // Deliberately not doc.Objects.Count: that also counts the objects living inside block
+      // definitions, so a nested assembly reports 19 where Rhino shows one block instance. Counting
+      // what the enumerator yields keeps 'objects' equal to what a person sees in the model, which
+      // is what someone hand-writing a baseline for models\STEPfile-future\ will write down.
       foreach (RhinoObject obj in doc.Objects)
+      {
+        m.Objects++;
         if (obj is InstanceObject) m.Instances++;
+      }
 
       Walk(doc.Objects.Cast<RhinoObject>(), Transform.Identity, 0, m, wantArea, wantVolume, wantBbox);
 
@@ -373,7 +427,12 @@ namespace MxTests
     static void Leaf(GeometryBase geometry, Transform xform, StepMetrics m,
                      bool wantArea, bool wantVolume, bool wantBbox)
     {
-      if (!geometry.IsValid) m.Invalid++;
+      if (!geometry.IsValid)
+      {
+        m.Invalid++;
+        if (m.InvalidReports.Count < StepMetrics.MaxInvalidReports)
+          m.InvalidReports.Add(DescribeInvalid(geometry));
+      }
 
       bool solid = false;
       switch (geometry)
@@ -413,6 +472,35 @@ namespace MxTests
       {
         if (placed != null) placed.Dispose();
       }
+    }
+
+    /// <summary>
+    /// One line naming an invalid leaf and, where the type offers a validity log, saying why.
+    /// The bounding box is included because it is usually the only way to find the thing again in
+    /// a 2000-brep assembly.
+    /// </summary>
+    static string DescribeInvalid(GeometryBase geometry)
+    {
+      string reason = null;
+      switch (geometry)
+      {
+        case Brep brep: brep.IsValidWithLog(out reason); break;
+        case Mesh mesh: mesh.IsValidWithLog(out reason); break;
+        case Curve curve: curve.IsValidWithLog(out reason); break;
+        case SubD subd: subd.IsValidWithLog(out reason); break;
+      }
+
+      if (string.IsNullOrWhiteSpace(reason)) reason = "no validity log available for this type";
+      reason = reason.Replace("\r", " ").Replace("\n", " ").Trim();
+
+      // Rounded, not round-tripped: this is a signpost for a human opening the model, not an
+      // oracle value, and full double precision would drown the message.
+      BoundingBox box = geometry.GetBoundingBox(true);
+      string where = box.IsValid
+        ? $"({box.Center.X:F3}, {box.Center.Y:F3}, {box.Center.Z:F3})"
+        : "an invalid bounding box";
+
+      return $"{geometry.GetType().Name} centred at {where}: {reason}";
     }
 
     static double AreaOf(GeometryBase geometry)
@@ -523,6 +611,13 @@ namespace MxTests
         $"[MXSTEP]\t{filename}\tobjects={m.Objects}\tbreps={m.Breps}\tsolids={m.Solids}\tinvalid={m.Invalid}" +
         $"\tseconds={m.ReadSeconds.ToString("F2", CultureInfo.InvariantCulture)}";
 
+      foreach (string report in m.InvalidReports)
+        line += $"{System.Environment.NewLine}[MXSTEP]\t{filename}\tinvalid: {report}";
+
+      if (m.Invalid > m.InvalidReports.Count)
+        line += $"{System.Environment.NewLine}[MXSTEP]\t{filename}\tinvalid: " +
+                $"and {m.Invalid - m.InvalidReports.Count} more, not listed.";
+
       try { TestContext.Progress.WriteLine(line); } catch { /* progress stream is best-effort */ }
 
       string logPath = System.Environment.GetEnvironmentVariable("MX_STEP_LOG");
@@ -546,16 +641,32 @@ namespace MxTests
                       .Any(s => s == "*" || filename.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) >= 0);
     }
 
+    /// <summary>Outcome of one <see cref="RegenerateOracle"/> call.</summary>
+    internal enum RegenOutcome
+    {
+      /// <summary>The file was not named by MX_STEP_REGEN.</summary>
+      Skipped,
+
+      /// <summary>The oracle was rewritten, or would have been under MX_STEP_REGEN_DRYRUN.</summary>
+      Written,
+
+      /// <summary>The model could not be imported, so there was nothing to record.</summary>
+      Failed,
+    }
+
     /// <summary>
     /// Re-imports one model and rewrites its sidecar oracle from what was actually measured.
     /// An existing oracle keeps exactly the keys it already declares; a new one gets
     /// <paramref name="defaultKeys"/>. MX_STEP_REGEN_FIELDS=ALL or =COUNTS overrides both.
     /// MX_STEP_REGEN_DRYRUN=1 reports without writing.
     /// </summary>
-    internal static bool RegenerateOracle(string filepath, string[] defaultKeys)
+    /// <param name="failure">Set to the reason when <see cref="RegenOutcome.Failed"/> is returned.</param>
+    internal static RegenOutcome RegenerateOracle(string filepath, string[] defaultKeys, out string failure)
     {
+      failure = null;
+
       string filename = Path.GetFileName(filepath);
-      if (!RegenSelected(filename)) return false;
+      if (!RegenSelected(filename)) return RegenOutcome.Skipped;
 
       bool dryRun = System.Environment.GetEnvironmentVariable("MX_STEP_REGEN_DRYRUN") == "1";
       string oraclePath = StepOracle.PathFor(filepath);
@@ -569,8 +680,11 @@ namespace MxTests
         bool rc = StepImporter.Read(filepath, doc, out double seconds);
         if (!rc || doc.Objects.Count == 0)
         {
-          Assert.Fail($"[regen] '{filename}': import failed (returned {rc}, {doc.Objects.Count} objects); cannot regenerate.");
-          return false;
+          // Not an assert: the caller walks a whole folder, and one un-importable model must not
+          // hide the baselines of every model after it.
+          failure = $"[regen] '{filename}': import failed (returned {rc}, {doc.Objects.Count} objects); cannot regenerate.";
+          AppendRegenReport($"===== REGEN {filename}  [FAILED] =====\n{failure}\n\n");
+          return RegenOutcome.Failed;
         }
 
         StepMetrics measured = StepImporter.Measure(doc, keys);
@@ -583,18 +697,25 @@ namespace MxTests
           "----- OLD -----\n" + (old == null ? "(none)" : File.ReadAllText(oraclePath).TrimEnd()) + "\n" +
           "----- NEW -----\n" + newText.TrimEnd() + "\n\n";
 
-        TestContext.Progress.WriteLine(report);
-        string logPath = System.Environment.GetEnvironmentVariable("MX_STEP_REGEN_LOG");
-        if (string.IsNullOrWhiteSpace(logPath)) logPath = Path.Combine(Path.GetTempPath(), "mx_step_regen_report.txt");
-        try { File.AppendAllText(logPath, report); } catch { /* report file is best-effort */ }
+        AppendRegenReport(report);
 
         if (!dryRun) File.WriteAllText(oraclePath, newText);
-        return true;
+        return RegenOutcome.Written;
       }
       finally
       {
         doc.Dispose();
       }
+    }
+
+    /// <summary>Echoes one regeneration report to the progress stream and to MX_STEP_REGEN_LOG.</summary>
+    static void AppendRegenReport(string report)
+    {
+      try { TestContext.Progress.WriteLine(report); } catch { /* progress stream is best-effort */ }
+
+      string logPath = System.Environment.GetEnvironmentVariable("MX_STEP_REGEN_LOG");
+      if (string.IsNullOrWhiteSpace(logPath)) logPath = Path.Combine(Path.GetTempPath(), "mx_step_regen_report.txt");
+      try { File.AppendAllText(logPath, report); } catch { /* report file is best-effort */ }
     }
 
     static string[] ChooseKeys(StepOracleFile old, string[] defaultKeys)
@@ -636,6 +757,15 @@ namespace MxTests
     [Test]
     public void ThereAreDataDrivenModels()
     {
+      // An [Explicit] fixture is allowed to find nothing: the -future folders are empty whenever
+      // there is no outstanding bug, and the -large models are deliberately not committed, so on
+      // most machines that folder does not exist at all. A fixture that runs by default is not -
+      // an empty corpus there means the ModelDirectory entries are wrong, which is worth failing on.
+      if (g_test_models.Count == 0 &&
+          typeof(T).GetCustomAttributes(typeof(ExplicitAttribute), false).Length > 0)
+        Assert.Ignore(
+          $"'{typeof(T).Name}' is [Explicit] and its folders hold no models. Nothing to do.");
+
       Assert.IsNotEmpty(g_test_models, $"There are no data driven models for '{GetType().Name}'.");
     }
 
@@ -665,8 +795,21 @@ namespace MxTests
     internal static void ExecuteRegenerate(string[] defaultKeys)
     {
       int n = 0;
+      List<string> failures = new List<string>();
+
       foreach (string path in g_test_models)
-        if (StepImportRunner.RegenerateOracle(path, defaultKeys)) n++;
+      {
+        StepImportRunner.RegenOutcome outcome =
+          StepImportRunner.RegenerateOracle(path, defaultKeys, out string failure);
+
+        if (outcome == StepImportRunner.RegenOutcome.Written) n++;
+        else if (outcome == StepImportRunner.RegenOutcome.Failed) failures.Add(failure);
+      }
+
+      if (failures.Count > 0)
+        Assert.Fail($"Regenerated {n} baseline(s). {failures.Count} model(s) could not be imported:"
+                    + System.Environment.NewLine
+                    + string.Join(System.Environment.NewLine, failures));
 
       if (n == 0)
         Assert.Ignore($"No models matched MX_STEP_REGEN='{System.Environment.GetEnvironmentVariable("MX_STEP_REGEN")}'.");

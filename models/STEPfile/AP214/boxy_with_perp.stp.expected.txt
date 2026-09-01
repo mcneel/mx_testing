@@ -1,0 +1,19 @@
+STEP IMPORT
+units Millimeters
+objects 1
+instances 0
+blockdefs 0
+layers 1
+breps 1
+extrusions 0
+surfaces 0
+meshes 0
+subds 0
+curves 0
+points 0
+other 0
+solids 1
+invalid 0
+area 48826.636690922154
+volume 174839.17813071987
+bbox -40.000000000000014,-40.000000000000014,-1.4210854715202004E-14 to 40.000000000000007,40.000000000000014,80

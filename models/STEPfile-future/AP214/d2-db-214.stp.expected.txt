@@ -1,0 +1,58 @@
+STEP IMPORT
+# HAND-WRITTEN GOAL, NOT A MEASUREMENT. Do not run Regenerate over this folder without
+# MX_STEP_REGEN_DRYRUN=1 -- regenerating would replace this goal with the current bug.
+#
+# Rhino 9.0.26238 imports nothing at all from this file: FileStp.Read returns true and the
+# document ends up with zero objects. The file does contain a solid:
+#
+#   #988  = MANIFOLD_SOLID_BREP('*SOL1', #987)                 -- 9 ADVANCED_FACEs
+#   #1001 = ADVANCED_BREP_SHAPE_REPRESENTATION('*MASTER', (#988, #1000), #996)
+#   #1139 = SHAPE_DEFINITION_REPRESENTATION(#20, #1001)        -- product shape -> the solid
+#
+# What appears to make this file different from the ones that do import is that its single
+# PRODUCT_DEFINITION_SHAPE #20 carries four representations, not one:
+#
+#   #1139 -> #1001 ADVANCED_BREP_SHAPE_REPRESENTATION  ('*MASTER', the solid)
+#   #1140 -> #1007 DRAUGHTING_MODEL                    ('2D WIREFRAME 1')
+#   #1141 -> #1019 DRAUGHTING_MODEL                    ('2D WIREFRAME 2')
+#   #1142 -> #1032 DRAUGHTING_MODEL                    ('2D WIREFRAME 3')
+#
+# f1-db-214.stp, which does import, has the same '*MASTER' structure but only one
+# SHAPE_DEFINITION_REPRESENTATION on its product shape. JoinSurfaces makes no difference;
+# neither does LimitFaces.
+#
+# Root cause, in src4\rhino4\Plug-ins\io_STEP\import_STEP\StepToRhino.cpp:
+#
+#   GetRepresentation()          ~line 3408
+#     ON_SimpleArray<stp_shape_definition_representation*> sdr_list;
+#     GetSDRUsedInList(pds, sdr_list);
+#     if (sdr_list.Count() != 1)
+#       return 0;                <-- four SDRs here, so it gives up
+#
+#   caller                       ~line 4887
+#     stp_representation* rep = GetRepresentation(pd_array[i]);
+#     if (!rep)
+#       return false;            <-- and that abandons the whole file
+#
+# So it is not that the importer picks the wrong representation of the four; it refuses to pick
+# at all unless there is exactly one, and one product definition failing that test abandons the
+# entire import. That is why the failure is total and silent. Note that the same file already
+# has GetProductDefSDRs(), which does handle a product shape with several SDRs, so the fix is
+# probably to select the ADVANCED_BREP_SHAPE_REPRESENTATION out of the list rather than to
+# require the list to have one entry.
+#
+# (Static reading of the importer source, matching the observed behaviour. Not stepped through
+# in a debugger -- there is no Rhino build in the source tree to debug.)
+#
+# The goal below is therefore counts only. The solid's area and volume are deliberately not
+# pinned: nothing has ever imported it, so there is no trustworthy number to write here yet.
+# Add them once the file imports and the result has been eyeballed in Rhino.
+#
+# When this fixture goes green, move the file and this baseline into models\STEPfile\AP214\.
+units Millimeters
+objects 1
+instances 0
+blockdefs 0
+breps 1
+solids 1
+invalid 0

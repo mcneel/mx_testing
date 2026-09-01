@@ -1,0 +1,28 @@
+STEP IMPORT
+# 'invalid 1' below is deliberate and is NOT a statement that one bad brep is acceptable. It pins
+# the current defect so that a change is noticed: 2 means something got worse, 0 means the importer
+# was fixed and this baseline should be updated to 0.
+#
+# The offender, out of 1330 breps, as reported by the run:
+#   Brep centred at (17.498, -8.300, 9.967)
+#   brep.m_E[289] edge is not valid: edge.m_vi[]=(252,251) but edge.IsClosed() is true.
+#
+# The same failure NissanGT-R.STEP produces, from an unrelated file by a different exporter: an
+# edge whose curve is geometrically closed while carrying two different vertices. Two independent
+# assemblies hitting it makes this a repeatable importer defect worth its own investigation.
+units Millimeters
+objects 1
+instances 1
+blockdefs 187
+layers 1
+breps 1330
+extrusions 0
+surfaces 0
+meshes 0
+subds 0
+curves 0
+points 0
+other 0
+solids 1295
+invalid 1
+bbox -555.348485498326,-374.503999964995,-457.50000000000097 to 555.34848549769333,1402.0000000042521,856.74997169453354

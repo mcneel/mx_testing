@@ -144,7 +144,7 @@ Available keys:
 | `layers` | Layers in the document. |
 | `breps`, `extrusions`, `surfaces`, `meshes`, `subds`, `curves`, `points`, `other` | Counts of leaf geometry, that is, after block instances are expanded. An assembly that arrives nested measures the same as the same assembly arriving flat. |
 | `solids` | Leaf geometry that is a closed solid. |
-| `invalid` | Leaf geometry that fails `IsValid`. Normally `0`. |
+| `invalid` | Leaf geometry that fails `IsValid`. Normally `0`. When it is not, the run names the offenders - geometry type, centre of the bounding box, and the `IsValidWithLog` reason - on the progress stream, in `MX_STEP_LOG`, and in the failure message if the count differs from the baseline. Up to ten are listed. |
 | `area` | Total area of the leaf surfaces, breps and meshes. |
 | `volume` | Total volume of the leaf solids. |
 | `bbox` | Bounding box of everything, as `minX,minY,minZ to maxX,maxY,maxZ`. |
@@ -174,6 +174,71 @@ The `#` (skip) and `!` (expected to fail) file name prefixes work exactly as the
 | `MX_STEP_REGEN_DRYRUN` | `1` reports the before/after without writing anything. |
 | `MX_STEP_REGEN_LOG` | Where the before/after report is appended. Defaults to `%TEMP%\mx_step_regen_report.txt`. |
 | `MX_STEP_LOG` | Where each run's measurements and import time are appended. Defaults to `%TEMP%\mx_step.txt`. |
+
+#### To add a new STEP export test: ####
+
+Export is tested as a **round trip**: open the source model, write it out through Rhino's STEP writer, read the result back in, and compare both ends. That is what makes it checkable without hand-authoring a reference STEP file for every model - and comparing the two ends against each other is more informative than either alone, because the difference between them *is* what the export did.
+
+The sidecar is named `.exported.txt`, so an import baseline and an export baseline sit side by side without colliding:
+
+```
+as1-ac-214.stp
+as1-ac-214.stp.expected.txt     <- StepImport
+as1-ac-214.stp.exported.txt     <- StepExport
+```
+
+1. Drop the source model in `models\STEPfile-export\` if it is a `.3dm`. STEP sources need nothing: `StepExport` already scans `models\STEPfile\`, so every model the import suite guards is round tripped too.
+1. Generate its baseline: run the `StepExport.Regenerate` test (`[Explicit]`) with `MX_STEPEXPORT_REGEN` set to a substring of the file name, or to `*` for the whole folder.
+1. **Read the generated file before committing it.** The `src*` keys are the model as it went in and the unprefixed keys are the model as it came back; a baseline that records a loss you did not intend is telling you something.
+1. Trim it to what you actually want to pin, and set the write options you want to cover.
+
+The sidecar looks like this:
+
+```
+STEP EXPORT
+# RH-12345
+
+schema AP214
+export2dcurves false
+exportblack true
+splitclosedsurfaces false
+fileschema AUTOMOTIVE_DESIGN
+
+srcobjects 10
+srcmeshes 1
+srcarea 3034.8671465679704
+
+objects 1
+meshes 0
+area 2434.8671428461462
+```
+
+Beyond the import keys, which all work here on both sides of the trip, an export sidecar has:
+
+| Key | Meaning |
+| --- | --- |
+| `schema` | Which schema to write: `AP203`, `AP214`, `AP214_CC2` or `AP242`. Defaults to `AP214` - note that `FileStpWriteOptions` itself defaults to AP203, which the suite deliberately does not inherit. |
+| `export2dcurves`, `exportblack`, `splitclosedsurfaces` | The remaining `FileStpWriteOptions` flags. All three are pinned in every baseline rather than inherited, so a moved default shows up as a diff. |
+| `fileschema` | What the written file's `FILE_SCHEMA` header actually declares. Compared by containment, so a baseline may pin the whole stamp (`AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF { 1 0 10303 442 3 1 4 }`) or just `AP242`. |
+| `src` + any import key | The measurement of the **source**, before the export. `srcbreps`, `srcarea`, `srcbbox` and so on. |
+| any import key | The same measurement of what came **back** from the round trip. |
+
+A model with no sidecar still runs, and still gets the checks that need no baseline: `FileStp.Write` returned true, it wrote a non-empty file, the file opens with `ISO-10303-21;`, declares a `FILE_SCHEMA`, ends with `END-ISO-10303-21;`, and imports again into at least one object. The run says so on the progress stream - `no baseline: Part 21 invariants only` - and asserts nothing about the geometry. Set `MX_STEPEXPORT_REQUIRE_BASELINE=1` to turn a missing sidecar into a failure instead.
+
+The `#` and `!` file name prefixes work as everywhere else. When a test fails, the STEP file that was written is kept beside the model as `#name.exported.stp` and what it read back is saved as `#name.exported.3dm`, so both ends of the failure can be opened. `MX_STEPEXPORT_KEEP=1` keeps the written file even on success.
+
+**The folders:**
+
+| Folder | Fixture | Runs by default | Holds |
+| --- | --- | --- | --- |
+| `models\STEPfile\` | `StepExport` | yes | Shared with `StepImport`. A file worth guarding on the way in is worth guarding on the way out. |
+| `models\STEPfile-export\` | `StepExport` | yes | `.3dm` sources. The only way to put Rhino-native geometry - extrusions, blocks, open surfaces, meshes - through the writer, since a STEP source can only ever hand it what a STEP reader produced. |
+| `models\STEPfile-export-future\` | `StepExportFuture` | no, `[Explicit]` | Models that do not survive the round trip yet. |
+| `models\STEPfile-large\` | `StepExportLarge` | no, `[Explicit]` | Shared with `StepImportLarge`. Three times the cost, since it is an import, an export and a second import. |
+
+`models\STEPfile-export\rhino-native-mix.3dm` is generated rather than drawn: `MxTests\AuthorExportSource.cs` is the readable statement of what is in it and the way to extend it. It carries a solid, a capped cylinder, an extrusion, an open surface, curves, a point, a mesh and a block inserted twice, and its baseline records what happens to each.
+
+**Regeneration environment variables** mirror the import ones exactly, on their own names so that regenerating one suite never quietly rewrites the other: `MX_STEPEXPORT_REGEN`, `MX_STEPEXPORT_REGEN_FIELDS`, `MX_STEPEXPORT_REGEN_DRYRUN`, `MX_STEPEXPORT_REGEN_LOG`, `MX_STEPEXPORT_LOG`. The comparison tolerances are shared with the import suite: `MX_STEP_RELTOL` and `MX_STEP_ABSTOL`.
 
 
 ### Notes on inner mechanics ###

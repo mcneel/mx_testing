@@ -1,0 +1,17 @@
+STEP IMPORT
+units Millimeters
+objects 1
+instances 1
+blockdefs 46
+layers 1
+breps 94
+extrusions 0
+surfaces 0
+meshes 0
+subds 0
+curves 0
+points 0
+other 0
+solids 94
+invalid 0
+bbox -555.40389014731124,-240.00000000000296,-548.39113317619729 to 549.95227645112186,706.15352738356569,556.25135203236709

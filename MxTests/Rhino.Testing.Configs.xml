@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Settings>
-  <RhinoSystemDirectory>C:\Program Files\Rhino 8\System\</RhinoSystemDirectory>
+  <RhinoSystemDirectory>C:\Program Files\Rhino 9 WIP\System\</RhinoSystemDirectory>
   <!-- Uncomment line below and set to system path of Rhino to test (overrides value set above) -->
   <!--<RhinoSystemDirectory>C:\dev\github\mcneel\rhino\src4\bin\Release\</RhinoSystemDirectory>-->
 
@@ -50,6 +50,24 @@
          committed, so both locations are optional. -->
     <ModelDirectory Fixture="StepImportLarge" Location="..\..\..\..\models\STEPfile-large\" Optional="true" Enabled="true" />
     <ModelDirectory Fixture="StepImportLarge" Location="..\..\..\..\private_models\models\STEPfile-large\" Optional="true" Enabled="true" />
+
+    <!-- StepExport round trips a model out through the STEP writer and back in. It reuses the
+         import corpus - a file worth guarding on the way in is worth guarding on the way out -
+         and adds models\STEPfile-export\ for .3dm sources, the only way to put Rhino-native
+         geometry through the writer. -->
+    <ModelDirectory Fixture="StepExport" Location="..\..\..\..\models\STEPfile\" Enabled="true" />
+    <ModelDirectory Fixture="StepExport" Location="..\..\..\..\models\STEPfile-export\" Enabled="true" />
+    <ModelDirectory Fixture="StepExport" Location="..\..\..\..\private_models\models\STEPfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="StepExport" Location="..\..\..\..\private_models\models\STEPfile-export\" Optional="true" Enabled="true" />
+
+    <!-- StepExportFuture is [Explicit]: models that do not survive the round trip yet. -->
+    <ModelDirectory Fixture="StepExportFuture" Location="..\..\..\..\models\STEPfile-export-future\" Enabled="true" />
+    <ModelDirectory Fixture="StepExportFuture" Location="..\..\..\..\private_models\models\STEPfile-export-future\" Optional="true" Enabled="true" />
+
+    <!-- StepExportLarge is [Explicit] too, and costs an import, an export and a second import per
+         model. Same uncommitted assemblies as StepImportLarge, so both locations are optional. -->
+    <ModelDirectory Fixture="StepExportLarge" Location="..\..\..\..\models\STEPfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="StepExportLarge" Location="..\..\..\..\private_models\models\STEPfile-large\" Optional="true" Enabled="true" />
   </ModelDirectories>
 
 </Settings>

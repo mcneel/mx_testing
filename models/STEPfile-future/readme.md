@@ -20,3 +20,9 @@ They describe the wanted result, not the current one, so regenerating one replac
 bug. Use `MX_STEP_REGEN_DRYRUN=1` to see what Rhino currently produces without writing anything.
 
 See the repository readme for the file format and the full set of keys.
+
+## What is in here ##
+
+| Model | Symptom |
+| --- | --- |
+| `AP214\d2-db-214.stp` | Imports nothing at all. `FileStp.Read` returns true and the document has zero objects, although the file holds a `MANIFOLD_SOLID_BREP` on its `*MASTER` shape representation. Its product definition shape carries three `DRAUGHTING_MODEL`s alongside the brep representation, which the file's baseline comments explain in full. |
