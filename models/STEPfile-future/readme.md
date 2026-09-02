@@ -26,3 +26,4 @@ See the repository readme for the file format and the full set of keys.
 | Model | Symptom |
 | --- | --- |
 | `AP214\d2-db-214.stp` | Imports nothing at all. `FileStp.Read` returns true and the document has zero objects, although the file holds a `MANIFOLD_SOLID_BREP` on its `*MASTER` shape representation. Its product definition shape carries three `DRAUGHTING_MODEL`s alongside the brep representation, which the file's baseline comments explain in full. |
+| `NIST_FTC\nist_ftc_06_asme1_rd.stp` | Imports all 144 faces of a `CLOSED_SHELL` but leaves one of them open. Exactly one naked edge remains -- the top rim of a 7.1374 mm cylindrical hole -- so the brep is not a solid and its volume measures 0. Nothing was built where the mating boundary should be. The file's baseline comments give the edge indices and coordinates. |

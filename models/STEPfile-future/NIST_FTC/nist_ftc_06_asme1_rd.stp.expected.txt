@@ -1,0 +1,55 @@
+STEP IMPORT
+# HAND-WRITTEN GOAL, NOT A MEASUREMENT. Do not run Regenerate over this folder without
+# MX_STEP_REGEN_DRYRUN=1 -- regenerating would replace this goal with the current bug.
+#
+# NIST MBE PMI FTC-06. The file is AP203, authored in inches, with a file tolerance of 1e-06,
+# and its shape is a single closed solid:
+#
+#   #101 = MANIFOLD_SOLID_BREP('', #102)   -- #102 is a CLOSED_SHELL over 144 ADVANCED_FACEs
+#   ADVANCED_BREP_SHAPE_REPRESENTATION     -- plus one GEOMETRIC_CURVE_SET of supplemental
+#                                             geometry: 73 curves and 34 points, on 11 layers
+#
+# Rhino 9.0.26245 imports all 144 faces but cannot close them. The importer says so itself, on
+# the command line:
+#
+#   Unable to fully close all of the solid objects in this STEP file. Some objects have naked edges
+#
+# The result is one brep, IsValid, IsManifold, 144 faces, 370 edges -- and exactly one naked
+# edge, so `solids` measures 0 and `volume` measures 0 for a part that is a solid in the file.
+#
+# The unclosed feature is face 74: a cylindrical hole wall, diameter 7.1374 mm (0.28125 in),
+# axis along Z, running from z = -239.7125 to z = -209.55 (30.1625 mm = 1.1875 in long), on
+# axis (-108.585, 50.8) mm in the imported document.
+#
+#   edge 224  z = -239.7125  closed circle  interior, joins face 75   <- bottom rim, fine
+#   edge 226  the seam       line           interior, face 74 twice
+#   edge 225  z = -209.55    closed circle  NAKED, face 74 only       <- top rim, unjoined
+#
+# Nothing else in the brep comes within 7 mm of that top rim -- the nearest edge is face 74's
+# own seam -- so this is not a join that missed by a hair: no mating boundary was built there at
+# all. The reading that fits is that the inner loop cutting this hole into the face it opens
+# through was never applied, leaving the hole wall opening into an untrimmed neighbour. That is
+# an inference from the imported geometry, not from stepping through the importer. Every
+# EDGE_LOOP in the file is referenced by exactly one FACE_BOUND / FACE_OUTER_BOUND, so it is not
+# the shared-loop pattern that d2-db-214.stp turns on.
+#
+# The goal below is counts only. `area` and `volume` are deliberately not pinned: no import has
+# ever closed this shell, so there is no trustworthy number to write here yet. Add them once the
+# file imports as a solid and the result has been eyeballed in Rhino.
+#
+# When this fixture goes green, move the file and this baseline into models\STEPfile\NIST_FTC\.
+units Millimeters
+objects 108
+instances 0
+blockdefs 0
+layers 11
+breps 1
+extrusions 0
+surfaces 0
+meshes 0
+subds 0
+curves 73
+points 34
+other 0
+solids 1
+invalid 0

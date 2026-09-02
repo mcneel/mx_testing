@@ -1,18 +1,18 @@
 # STEP import and export tests — how they work, and how to add one
 
-**Scope:** the 47 STEP tests in `MxTests`. Implementation lives in `MxTests\StepImportBase.cs` and
+**Scope:** the 57 STEP tests in `MxTests`. Implementation lives in `MxTests\StepImportBase.cs` and
 `MxTests\StepExportBase.cs`; the folder-to-fixture mapping is in `MxTests\Rhino.Testing.Configs.xml`.
 The repository `readme.md` covers the same ground in condensed form (§ "To add a new STEP import
 test" and § "To add a new STEP export test").
 
 ---
 
-## The 47
+## The 57
 
 | Fixture | Tests | Runs by default? | Folder |
 | --- | --- | --- | --- |
-| `StepImport` | 22 (21 models + `ThereAreDataDrivenModels`) | yes | `models\STEPfile\` |
-| `StepExport` | 25 (24 models + `ThereAreDataDrivenModels`) | yes | `models\STEPfile\` + `models\STEPfile-export\` |
+| `StepImport` | 27 (26 models + `ThereAreDataDrivenModels`) | yes | `models\STEPfile\` |
+| `StepExport` | 30 (29 models + `ThereAreDataDrivenModels`) | yes | `models\STEPfile\` + `models\STEPfile-export\` |
 | `StepImportFuture` | — | no, `[Explicit]` | `models\STEPfile-future\` |
 | `StepImportLarge` | — | no, `[Explicit]` | `models\STEPfile-large\` |
 | `StepExportFuture` | — | no, `[Explicit]` | `models\STEPfile-export-future\` |
@@ -269,7 +269,7 @@ block instance.
 
 | Key | Values | Note |
 | --- | --- | --- |
-| `schema` | `AP203`, `AP214`, `AP214_CC2`, `AP242` (and the `SF_*` spellings) | Suite default is **AP214**, because that is what the corpus is and what most callers ask for. |
+| `schema` | `AP203`, `AP214`, `AP214_CC2`, `AP242` (and the `SF_*` spellings) | Suite default is **AP214**, because that is what most of the corpus is and what most callers ask for. The NIST FTC models are AP203 sources; they are still written back out as AP214. |
 | `export2dcurves` | `true` / `false` (`1` / `0`) | Default `false`. |
 | `exportblack` | `true` / `false` | Default `true`. |
 | `splitclosedsurfaces` | `true` / `false` | Default `false`. Some receiving systems need it. |
