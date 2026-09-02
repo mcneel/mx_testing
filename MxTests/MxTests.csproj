@@ -35,6 +35,11 @@
     <Compile Remove="SurfaceIntersect.cs" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(InRhino)' == 'False'">
+    <!-- the MeshMeshPredicate overload with witness faces is not in a released RhinoCommon yet. See RH-67482. -->
+    <Compile Remove="MeshIntersectPredicate.cs" />
+  </ItemGroup>
+
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
     <WarningLevel>1</WarningLevel>
     <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
@@ -65,7 +70,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="8.*" PrivateAssets="all" ExcludeAssets="runtime" IncludeAssets="compile; build; native; contentfiles; analyzers; buildtransitive" />
+        <PackageReference Include="RhinoCommon" Version="*-*" PrivateAssets="all" ExcludeAssets="runtime" IncludeAssets="compile; build; native; contentfiles; analyzers; buildtransitive" />
+        <!-- Exclude references from Rhino.Testing dependency. Grasshopper pins RhinoCommon exactly, so both float together. -->
+        <PackageReference Include="Grasshopper" Version="*-*" ExcludeAssets="all" />
       </ItemGroup>
     </Otherwise>
   </Choose>
