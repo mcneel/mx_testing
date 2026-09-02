@@ -1,0 +1,22 @@
+<Project>
+  <!-- LOCAL override for building the tests standalone (outside the Rhino source tree).
+
+       Both test projects target net48;net10.0-windows. The net10.0-windows tests build and
+       discover fine, but the test host crashes on run against Rhino.Testing 9.0.5-beta /
+       Rhino 9 WIP:
+
+           The active test run was aborted. Reason: Test host process crashed
+
+       In the IDE that means Test Explorer lists the net10 duplicates alongside the net48 ones,
+       and running one produces a build log with no test results. Narrow the standalone build to
+       net48, which runs green in VS 2026 Test Explorer, vstest.console and `dotnet test`.
+
+       This must live in a .targets file, not .props: TargetFrameworks is assigned in the csproj
+       body, and .targets is imported after it.
+
+       The in-Rhino build ('$(InRhino)' == 'True') is deliberately untouched. Drop the net48
+       narrowing once Rhino.Testing can host the tests on .NET 10. -->
+  <PropertyGroup Condition="'$(InRhino)' != 'True'">
+    <TargetFrameworks>net48</TargetFrameworks>
+  </PropertyGroup>
+</Project>
