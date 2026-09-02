@@ -34,6 +34,10 @@
   <ItemGroup Condition="'$(InRhino)' == 'False'">
     <!-- this test only works in the Rhino build, uses unpublished SDK functions. -->
     <Compile Remove="FilletEdgeVariableRadius.cs" />
+    <!-- the SubD surface parameter API (SubDComponentParameter, SubD.ClosestPoint,
+         SubD.Evaluate) is not in a released RhinoCommon yet. See RH-71098, RH-53383. -->
+    <Compile Remove="SubDComponentParameter.cs" />
+    <Compile Remove="SubDEvaluate.cs" />
   </ItemGroup>
 
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
@@ -70,7 +74,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="8.*" PrivateAssets="all" ExcludeAssets="runtime" IncludeAssets="compile; build; native; contentfiles; analyzers; buildtransitive" />
+        <PackageReference Include="RhinoCommon" Version="*-*" PrivateAssets="all" ExcludeAssets="runtime" IncludeAssets="compile; build; native; contentfiles; analyzers; buildtransitive" />
+        <!-- Exclude references from Rhino.Testing dependency. Grasshopper pins RhinoCommon exactly, so both float together. -->
+        <PackageReference Include="Grasshopper" Version="*-*" ExcludeAssets="all" />
       </ItemGroup>
     </Otherwise>
   </Choose>

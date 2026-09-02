@@ -89,6 +89,64 @@ namespace MxTests
     }
 
     [Test]
+    public void FastAndPrecise_AgreeOnPenetratingBoxes_AndReportWitnessFaces()
+    {
+      SetupFixture.Prerequisites();
+      using (var a = Box(0, 0, 0, 1, 1, 1))
+      using (var b = Box(0.5, 0.5, 0.5, 1.5, 1.5, 1.5))
+      using (var log = new TextLog())
+      {
+        foreach (bool fast in new[] { true, false })
+        {
+          bool rc = Intersection.MeshMeshPredicate(new[] { a, b }, null, Tolerance, fast, out int[] pairs, out int[] faces, log, System.Threading.CancellationToken.None);
+          Assert.That(log.ToString(), Does.Not.StartWith("Error:"), log.ToString());
+          Assert.That(rc, Is.True, "fast=" + fast);
+          Assert.That(Couples(pairs), Is.EquivalentTo(new[] { "0-1" }), "fast=" + fast);
+          Assert.That(faces.Length, Is.EqualTo(2), "one face couple per mesh couple, fast=" + fast);
+          Assert.That(faces[0], Is.InRange(0, a.Faces.Count - 1), "fast=" + fast);
+          Assert.That(faces[1], Is.InRange(0, b.Faces.Count - 1), "fast=" + fast);
+        }
+      }
+    }
+
+    [Test]
+    public void CoplanarPatches_OnlyThePreciseFormReportsTheOverlap()
+    {
+      SetupFixture.Prerequisites();
+      using (var a = Mesh.CreateFromPlane(Plane.WorldXY, new Interval(0, 10), new Interval(0, 10), 4, 4))
+      using (var b = Mesh.CreateFromPlane(Plane.WorldXY, new Interval(5, 15), new Interval(5, 15), 4, 4))
+      using (var log = new TextLog())
+      {
+        bool fast = Intersection.MeshMeshPredicate(new[] { a, b }, null, Tolerance, true, out int[] fastPairs, out _, log, System.Threading.CancellationToken.None);
+        Assert.That(fast, Is.False, "no face crosses another: the fast form reports nothing");
+        Assert.That(fastPairs, Is.Empty);
+
+        bool precise = Intersection.MeshMeshPredicate(new[] { a, b }, null, Tolerance, false, out int[] precisePairs, out int[] faces, log, System.Threading.CancellationToken.None);
+        Assert.That(log.ToString(), Does.Not.StartWith("Error:"), log.ToString());
+        Assert.That(precise, Is.True, "coplanar overlap is an intersection for the precise form");
+        Assert.That(Couples(precisePairs), Is.EquivalentTo(new[] { "0-1" }));
+        Assert.That(faces.Length, Is.EqualTo(2));
+      }
+    }
+
+    [Test]
+    public void TwoSets_IndicesAreIntoEachSet()
+    {
+      SetupFixture.Prerequisites();
+      using (var a = Box(0, 0, 0, 1, 1, 1))
+      using (var far = Box(10, 10, 10, 11, 11, 11))
+      using (var b = Box(0.5, 0.5, 0.5, 1.5, 1.5, 1.5))
+      using (var log = new TextLog())
+      {
+        bool rc = Intersection.MeshMeshPredicate(new[] { a }, new[] { far, b }, Tolerance, true, out int[] pairs, out int[] faces, log, System.Threading.CancellationToken.None);
+        Assert.That(log.ToString(), Does.Not.StartWith("Error:"), log.ToString());
+        Assert.That(rc, Is.True);
+        Assert.That(pairs, Is.EqualTo(new[] { 0, 1 }), "(index in first set, index in second set)");
+        Assert.That(faces.Length, Is.EqualTo(2));
+      }
+    }
+
+    [Test]
     public void ThreeMeshes_OnlyTheIntersectingCoupleIsReported()
     {
       SetupFixture.Prerequisites();

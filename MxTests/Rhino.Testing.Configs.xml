@@ -9,6 +9,8 @@
   <Enabled>true</Enabled>
 
   <ModelDirectories>
+    <ModelDirectory Fixture="AlignVertices" Location="..\..\..\..\models\AlignVertices\" Enabled="true" />
+    <ModelDirectory Fixture="AlignVertices" Location="..\..\..\..\private_models\models\AlignVertices\" Optional="true" Enabled="true" />
     <ModelDirectory Fixture="MeshIntersect" Location="..\..\..\..\models\MeshIntersect\" Enabled="true" />
     <ModelDirectory Fixture="MeshIntersect" Location="..\..\..\..\private_models\models\MeshIntersect\" Optional="true" Enabled="true" />
 
