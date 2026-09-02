@@ -1,5 +1,8 @@
 <Project>
-  <!-- LOCAL override for building the tests standalone (outside the Rhino source tree).
+  <!-- Overrides for building the tests standalone, outside the Rhino source tree. The in-Rhino
+       build ('$(InRhino)' == 'True') is deliberately untouched throughout this file. -->
+
+  <!-- 1. Target framework.
 
        Both test projects target net48;net10.0-windows. The net10.0-windows tests build and
        discover fine, but the test host crashes on run against Rhino.Testing 9.0.5-beta /
@@ -14,9 +17,41 @@
        This must live in a .targets file, not .props: TargetFrameworks is assigned in the csproj
        body, and .targets is imported after it.
 
-       The in-Rhino build ('$(InRhino)' == 'True') is deliberately untouched. Drop the net48
-       narrowing once Rhino.Testing can host the tests on .NET 10. -->
+       Drop this once Rhino.Testing can host the tests on .NET 10. -->
   <PropertyGroup Condition="'$(InRhino)' != 'True'">
     <TargetFrameworks>net48</TargetFrameworks>
   </PropertyGroup>
+
+  <!-- 2. Assembly binding.
+
+       Standalone, there is no RhinoCommon.dll next to the test assembly - the csproj references
+       the package with ExcludeAssets="runtime" on purpose, because the managed RhinoCommon must
+       load out of Rhino's own System folder or its native core (RhinoLibrary.dll) is not found.
+       With nothing bound, NUnit cannot load the test assembly and discovers zero tests; with a
+       copy in the output folder instead, discovery works but every test fails with
+       DllNotFoundException: Unable to load DLL 'RhinoLibrary'.
+
+       So bind RhinoCommon / Rhino.UI / Eto straight to the install with <codeBase>. The versions
+       are read from the installed files on every build rather than hardcoded, because the
+       floating RhinoCommon package version and the Rhino WIP install drift apart independently -
+       a fixed version here goes stale at the next WIP update and the tests vanish again.
+
+       Runs after the SDK's own GenerateBindingRedirects, so it amends that output. -->
+  <Target Name="MxWriteRhinoBindings"
+          AfterTargets="Build"
+          Condition="'$(InRhino)' != 'True'
+                     AND '$(TargetFramework)' == 'net48'
+                     AND Exists('$(MSBuildProjectDirectory)\Rhino.Testing.Configs.xml')
+                     AND Exists('$(MSBuildThisFileDirectory)build\write-rhino-bindings.ps1')">
+    <XmlPeek XmlInputPath="$(MSBuildProjectDirectory)\Rhino.Testing.Configs.xml"
+             Query="/Settings/RhinoSystemDirectory/text()">
+      <Output TaskParameter="Result" PropertyName="MxRhinoSystemDir" />
+    </XmlPeek>
+
+    <!-- The trailing backslash of "...\System\" would escape the closing quote of the command
+         line, so hand the script a trimmed path. -->
+    <Exec Condition="'$(MxRhinoSystemDir)' != ''"
+          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)build\write-rhino-bindings.ps1&quot; -ConfigPath &quot;$(OutputPath)$(TargetFileName).config&quot; -RhinoSystemDir &quot;$(MxRhinoSystemDir.TrimEnd('\'))&quot;"
+          StandardOutputImportance="high" />
+  </Target>
 </Project>
