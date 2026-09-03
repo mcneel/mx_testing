@@ -6,7 +6,7 @@ using Rhino.Geometry;
 using System.Drawing;
 using System.IO;
 
-namespace MxTests
+namespace FileIO
 {
   /// <summary>
   /// Authors <c>models\STEPfile-export\rhino-native-mix.3dm</c>, the export suite's purpose-made

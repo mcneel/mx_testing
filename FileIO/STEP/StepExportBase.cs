@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace MxTests
+namespace FileIO
 {
   /// <summary>
   /// The write options one export test runs with, plus the parsing and formatting that puts them

@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.FileIO;
@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace MxTests
+namespace FileIO
 {
   /// <summary>
   /// The quantities a STEP import is judged on. Counts are exact; areas, volumes and the bounding
@@ -626,8 +626,9 @@ namespace MxTests
     }
 
     // ===== Baseline regeneration =====
-    // Opt-in tooling, mirroring MeasuredBase's oracle regeneration: never runs during a normal
-    // assert, only from the [Explicit] Regenerate() tests and only for files named by MX_STEP_REGEN.
+    // Opt-in tooling, mirroring the oracle regeneration of the mesh suites in MxTests: never
+    // runs during a normal assert, only from the [Explicit] Regenerate() tests and only for
+    // files named by MX_STEP_REGEN.
 
     /// <summary>True if <paramref name="filename"/> matches the comma-separated MX_STEP_REGEN list. "*" matches all.</summary>
     internal static bool RegenSelected(string filename)
@@ -733,7 +734,7 @@ namespace MxTests
   }
 
   /// <summary>
-  /// Folder-scanning base for STEP fixtures. It is the counterpart of <see cref="AnyCommand{T}"/>
+  /// Folder-scanning base for STEP fixtures. It is the counterpart of <c>MxTests.AnyCommand&lt;T&gt;</c>
   /// for tests whose input is not a .3dm, and it honours the same file name conventions: a name
   /// beginning with '#' is skipped, a name beginning with '!' is expected to fail.
   /// </summary>

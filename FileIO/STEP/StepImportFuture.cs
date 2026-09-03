@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace MxTests
+namespace FileIO
 {
   /// <summary>
   /// STEP models that do not import correctly yet.

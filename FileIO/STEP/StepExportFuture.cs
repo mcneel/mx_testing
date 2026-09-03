@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace MxTests
+namespace FileIO
 {
   /// <summary>
   /// Models that do not survive a STEP export round trip yet.

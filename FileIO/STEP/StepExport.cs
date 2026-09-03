@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace MxTests
+namespace FileIO
 {
   /// <summary>
   /// Round trips every model in the StepExport folders through the STEP writer: open it, export to

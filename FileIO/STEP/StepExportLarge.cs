@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace MxTests
+namespace FileIO
 {
   /// <summary>
   /// The same round trip as <see cref="StepExport"/>, over assemblies of hundreds of megabytes.

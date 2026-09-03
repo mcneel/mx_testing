@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace MxTests
+namespace FileIO
 {
   /// <summary>
   /// Imports every STEP model in the StepImport folders and checks it against its sidecar baseline.

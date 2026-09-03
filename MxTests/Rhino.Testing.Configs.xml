@@ -41,35 +41,6 @@
     <ModelDirectory Fixture="SurfaceIntersect" Location="..\..\..\..\models\SurfaceIntersect\" Enabled="true" />
     <ModelDirectory Fixture="SurfaceIntersect" Location="..\..\..\..\private_models\models\SurfaceIntersect\" Optional="true" Enabled="true" />
 
-    <ModelDirectory Fixture="StepImport" Location="..\..\..\..\models\STEPfile\" Enabled="true" />
-    <ModelDirectory Fixture="StepImport" Location="..\..\..\..\private_models\models\STEPfile\" Optional="true" Enabled="true" />
-
-    <!-- StepImportFuture is [Explicit]: models that do not import correctly yet, run on purpose. -->
-    <ModelDirectory Fixture="StepImportFuture" Location="..\..\..\..\models\STEPfile-future\" Enabled="true" />
-    <ModelDirectory Fixture="StepImportFuture" Location="..\..\..\..\private_models\models\STEPfile-future\" Optional="true" Enabled="true" />
-
-    <!-- StepImportLarge is [Explicit] too. The models are hundreds of megabytes each and are not
-         committed, so both locations are optional. -->
-    <ModelDirectory Fixture="StepImportLarge" Location="..\..\..\..\models\STEPfile-large\" Optional="true" Enabled="true" />
-    <ModelDirectory Fixture="StepImportLarge" Location="..\..\..\..\private_models\models\STEPfile-large\" Optional="true" Enabled="true" />
-
-    <!-- StepExport round trips a model out through the STEP writer and back in. It reuses the
-         import corpus - a file worth guarding on the way in is worth guarding on the way out -
-         and adds models\STEPfile-export\ for .3dm sources, the only way to put Rhino-native
-         geometry through the writer. -->
-    <ModelDirectory Fixture="StepExport" Location="..\..\..\..\models\STEPfile\" Enabled="true" />
-    <ModelDirectory Fixture="StepExport" Location="..\..\..\..\models\STEPfile-export\" Enabled="true" />
-    <ModelDirectory Fixture="StepExport" Location="..\..\..\..\private_models\models\STEPfile\" Optional="true" Enabled="true" />
-    <ModelDirectory Fixture="StepExport" Location="..\..\..\..\private_models\models\STEPfile-export\" Optional="true" Enabled="true" />
-
-    <!-- StepExportFuture is [Explicit]: models that do not survive the round trip yet. -->
-    <ModelDirectory Fixture="StepExportFuture" Location="..\..\..\..\models\STEPfile-export-future\" Enabled="true" />
-    <ModelDirectory Fixture="StepExportFuture" Location="..\..\..\..\private_models\models\STEPfile-export-future\" Optional="true" Enabled="true" />
-
-    <!-- StepExportLarge is [Explicit] too, and costs an import, an export and a second import per
-         model. Same uncommitted assemblies as StepImportLarge, so both locations are optional. -->
-    <ModelDirectory Fixture="StepExportLarge" Location="..\..\..\..\models\STEPfile-large\" Optional="true" Enabled="true" />
-    <ModelDirectory Fixture="StepExportLarge" Location="..\..\..\..\private_models\models\STEPfile-large\" Optional="true" Enabled="true" />
   </ModelDirectories>
 
 </Settings>

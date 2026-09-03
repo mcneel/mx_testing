@@ -1,0 +1,97 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RhinoCSDLLPropsFile>$(MSBuildThisFileDirectory)\..\..\..\..\RhinoProjectPropertySheets\Rhino.CS.Dll.props</RhinoCSDLLPropsFile>
+    <InRhino>False</InRhino>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="Exists('$(RhinoCSDLLPropsFile)')">
+    <InRhino>True</InRhino>
+  </PropertyGroup>
+
+  <Import Condition="'$(InRhino)' == 'True'" Project="$(RhinoCSDLLPropsFile)" />
+
+  <PropertyGroup>
+    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform(windows))">net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform(windows))">net48;net10.0-windows</TargetFrameworks>
+    <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform(windows))">win-x64</RuntimeIdentifier>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>999</WarningLevel>
+    <IsPackable>false</IsPackable>
+    <!-- Uncomment if you need to debug native code on mac by running the test executable directly -->
+    <!-- <EnableNUnitRunner>true</EnableNUnitRunner> -->
+
+    <Nullable>disable</Nullable>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <SignAssembly>False</SignAssembly>
+    <AssemblyOriginatorKeyFile>../MxTesting.snk</AssemblyOriginatorKeyFile>
+    <NoWarn>NU1701</NoWarn>
+    <LangVersion Condition="$(TargetFramework) == 'net48'">10</LangVersion>
+
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
+    <WarningLevel>1</WarningLevel>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('Release'))">
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
+    <PackageReference Include="NUnit" Version="4.4.0" />
+    <PackageReference Include="Rhino.Testing" Version="9.0.5-beta" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="NUnit.Framework.Legacy.ClassicAssert" Alias="Assert" />
+  </ItemGroup>
+
+  <Choose>
+    <When Condition="'$(InRhino)' == 'True'">
+      <ItemGroup>
+        <ProjectReference Include="..\..\..\..\DotNetSDK\rhinocommon\dotnet\RhinoCommon.csproj" Private="False" PrivateAssets="all" />
+        <!-- Exclude references from Rhino.Testing dependency -->
+        <PackageReference Include="Grasshopper" Version="9.0.26027.12305-wip" ExcludeAssets="all" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="RhinoCommon" Version="*-*" PrivateAssets="all" ExcludeAssets="runtime" IncludeAssets="compile; build; native; contentfiles; analyzers; buildtransitive" />
+        <!-- Exclude references from Rhino.Testing dependency. Grasshopper pins RhinoCommon exactly, so both float together. -->
+        <PackageReference Include="Grasshopper" Version="*-*" ExcludeAssets="all" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+
+  <Target Name="PrintInRhino" BeforeTargets="Build">
+    <Message Text="InRhino: $(InRhino)" Importance="high" />
+  </Target>
+
+  <!-- copy the config file. -->
+  <Target Name="CopyConfigXml" BeforeTargets="Build">
+    <Copy SourceFiles="Rhino.Testing.Configs.xml" DestinationFolder="$(OutputPath)" />
+  </Target>
+
+  <!-- modify the testing config file if we're building inside the Rhino build. -->
+  <Target Name="WriteRhinoSystemDirectory" Condition="'$(InRhino)' == 'True'" AfterTargets="CopyConfigXml">
+    <Exec Command="$(RhinoRootDir)/build/mac/getderiveddata/getderiveddata.sh" ConsoleToMSBuild="true" Condition="$([MSBuild]::IsOSPlatform(osx))">
+      <Output TaskParameter="ConsoleOutput" PropertyName="DerivedDataDir" />
+    </Exec>
+    <PropertyGroup>
+      <RhinoDir Condition="$([MSBuild]::IsOSPlatform(osx))">$(DerivedDataDir)Build/Products/$(Configuration)/Rhinoceros.app</RhinoDir>
+      <RhinoDir Condition="$(RhinoDir) == ''">$(RhinoOutputDir)</RhinoDir>
+    </PropertyGroup>
+
+    <XmlPoke XmlInputPath="$(OutputPath)/Rhino.Testing.Configs.xml" Value="$(RhinoDir)" Query="/Settings/RhinoSystemDirectory" />
+  </Target>
+
+  <!-- give some feedback -->
+  <Target Name="PrintCopied" Condition="'$(InRhino)' == 'True'" AfterTargets="WriteRhinoSystemDirectory">
+    <Message Text="Copied Rhino.Testing.Configs.xml with RhinoSystemDir=$(RhinoOutputDir) to $(OutputPath)" Importance="high" />
+  </Target>
+</Project>

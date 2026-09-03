@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace MxTests
+namespace FileIO
 {
   /// <summary>
   /// The same checks as <see cref="StepImport"/>, over assemblies of hundreds of megabytes.

@@ -14,6 +14,7 @@ YOUR TESTS ADDITIONS ARE WELCOME!
 1. In Visual Studio, choose `Tests -> Run All Tests`.
 1. If the Test panel does not show up, you can open it using `Tests -> Test Explorer`.
 1. You can explore the project in the Solution Explorer panel (`Ctrl+Alt+L`): you can find the projects in `Solution (Rhino) -> Unit Tests`.
+1. There are three test projects: `MxTests` (mesh and intersection suites), `NetSDKTests` (RhinoCommon SDK tests) and `FileIO` (file format tests, one folder per format - `FileIO\STEP\` today). Each is self contained: its own `Rhino.Testing.Configs.xml`, its own `SetupFixture`, no project references between them.
 1. There is a `MxTests` project and a `RhinoCommonDelayed` project. The first one is loaded by the testing framework by reflection and does NOT directly use RhinoCommon. This allows to set up hooks and other features to make sure that RhinoCommon is loaded properly, before `RhinoCommonDelayed` is loaded.
 1. There is a setting file located at `MxTests -> MxTests.testsettings.xml`. There is generally no need to modify any settings.
 
@@ -108,7 +109,7 @@ as1-ac-214.stp
 as1-ac-214.stp.expected.txt
 ```
 
-1. Drop the STEP file in `models\STEPfile\`, the verified folder (see the `StepImport` entries in `MxTests.Rhino.Testing.Configs.xml`). Subfolders are scanned too, so `models\STEPfile\AP214\` and any other grouping you like both work.
+1. Drop the STEP file in `models\STEPfile\`, the verified folder (see the `StepImport` entries in `FileIO\Rhino.Testing.Configs.xml`). Subfolders are scanned too, so `models\STEPfile\AP214\` and any other grouping you like both work.
 1. Generate its baseline: run the `StepImport.Regenerate` test (it is `[Explicit]`, so it only runs when selected) with the environment variable `MX_STEP_REGEN` set to a substring of the file name, or to `*` for every model in the folder.
 1. **Read the generated file before committing it.** Regeneration records whatever Rhino currently produces; it is your job to confirm that is right.
 1. Trim the file down to the values you actually want to pin. Only the keys present are asserted, so a model can be held loosely or tightly.
@@ -236,7 +237,7 @@ The `#` and `!` file name prefixes work as everywhere else. When a test fails, t
 | `models\STEPfile-export-future\` | `StepExportFuture` | no, `[Explicit]` | Models that do not survive the round trip yet. |
 | `models\STEPfile-large\` | `StepExportLarge` | no, `[Explicit]` | Shared with `StepImportLarge`. Three times the cost, since it is an import, an export and a second import. |
 
-`models\STEPfile-export\rhino-native-mix.3dm` is generated rather than drawn: `MxTests\AuthorExportSource.cs` is the readable statement of what is in it and the way to extend it. It carries a solid, a capped cylinder, an extrusion, an open surface, curves, a point, a mesh and a block inserted twice, and its baseline records what happens to each.
+`models\STEPfile-export\rhino-native-mix.3dm` is generated rather than drawn: `FileIO\STEP\AuthorExportSource.cs` is the readable statement of what is in it and the way to extend it. It carries a solid, a capped cylinder, an extrusion, an open surface, curves, a point, a mesh and a block inserted twice, and its baseline records what happens to each.
 
 **Regeneration environment variables** mirror the import ones exactly, on their own names so that regenerating one suite never quietly rewrites the other: `MX_STEPEXPORT_REGEN`, `MX_STEPEXPORT_REGEN_FIELDS`, `MX_STEPEXPORT_REGEN_DRYRUN`, `MX_STEPEXPORT_REGEN_LOG`, `MX_STEPEXPORT_LOG`. The comparison tolerances are shared with the import suite: `MX_STEP_RELTOL` and `MX_STEP_ABSTOL`.
 

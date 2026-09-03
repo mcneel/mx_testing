@@ -1,7 +1,8 @@
 # STEP import and export tests — how they work, and how to add one
 
-**Scope:** the 57 STEP tests in `MxTests`. Implementation lives in `MxTests\StepImportBase.cs` and
-`MxTests\StepExportBase.cs`; the folder-to-fixture mapping is in `MxTests\Rhino.Testing.Configs.xml`.
+**Scope:** the 57 STEP tests in the `FileIO` project. Implementation lives in
+`FileIO\STEP\StepImportBase.cs` and `FileIO\STEP\StepExportBase.cs`; the folder-to-fixture mapping is in
+`FileIO\Rhino.Testing.Configs.xml`.
 The repository `readme.md` covers the same ground in condensed form (§ "To add a new STEP import
 test" and § "To add a new STEP export test").
 
@@ -305,7 +306,7 @@ document can contain, and several of those cases are only reachable from a `.3dm
 | Non-manifold breps | Written as sets of unjoined surfaces rather than as a solid. |
 
 There is one such model today: `models\STEPfile-export\rhino-native-mix.3dm`. It is *generated*
-rather than drawn — `MxTests\AuthorExportSource.cs` is the readable statement of what is in it and
+rather than drawn — `FileIO\STEP\AuthorExportSource.cs` is the readable statement of what is in it and
 the way to extend it. It carries a solid, a capped cylinder, an extrusion, an open surface, curves, a
 point, a mesh and a block inserted twice, and its baseline records what happens to each.
 
@@ -406,11 +407,12 @@ Inside the Rhino source tree, open `rhino\src4\BuildSolutions\Rhino.sln` and use
 Outside it, against an installed Rhino:
 
 ```bash
-MSBuildEnableWorkloadResolver=false dotnet test MxTests/MxTests.csproj -f net48 --no-build --filter "FullyQualifiedName~MxTests.StepImport"
+MSBuildEnableWorkloadResolver=false dotnet test FileIO/FileIO.csproj -f net48 --no-build --filter "FullyQualifiedName~FileIO.StepImport"
 ```
 
 ```bash
-MSBuildEnableWorkloadResolver=false dotnet test MxTests/MxTests.csproj -f net48 --no-build --filter "FullyQualifiedName~MxTests.StepExport"
+MSBuildEnableWorkloadResolver=false dotnet test FileIO/FileIO.csproj -f net48 --no-build --filter "FullyQualifiedName~FileIO.StepExport"
 ```
 
-See `STEP-testing-handoff.md` for the environment setup that makes the out-of-tree run work.
+The out-of-tree run needs no extra setup: `FileIO\Rhino.Testing.Configs.xml` is committed, and it
+points the harness at an installed Rhino and at the `models\` folders.
