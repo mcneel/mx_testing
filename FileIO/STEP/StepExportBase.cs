@@ -22,7 +22,21 @@ namespace FileIO
   /// </remarks>
   internal sealed class StepExportOptions
   {
-    internal FileStpWriteOptions.StepSchema Schema = FileStpWriteOptions.StepSchema.SF_214;
+    /// <summary>The schema the writer is asked for.</summary>
+    /// <remarks>
+    /// A property over an int rather than a field of the RhinoCommon enum, for the reason given on
+    /// <see cref="StepMetrics.Bbox"/>: a field of a RhinoCommon value type would force RhinoCommon
+    /// to load while NUnit is scanning this assembly, which standalone on net10.0-windows is
+    /// before anything can resolve it.
+    /// </remarks>
+    internal FileStpWriteOptions.StepSchema Schema
+    {
+      get { return (FileStpWriteOptions.StepSchema)m_schema; }
+      set { m_schema = (int)value; }
+    }
+
+    int m_schema = (int)FileStpWriteOptions.StepSchema.SF_214;
+
     internal bool Export2dCurves;
     internal bool ExportBlack = true;
     internal bool SplitClosedSurfaces;

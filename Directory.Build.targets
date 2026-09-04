@@ -4,37 +4,36 @@
 
   <!-- 1. Target framework.
 
-       Both test projects target net48;net10.0-windows. The net10.0-windows tests build and
-       discover fine, but the test host crashes on run against Rhino.Testing 9.0.5-beta /
-       Rhino 9 WIP:
+       Both target frameworks run standalone: net48 through the <codeBase> bindings written below,
+       net10.0-windows through the assembly resolvers Rhino.Testing installs when it boots Rhino.
+       So the csproj's own net48;net10.0-windows stands, and this file no longer narrows it.
 
-           The active test run was aborted. Reason: Test host process crashed
-
-       In the IDE that means Test Explorer lists the net10 duplicates alongside the net48 ones,
-       and running one produces a build log with no test results. Narrow the standalone build to
-       net48, which runs green in VS 2026 Test Explorer, vstest.console and `dotnet test`.
-
-       This must live in a .targets file, not .props: TargetFrameworks is assigned in the csproj
-       body, and .targets is imported after it.
-
-       Drop this once Rhino.Testing can host the tests on .NET 10. -->
-  <PropertyGroup Condition="'$(InRhino)' != 'True'">
+       The escape hatch is opt-in: build or test with -p:MxStandaloneNet48Only=true to drop
+       net10.0-windows, which is worth having if a Rhino WIP update breaks the net10 test host
+       again. It must live in a .targets file, not .props: TargetFrameworks is assigned in the
+       csproj body, and .targets is imported after it. -->
+  <PropertyGroup Condition="'$(InRhino)' != 'True' AND '$(MxStandaloneNet48Only)' == 'true'">
     <TargetFrameworks>net48</TargetFrameworks>
   </PropertyGroup>
 
-  <!-- 2. Assembly binding.
+  <!-- 2. Assembly binding, net48 only.
 
        Standalone, there is no RhinoCommon.dll next to the test assembly - the csproj references
        the package with ExcludeAssets="runtime" on purpose, because the managed RhinoCommon must
        load out of Rhino's own System folder or its native core (RhinoLibrary.dll) is not found.
        With nothing bound, NUnit cannot load the test assembly and discovers zero tests; with a
-       copy in the output folder instead, discovery works but every test fails with
-       DllNotFoundException: Unable to load DLL 'RhinoLibrary'.
+       copy in the output folder instead, discovery works but the test host crashes on run.
 
        So bind RhinoCommon / Rhino.UI / Eto straight to the install with <codeBase>. The versions
        are read from the installed files on every build rather than hardcoded, because the
        floating RhinoCommon package version and the Rhino WIP install drift apart independently -
        a fixed version here goes stale at the next WIP update and the tests vanish again.
+
+       net10.0-windows needs no counterpart: <codeBase> is a .NET Framework mechanism, and there
+       Rhino.Testing resolves RhinoCommon out of RhinoSystemDirectory itself. That resolver is
+       installed when Rhino boots, which is after NUnit has scanned the test assembly, so a test
+       assembly must not force RhinoCommon to load during that scan - see the note on
+       StepMetrics.Bbox in FileIO\STEP\StepImportBase.cs.
 
        Runs after the SDK's own GenerateBindingRedirects, so it amends that output. -->
   <Target Name="MxWriteRhinoBindings"

@@ -53,7 +53,46 @@ namespace FileIO
 
     internal double Area;
     internal double Volume;
-    internal BoundingBox Bbox = BoundingBox.Empty;
+
+    /// <summary>The bounding box of everything <see cref="StepImporter.Measure"/> walked.</summary>
+    /// <remarks>
+    /// Held as plain doubles rather than as a <see cref="BoundingBox"/> field on purpose. A field
+    /// of a RhinoCommon value type is part of this class's layout, so the runtime must load
+    /// RhinoCommon to load the class - and NUnit scans every type in the test assembly before
+    /// Rhino.Testing has booted Rhino and installed its assembly resolvers. Standalone on
+    /// net10.0-windows there is nothing else to resolve RhinoCommon at that point, so one such
+    /// field makes the whole assembly undiscoverable: zero tests, "NUnit failed to load". net48
+    /// does not care, because the &lt;codeBase&gt; bindings written by Directory.Build.targets
+    /// bind RhinoCommon before anything is scanned. A property is a method, and method signatures
+    /// resolve lazily, so exposing the box this way costs nothing.
+    /// </remarks>
+    internal BoundingBox Bbox
+    {
+      get
+      {
+        return m_has_bbox
+          ? new BoundingBox(m_bbox_min_x, m_bbox_min_y, m_bbox_min_z,
+                            m_bbox_max_x, m_bbox_max_y, m_bbox_max_z)
+          : BoundingBox.Empty;
+      }
+    }
+
+    /// <summary>Grows <see cref="Bbox"/> to include <paramref name="box"/>.</summary>
+    internal void UnionBbox(BoundingBox box)
+    {
+      BoundingBox rc = Bbox;
+      rc.Union(box);
+
+      m_has_bbox = rc.IsValid;
+      if (!m_has_bbox) return;
+
+      m_bbox_min_x = rc.Min.X; m_bbox_min_y = rc.Min.Y; m_bbox_min_z = rc.Min.Z;
+      m_bbox_max_x = rc.Max.X; m_bbox_max_y = rc.Max.Y; m_bbox_max_z = rc.Max.Z;
+    }
+
+    bool m_has_bbox;
+    double m_bbox_min_x, m_bbox_min_y, m_bbox_min_z;
+    double m_bbox_max_x, m_bbox_max_y, m_bbox_max_z;
 
     internal double ReadSeconds;
   }
@@ -449,7 +488,7 @@ namespace FileIO
       }
       if (solid) m.Solids++;
 
-      if (wantBbox) m.Bbox.Union(geometry.GetBoundingBox(xform));
+      if (wantBbox) m.UnionBbox(geometry.GetBoundingBox(xform));
 
       if (!wantArea && !wantVolume) return;
 
