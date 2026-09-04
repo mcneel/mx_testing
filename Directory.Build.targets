@@ -16,7 +16,24 @@
     <TargetFrameworks>net48</TargetFrameworks>
   </PropertyGroup>
 
-  <!-- 2. Assembly binding, net48 only.
+  <!-- 2. net48 reference conflicts, MSB3277 x2.
+
+       On net48 the test platform pulls both halves of a split graph: Microsoft.TestPlatform.-
+       ObjectModel 17.12.0 asks for System.Reflection.Metadata 1.6.0, which in turn asks for
+       System.Collections.Immutable 1.5.0 (assembly versions 1.4.2.0 and 1.2.3.0), while
+       Microsoft.Testing.Extensions.VSTestBridge is compiled against 8.0.0.0 of both. Neither is a
+       direct reference, so RAR picks the 1.x pair for being primary and warns that it could not
+       resolve the conflict - once per assembly, in every project.
+
+       Referencing the 8.0.0 packages directly makes 8.0.0.0 the primary and the exact version
+       VSTestBridge wants, and lets the 1.x chain unify upwards. netcoreapp resolves this on its
+       own, hence net48 only. -->
+  <ItemGroup Condition="'$(InRhino)' != 'True' AND '$(TargetFramework)' == 'net48'">
+    <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- 3. Assembly binding, net48 only.
 
        Standalone, there is no RhinoCommon.dll next to the test assembly - the csproj references
        the package with ExcludeAssets="runtime" on purpose, because the managed RhinoCommon must
