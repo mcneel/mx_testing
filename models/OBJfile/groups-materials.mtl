@@ -1,0 +1,5 @@
+# mx_testing hand-authored material library
+newmtl RedMat
+Kd 1.0 0.0 0.0
+newmtl BlueMat
+Kd 0.0 0.0 1.0

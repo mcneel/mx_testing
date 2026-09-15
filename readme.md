@@ -14,7 +14,7 @@ YOUR TESTS ADDITIONS ARE WELCOME!
 1. In Visual Studio, choose `Tests -> Run All Tests`.
 1. If the Test panel does not show up, you can open it using `Tests -> Test Explorer`.
 1. You can explore the project in the Solution Explorer panel (`Ctrl+Alt+L`): you can find the projects in `Solution (Rhino) -> Unit Tests`.
-1. There are three test projects: `MxTests` (mesh and intersection suites), `NetSDKTests` (RhinoCommon SDK tests) and `FileIO` (file format tests, one folder per format - `FileIO\STEP\`, `FileIO\IGES\`, `FileIO\DXF\` and `FileIO\DWG\` today). Each is self contained: its own `Rhino.Testing.Configs.xml`, its own `SetupFixture`, no project references between them.
+1. There are three test projects: `MxTests` (mesh and intersection suites), `NetSDKTests` (RhinoCommon SDK tests) and `FileIO` (file format tests, one folder per format - `FileIO\STEP\`, `FileIO\IGES\`, `FileIO\DXF\`, `FileIO\DWG\` and `FileIO\WavefrontObj\` today). Each is self contained: its own `Rhino.Testing.Configs.xml`, its own `SetupFixture`, no project references between them.
 1. There is a `MxTests` project and a `RhinoCommonDelayed` project. The first one is loaded by the testing framework by reflection and does NOT directly use RhinoCommon. This allows to set up hooks and other features to make sure that RhinoCommon is loaded properly, before `RhinoCommonDelayed` is loaded.
 1. There is a setting file located at `MxTests -> MxTests.testsettings.xml`. There is generally no need to modify any settings.
 
@@ -285,6 +285,15 @@ extension `.dwg`. DWG shares the plugin, API and options with DXF (see that sect
 structural checks are byte-level on the binary header - the six-byte version magic is the live
 probe that the `Version` option plumbs (`dwg-r2000.dwg` begins `AC1015`, the default `AC1032`).
 Details in `DWG-tests-guide.md`.
+
+#### To add a new OBJ test: ####
+
+The OBJ suites run on `MX_OBJ_*` / `MX_OBJEXPORT_*` and `models\OBJfile*\`. Uniquely, the import
+corpus is hand-authored text (the .obj IS the reviewable source, and it can exercise dialect
+quirks Rhino's writer never emits), and both directions use the fully managed
+`FileObj.Read`/`FileObj.Write` APIs where every option genuinely applies. Never use bare
+`doc.Import`/`Export` for OBJ - the plugin path reads persisted machine Settings whose defaults
+diverge from the API's (MapZtoY). Details, grammar checks and landmines in `OBJ-tests-guide.md`.
 
 ### Notes on inner mechanics ###
 
