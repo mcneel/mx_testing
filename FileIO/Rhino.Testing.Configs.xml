@@ -44,6 +44,36 @@
     <ModelDirectory Fixture="StepExportLarge" Location="..\..\..\..\models\STEPfile-large\" Optional="true" Enabled="true" />
     <ModelDirectory Fixture="StepExportLarge" Location="..\..\..\..\private_models\models\STEPfile-large\" Optional="true" Enabled="true" />
 
+    <!-- ===== IGES ===== -->
+
+    <ModelDirectory Fixture="IgesImport" Location="..\..\..\..\models\IGESfile\" Enabled="true" />
+    <ModelDirectory Fixture="IgesImport" Location="..\..\..\..\private_models\models\IGESfile\" Optional="true" Enabled="true" />
+
+    <!-- IgesImportFuture is [Explicit]: models that do not import correctly yet, run on purpose. -->
+    <ModelDirectory Fixture="IgesImportFuture" Location="..\..\..\..\models\IGESfile-future\" Enabled="true" />
+    <ModelDirectory Fixture="IgesImportFuture" Location="..\..\..\..\private_models\models\IGESfile-future\" Optional="true" Enabled="true" />
+
+    <!-- IgesImportLarge is [Explicit] too. The models are not committed, so both locations are optional. -->
+    <ModelDirectory Fixture="IgesImportLarge" Location="..\..\..\..\models\IGESfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="IgesImportLarge" Location="..\..\..\..\private_models\models\IGESfile-large\" Optional="true" Enabled="true" />
+
+    <!-- IgesExport round trips a model out through the IGES writer and back in. It reuses the
+         import corpus and adds models\IGESfile-export\ for .3dm sources, the only way to put
+         Rhino-native geometry through the writer. -->
+    <ModelDirectory Fixture="IgesExport" Location="..\..\..\..\models\IGESfile\" Enabled="true" />
+    <ModelDirectory Fixture="IgesExport" Location="..\..\..\..\models\IGESfile-export\" Enabled="true" />
+    <ModelDirectory Fixture="IgesExport" Location="..\..\..\..\private_models\models\IGESfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="IgesExport" Location="..\..\..\..\private_models\models\IGESfile-export\" Optional="true" Enabled="true" />
+
+    <!-- IgesExportFuture is [Explicit]: models that do not survive the round trip yet. -->
+    <ModelDirectory Fixture="IgesExportFuture" Location="..\..\..\..\models\IGESfile-export-future\" Enabled="true" />
+    <ModelDirectory Fixture="IgesExportFuture" Location="..\..\..\..\private_models\models\IGESfile-export-future\" Optional="true" Enabled="true" />
+
+    <!-- IgesExportLarge is [Explicit] too, and costs an import, an export and a second import per
+         model. Same uncommitted files as IgesImportLarge, so both locations are optional. -->
+    <ModelDirectory Fixture="IgesExportLarge" Location="..\..\..\..\models\IGESfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="IgesExportLarge" Location="..\..\..\..\private_models\models\IGESfile-large\" Optional="true" Enabled="true" />
+
   </ModelDirectories>
 
 </Settings>

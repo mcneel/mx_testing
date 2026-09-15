@@ -1,0 +1,19 @@
+IGES IMPORT
+units Millimeters
+objects 6
+instances 0
+blockdefs 0
+layers 1
+breps 6
+extrusions 0
+surfaces 0
+meshes 0
+subds 0
+curves 0
+points 0
+other 0
+solids 0
+invalid 0
+area 201.0619323109625
+volume 0
+bbox -2,-2,0 to 14,2,6

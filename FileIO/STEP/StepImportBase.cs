@@ -149,7 +149,19 @@ namespace FileIO
 
     static double Delta(double expected)
     {
-      return Math.Max(Math.Abs(expected) * RelativeTolerance, AbsoluteTolerance);
+      return Delta(expected, "MX_STEP");
+    }
+
+    /// <summary>
+    /// The comparison slack under another format's environment prefix, so that the suites reusing
+    /// this oracle (IGES onwards) get their own MX_&lt;FMT&gt;_RELTOL / MX_&lt;FMT&gt;_ABSTOL knobs
+    /// instead of silently sharing STEP's.
+    /// </summary>
+    static double Delta(double expected, string envPrefix)
+    {
+      double rel = EnvDouble(envPrefix + "_RELTOL", 1e-8);
+      double abs = EnvDouble(envPrefix + "_ABSTOL", 1e-6);
+      return Math.Max(Math.Abs(expected) * rel, abs);
     }
 
     internal static string PathFor(string modelPath) => modelPath + Suffix;
@@ -221,6 +233,14 @@ namespace FileIO
     /// </summary>
     internal static void Check(string filename, IEnumerable<KeyValuePair<string, string>> entries, StepMetrics actual)
     {
+      Check(filename, entries, actual, "MX_STEP");
+    }
+
+    /// <summary>
+    /// The same assertion under another format's tolerance prefix - see <see cref="Delta(double, string)"/>.
+    /// </summary>
+    internal static void Check(string filename, IEnumerable<KeyValuePair<string, string>> entries, StepMetrics actual, string envPrefix)
+    {
       foreach (var entry in entries)
       {
         string key = entry.Key;
@@ -247,21 +267,21 @@ namespace FileIO
               };
               string[] names = new string[] { "min.x", "min.y", "min.z", "max.x", "max.y", "max.z" };
               for (int i = 0; i < 6; i++)
-                Assert.AreEqual(n[i], corners[i], Delta(n[i]), $"{where}: {names[i]} differs.");
+                Assert.AreEqual(n[i], corners[i], Delta(n[i], envPrefix), $"{where}: {names[i]} differs.");
             }
             break;
 
           case "area":
             {
               double expected = ParseDouble(value, where);
-              Assert.AreEqual(expected, actual.Area, Delta(expected), where);
+              Assert.AreEqual(expected, actual.Area, Delta(expected, envPrefix), where);
             }
             break;
 
           case "volume":
             {
               double expected = ParseDouble(value, where);
-              Assert.AreEqual(expected, actual.Volume, Delta(expected), where);
+              Assert.AreEqual(expected, actual.Volume, Delta(expected, envPrefix), where);
             }
             break;
 
