@@ -74,6 +74,28 @@
     <ModelDirectory Fixture="IgesExportLarge" Location="..\..\..\..\models\IGESfile-large\" Optional="true" Enabled="true" />
     <ModelDirectory Fixture="IgesExportLarge" Location="..\..\..\..\private_models\models\IGESfile-large\" Optional="true" Enabled="true" />
 
+    <!-- ===== DXF ===== -->
+
+    <ModelDirectory Fixture="DxfImport" Location="..\..\..\..\models\DXFfile\" Enabled="true" />
+    <ModelDirectory Fixture="DxfImport" Location="..\..\..\..\private_models\models\DXFfile\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="DxfImportFuture" Location="..\..\..\..\models\DXFfile-future\" Enabled="true" />
+    <ModelDirectory Fixture="DxfImportFuture" Location="..\..\..\..\private_models\models\DXFfile-future\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="DxfImportLarge" Location="..\..\..\..\models\DXFfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DxfImportLarge" Location="..\..\..\..\private_models\models\DXFfile-large\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="DxfExport" Location="..\..\..\..\models\DXFfile\" Enabled="true" />
+    <ModelDirectory Fixture="DxfExport" Location="..\..\..\..\models\DXFfile-export\" Enabled="true" />
+    <ModelDirectory Fixture="DxfExport" Location="..\..\..\..\private_models\models\DXFfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DxfExport" Location="..\..\..\..\private_models\models\DXFfile-export\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="DxfExportFuture" Location="..\..\..\..\models\DXFfile-export-future\" Enabled="true" />
+    <ModelDirectory Fixture="DxfExportFuture" Location="..\..\..\..\private_models\models\DXFfile-export-future\" Optional="true" Enabled="true" />
+
+    <ModelDirectory Fixture="DxfExportLarge" Location="..\..\..\..\models\DXFfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DxfExportLarge" Location="..\..\..\..\private_models\models\DXFfile-large\" Optional="true" Enabled="true" />
+
   </ModelDirectories>
 
 </Settings>

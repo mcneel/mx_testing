@@ -859,6 +859,10 @@ namespace FileIO
 
       foreach (string path in g_test_models)
       {
+        // '!' models are expected to fail; their baselines state the wanted (failing) comparison
+        // and must never be replaced with whatever the current build produces.
+        if (Path.GetFileName(path).StartsWith("!", StringComparison.InvariantCultureIgnoreCase)) continue;
+
         StepImportRunner.RegenOutcome outcome =
           StepImportRunner.RegenerateOracle(path, defaultKeys, out string failure);
 

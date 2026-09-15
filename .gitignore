@@ -53,6 +53,13 @@ models/IGESfile-large/**
 !models/IGESfile-large/**/*.exported.txt
 !models/IGESfile-large/**/readme.md
 
+# DXF large models: same arrangement as STEPfile-large above.
+models/DXFfile-large/**
+!models/DXFfile-large/**/
+!models/DXFfile-large/**/*.expected.txt
+!models/DXFfile-large/**/*.exported.txt
+!models/DXFfile-large/**/readme.md
+
 # Customer test models that must not be published. The test configs list
 # private_models\models\<fixture>\ as an Optional second location for every fixture, so a machine
 # without this folder simply finds nothing there. Give it its own private git remote and clone it

@@ -1,0 +1,19 @@
+DXF IMPORT
+units Millimeters
+objects 5
+instances 0
+blockdefs 0
+layers 2
+breps 0
+extrusions 0
+surfaces 0
+meshes 0
+subds 0
+curves 4
+points 1
+other 0
+solids 0
+invalid 0
+area 0
+volume 0
+bbox 0,0,0 to 34,35,0

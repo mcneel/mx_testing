@@ -14,7 +14,7 @@ YOUR TESTS ADDITIONS ARE WELCOME!
 1. In Visual Studio, choose `Tests -> Run All Tests`.
 1. If the Test panel does not show up, you can open it using `Tests -> Test Explorer`.
 1. You can explore the project in the Solution Explorer panel (`Ctrl+Alt+L`): you can find the projects in `Solution (Rhino) -> Unit Tests`.
-1. There are three test projects: `MxTests` (mesh and intersection suites), `NetSDKTests` (RhinoCommon SDK tests) and `FileIO` (file format tests, one folder per format - `FileIO\STEP\` and `FileIO\IGES\` today). Each is self contained: its own `Rhino.Testing.Configs.xml`, its own `SetupFixture`, no project references between them.
+1. There are three test projects: `MxTests` (mesh and intersection suites), `NetSDKTests` (RhinoCommon SDK tests) and `FileIO` (file format tests, one folder per format - `FileIO\STEP\`, `FileIO\IGES\` and `FileIO\DXF\` today). Each is self contained: its own `Rhino.Testing.Configs.xml`, its own `SetupFixture`, no project references between them.
 1. There is a `MxTests` project and a `RhinoCommonDelayed` project. The first one is loaded by the testing framework by reflection and does NOT directly use RhinoCommon. This allows to set up hooks and other features to make sure that RhinoCommon is loaded properly, before `RhinoCommonDelayed` is loaded.
 1. There is a setting file located at `MxTests -> MxTests.testsettings.xml`. There is generally no need to modify any settings.
 
@@ -264,6 +264,18 @@ unpublishable customer files go in `private_models\models\IGESfile*\`.
 
 Everything else - folder tiers, regeneration etiquette, structural check details, corpus
 re-authoring - is in `IGES-tests-guide.md`.
+
+#### To add a new DXF test: ####
+
+The DXF suites (`DxfImport`, `DxfExport`, plus `[Explicit]` `-future`/`-large`) are the same
+pattern again on `MX_DXF_*` / `MX_DXFEXPORT_*` and `models\DXFfile*\`, extension `.dxf`. DXF has
+no RhinoCommon class of its own - `FileDwg` handles both DWG and DXF, dispatching on the path
+extension - and the suite always goes through `FileDwg.Read`/`FileDwg.Write` with full explicit
+options (bare `doc.Export` writes a different AutoCAD version than `FileDwg.Write`, and the import
+plugin ignores near-empty option dictionaries). Unlike IGES, the write options genuinely reach the
+native writer, so option-varied corpus models are meaningful; three specific keys are silently
+broken today and are documented, with the structural `$ACADVER` check as the tripwire, in
+`DXF-tests-guide.md` along with the pair-grammar structural checks and the corpus.
 
 ### Notes on inner mechanics ###
 

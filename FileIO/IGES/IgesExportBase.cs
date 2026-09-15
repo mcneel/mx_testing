@@ -708,9 +708,16 @@ namespace FileIO
       string full = Path.Combine(filepath, filename);
 
       if (filename.StartsWith("!", StringComparison.InvariantCultureIgnoreCase))
-        Assert.Throws<AssertionException>(
-          delegate { IgesExportRunner.Run(full, defaultKeys, false); },
-          "Expected failure, but test succeeded.");
+      {
+        // Expected to fail. A '!' source may fail as an assertion (a comparison) or by being
+        // unreadable in the first place (OpenSource throws InvalidOperationException) - both are
+        // the failure the '!' announces.
+        bool failedAsExpected = false;
+        try { IgesExportRunner.Run(full, defaultKeys, false); }
+        catch (AssertionException) { failedAsExpected = true; }
+        catch (InvalidOperationException) { failedAsExpected = true; }
+        Assert.IsTrue(failedAsExpected, "Expected failure, but test succeeded.");
+      }
       else
         IgesExportRunner.Run(full, defaultKeys, writeDebugModel);
     }
@@ -723,6 +730,9 @@ namespace FileIO
 
       foreach (string path in g_test_models)
       {
+        // '!' models are expected to fail; never regenerate their baselines.
+        if (Path.GetFileName(path).StartsWith("!", StringComparison.InvariantCultureIgnoreCase)) continue;
+
         StepImportRunner.RegenOutcome outcome =
           IgesExportRunner.RegenerateOracle(path, defaultKeys, out string failure);
 

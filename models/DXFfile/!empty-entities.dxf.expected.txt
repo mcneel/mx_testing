@@ -1,0 +1,6 @@
+DXF IMPORT
+# Expected-failure model ('!' prefix): a structurally valid DXF whose ENTITIES section is
+# empty. The import returns true with zero objects, and the runner's "imported without error
+# but produced no objects" assertion is the failure the '!' expects. The counts below are the
+# deliberately-unreachable wanted state; regeneration skips '!' models by design.
+objects 1
