@@ -1,0 +1,254 @@
+Source,Date,File Name,Problem / Context,Link,Folder,Downloaded
+Discourse,2026-09-01,nist_ftc_08_asme1_ap242-e2.stp,NIST AP242 sample used in request to expose STEP header metadata on export,https://discourse.mcneel.com/t/export-step-with-metadata/199361,,Pending (run download_discourse_step.ps1)
+Discourse,2026-09-01,nist_stc_08_asme1_ap242-e3.stp,NIST AP242 sample used in request to expose STEP header metadata on export,https://discourse.mcneel.com/t/export-step-with-metadata/199361,,Pending (run download_discourse_step.ps1)
+Discourse,2026-09-01,nist_ftc_09_asme1_ap242-e1.stp,NIST AP242 sample used in request to expose STEP header metadata on export,https://discourse.mcneel.com/t/export-step-with-metadata/199361,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-24,SINGLE SPAN LEARN.stp,Sample for MatchSrf surface edge going rogue,https://discourse.mcneel.com/t/matchsrf-surface-edge-going-rogue-please-help/221832,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-24,SINGLE SPAN LEARN_v2 fixed.stp,Fixed sample for MatchSrf surface edge going rogue,https://discourse.mcneel.com/t/matchsrf-surface-edge-going-rogue-please-help/221832,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-23,SINGLE_SPAN_LEARN_large_fixed_G1_p8_2span.step,Sample for MatchSrf surface edge going rogue,https://discourse.mcneel.com/t/matchsrf-surface-edge-going-rogue-please-help/221832,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-23,SINGLE_SPAN_LEARN_large_fixed_G1_p7_3span.step,Sample for MatchSrf surface edge going rogue,https://discourse.mcneel.com/t/matchsrf-surface-edge-going-rogue-please-help/221832,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-23,testglue_scripted.stp,Rhino STEP export converts straight lines to curves (RH-97978),https://discourse.mcneel.com/t/rhino-step-export-converts-straight-lines-to-curves/221628,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-12,Demo.stp,F2F Bridge add-in demo for Rhino-to-Fusion 360 STEP import,https://discourse.mcneel.com/t/f2f-bridge-full-rhino-to-fusion-360-import-free-add-in/221688,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-10,FusionPart.step,Rhino STEP export converts straight lines to curves (RH-97978),https://discourse.mcneel.com/t/rhino-step-export-converts-straight-lines-to-curves/221628,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-10,SolidPart.step,Rhino STEP export converts straight lines to curves (RH-97978),https://discourse.mcneel.com/t/rhino-step-export-converts-straight-lines-to-curves/221628,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-10,SolidPart.step,Rhino STEP export converts straight lines to curves (cross-post),https://discourse.mcneel.com/t/re-rhino-step-export-converts-straight-lines-to-curves/222166,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-10,RhinoPart.stp,Rhino STEP export converts straight lines to curves (RH-97978),https://discourse.mcneel.com/t/rhino-step-export-converts-straight-lines-to-curves/221628,,Pending (run download_discourse_step.ps1)
+Discourse,2026-08-10,RhinoPart.stp,Rhino STEP export converts straight lines to curves (cross-post),https://discourse.mcneel.com/t/re-rhino-step-export-converts-straight-lines-to-curves/222166,,Pending (run download_discourse_step.ps1)
+Discourse,2026-06-09,01.step,Sample geometry for seamless pattern on Brep surface,https://discourse.mcneel.com/t/seamless-pattern-on-brep-surface/219707,,Pending (run download_discourse_step.ps1)
+Discourse,2026-06-07,04.step,Sample geometry for seamless pattern on Brep surface,https://discourse.mcneel.com/t/seamless-pattern-on-brep-surface/219707,,Pending (run download_discourse_step.ps1)
+Discourse,2026-06-03,157f8ef244231cb5305051c293e4ec2d.stp,STEP import: conical surface interpreted as a circle (cone lost),https://discourse.mcneel.com/t/step-import-issue-conical-surface-interpreted-as-a-circle/219575,,Pending (run download_discourse_step.ps1)
+Discourse,2026-06-03,Bad surface.stp,STEP export creating bad object,https://discourse.mcneel.com/t/step-export-creating-bad-object/219572,,Pending (run download_discourse_step.ps1)
+Discourse,2026-06-03,H2.step,Sample while asking how to export unrolled surface as DXF,https://discourse.mcneel.com/t/how-to-export-unrolled-surface-as-dxf/219492,,Pending (run download_discourse_step.ps1)
+Discourse,2026-06-03,H1.step,Sample while asking how to export unrolled surface as DXF,https://discourse.mcneel.com/t/how-to-export-unrolled-surface-as-dxf/219492,,Pending (run download_discourse_step.ps1)
+Discourse,2026-06-01,T3b.step,Sample while asking how to export unrolled surface as DXF,https://discourse.mcneel.com/t/how-to-export-unrolled-surface-as-dxf/219492,,Pending (run download_discourse_step.ps1)
+Discourse,2026-05-30,T4.step,Sample while asking how to export unrolled surface as DXF,https://discourse.mcneel.com/t/how-to-export-unrolled-surface-as-dxf/219492,,Pending (run download_discourse_step.ps1)
+Discourse,2026-05-13,PMP_BRK.stp,Closed solid polysurface unroll for lasercutting,https://discourse.mcneel.com/t/closed-solid-polysurface-unroll-for-lasercutting/218990,,Pending (run download_discourse_step.ps1)
+Discourse,2026-04-20,extend_this_01.stp,Extend solids in push-pull gone,https://discourse.mcneel.com/t/extend-solids-in-push-pull-gone/218200,,Pending (run download_discourse_step.ps1)
+Discourse,2026-04-13,Duravit_D-Code_33849_3D-PD_[phone].stp,STEP import crashes Rhino 9,https://discourse.mcneel.com/t/step-import-crashes-rhino-9/217963,,Pending (run download_discourse_step.ps1)
+Discourse,2026-03-07,threadcutter-test.step,Threads and solid booleans,https://discourse.mcneel.com/t/threads-and-solid-booleans/216730,,Pending (run download_discourse_step.ps1)
+Discourse,2026-03-05,collet.stp,Copy-paste causing linked block to import again,https://discourse.mcneel.com/t/strange-issue-with-copy-paste-causing-linked-block-to-import-again/216480,,Pending (run download_discourse_step.ps1)
+Discourse,2026-02-04,Chamfered Cube _ Offset Surfaces.STEP,Sample for panel-generating Grasshopper definition,https://discourse.mcneel.com/t/private-commission-for-a-panel-generating-grasshopper-definition/214989,,Pending (run download_discourse_step.ps1)
+Discourse,2026-02-01,Chamfered Cube _ 50mm Offset and Lofted.STEP,Sample for panel-generating Grasshopper definition,https://discourse.mcneel.com/t/private-commission-for-a-panel-generating-grasshopper-definition/214989,,Pending (run download_discourse_step.ps1)
+Discourse,2026-02-01,Icosahedron.STEP,Sample for panel-generating Grasshopper definition,https://discourse.mcneel.com/t/private-commission-for-a-panel-generating-grasshopper-definition/214989,,Pending (run download_discourse_step.ps1)
+Discourse,2026-02-01,Chamfered Cube.STEP,Sample for panel-generating Grasshopper definition,https://discourse.mcneel.com/t/private-commission-for-a-panel-generating-grasshopper-definition/214989,,Pending (run download_discourse_step.ps1)
+Discourse,2026-02-01,Dodecahedron.STEP,Sample for panel-generating Grasshopper definition,https://discourse.mcneel.com/t/private-commission-for-a-panel-generating-grasshopper-definition/214989,,Pending (run download_discourse_step.ps1)
+Discourse,2026-02-01,Random.STEP,Sample for panel-generating Grasshopper definition,https://discourse.mcneel.com/t/private-commission-for-a-panel-generating-grasshopper-definition/214989,,Pending (run download_discourse_step.ps1)
+Discourse,2026-01-15,test.stp,Grasshopper Make2D question sample,https://discourse.mcneel.com/t/grasshopper-make-2d-question/214581,,Pending (run download_discourse_step.ps1)
+Discourse,2026-01-05,fillet fails 1.stp,Plasticity vs Rhino fillet comparison sample,https://discourse.mcneel.com/t/plasticity-new-software/152284,,Pending (run download_discourse_step.ps1)
+Discourse,2025-12-23,army_axe_18.stp,M48 tomahawk military axe modeling,https://discourse.mcneel.com/t/m48-tomahawk-military-axe/213937,,Pending (run download_discourse_step.ps1)
+Discourse,2025-12-11,parametric panel sharp.stp,Beta FilletSrf improvements sample,https://discourse.mcneel.com/t/rhino-beta-feature-filletsrf-improvements/205956,,Pending (run download_discourse_step.ps1)
+Discourse,2025-12-08,SmitBronco 002.stp,Maritime hull modeling sample,https://discourse.mcneel.com/t/re-rhino-expert-for-maritime-hull-modeling/213082,,Pending (run download_discourse_step.ps1)
+Discourse,2025-11-17,stand51.stp,How to create 1mm radii on all sharp edges,https://discourse.mcneel.com/t/how-do-i-create-1-mm-radii-on-all-sharp-edges/212507,,Pending (run download_discourse_step.ps1)
+Discourse,2025-11-10,creo patch.stp,Merge Creo surface patch,https://discourse.mcneel.com/t/merge-creo-surface-patch/212201,,Pending (run download_discourse_step.ps1)
+Discourse,2025-11-01,Ab trailing truck.STEP,AutoCAD fillets improperly handled,https://discourse.mcneel.com/t/autocad-fillets-improperly-handled/211786,,Pending (run download_discourse_step.ps1)
+Discourse,2025-09-02,Subobject color check(1).stp,Check color code of a surface assigned in sub-object mode,https://discourse.mcneel.com/t/ways-to-check-color-code-of-a-surface-assigned-in-sub-object-mode/209208,,Pending (run download_discourse_step.ps1)
+Discourse,2025-08-15,test_2d_1.stp,Exported STEP file has different uv-direction of surface,https://discourse.mcneel.com/t/exported-step-file-has-different-uv-direction-of-surface/208549,,Pending (run download_discourse_step.ps1)
+Discourse,2025-08-15,test.stp,STEP file imported back looks different from the original,https://discourse.mcneel.com/t/step-file-imported-back-looks-different-from-the-original-one/208546,,Pending (run download_discourse_step.ps1)
+Discourse,2025-07-31,STEP_AP2014_Rhino7win_ExportParamSpaceCurves.stp,STEP export/import strange behavior,https://discourse.mcneel.com/t/step-export-import-strange-behavior/207799,,Pending (run download_discourse_step.ps1)
+Discourse,2025-07-31,STEP_AP2014_from_Rhino7win.stp,STEP export/import strange behavior,https://discourse.mcneel.com/t/step-export-import-strange-behavior/207799,,Pending (run download_discourse_step.ps1)
+Discourse,2025-07-30,STEP.stp,STEP export/import strange behavior,https://discourse.mcneel.com/t/step-export-import-strange-behavior/207799,,Pending (run download_discourse_step.ps1)
+Discourse,2025-07-21,tutorial.step,STEP attributes question,https://discourse.mcneel.com/t/step-attributes/207385,,Pending (run download_discourse_step.ps1)
+Discourse,2025-07-19,tutorial.step,STEP in Rhino 8 question,https://discourse.mcneel.com/t/step-in-rhino8/207332,,Pending (run download_discourse_step.ps1)
+Discourse,2025-07-16,brep.step,Exported STEP is empty,https://discourse.mcneel.com/t/exported-step-is-empty/207223,,Pending (run download_discourse_step.ps1)
+Discourse,2025-07-04,cylinder solid ap242.stp,How to export NURBS as primitive surface,https://discourse.mcneel.com/t/how-to-export-nurbs-as-primitive-surface/206575,,Pending (run download_discourse_step.ps1)
+Discourse,2025-06-30,test_file.stp,STEP file exported with incomplete coordinates,https://discourse.mcneel.com/t/step-file-exported-with-incomplete-coordinates/206590,,Pending (run download_discourse_step.ps1)
+Discourse,2025-06-24,ring-crease.stp,Beta FilletSrf improvements sample,https://discourse.mcneel.com/t/rhino-beta-feature-filletsrf-improvements/205956,,Pending (run download_discourse_step.ps1)
+Discourse,2025-06-24,radius-curve.stp,Beta FilletSrf improvements sample,https://discourse.mcneel.com/t/rhino-beta-feature-filletsrf-improvements/205956,,Pending (run download_discourse_step.ps1)
+Discourse,2025-06-24,ring_proe.stp,Beta FilletSrf improvements sample (Pro/E origin),https://discourse.mcneel.com/t/rhino-beta-feature-filletsrf-improvements/205956,,Pending (run download_discourse_step.ps1)
+Discourse,2025-06-16,150a8cca-a387-3511-b241-a0f1cccd44aa (1).stp,Transparency missing when importing STEP file,https://discourse.mcneel.com/t/transparency-missing-when-importing-step-file-in-rhino/205924,,Pending (run download_discourse_step.ps1)
+Discourse,2025-06-15,8WO-1100020-00_only_model_example.stp,How to display solid section edges instead of dashed lines,https://discourse.mcneel.com/t/how-to-display-solid-section-edges-instead-of-dashed-lines-in-views/205923,,Pending (run download_discourse_step.ps1)
+Discourse,2025-06-06,REY1936-100.STEP,Converting STEP to RFA with the right model,https://discourse.mcneel.com/t/converting-step-to-rfa-with-the-right-model/205549,,Pending (run download_discourse_step.ps1)
+Discourse,2025-05-16,test.stp,Export mesh as STL file sample,https://discourse.mcneel.com/t/export-mesh-as-stl-file/178061,,Pending (run download_discourse_step.ps1)
+Discourse,2025-04-23,FLG-240712.stp,Flat pattern for sheet metal,https://discourse.mcneel.com/t/flat-pattern-for-sheet-metal/203482,,Pending (run download_discourse_step.ps1)
+Discourse,2025-04-13,erroneous_fillet_during_step_import.step,Erroneous fillet during STEP file import,https://discourse.mcneel.com/t/erroneous-fillet-during-step-file-import/202978,,Pending (run download_discourse_step.ps1)
+Discourse,2025-03-19,Cylinder 1.STEP,Export STEP with metadata,https://discourse.mcneel.com/t/export-step-with-metadata/199361,,Pending (run download_discourse_step.ps1)
+Discourse,2025-03-18,model1.stp,MultiSidePatch command sample,https://discourse.mcneel.com/t/multisidepatch-command/199081,,Pending (run download_discourse_step.ps1)
+Discourse,2025-03-12,92865A544_NO THREADS_Medium-Strength Grade 5 Steel Hex Head Screw (1).STEP,PDF printing technical mode missing and false objects,https://discourse.mcneel.com/t/pdf-printing-technical-mode-missing-and-false-objects/200831,,Pending (run download_discourse_step.ps1)
+Discourse,2025-03-05,join.stp,Boolean with pipes,https://discourse.mcneel.com/t/boolean-with-pipes/200748,,Pending (run download_discourse_step.ps1)
+Discourse,2025-03-04,Goggles_3dm.stp,Help with ski goggle build,https://discourse.mcneel.com/t/help-with-ski-goggle-build/200731,,Pending (run download_discourse_step.ps1)
+Discourse,2025-02-28,surf-fill.stp,Beta Patch re-implemented sample,https://discourse.mcneel.com/t/rhino-beta-feature-patch-re-implemented/198660,,Pending (run download_discourse_step.ps1)
+Discourse,2025-02-20,Guitar Body 2.step,Newbie thickening a guitar body,https://discourse.mcneel.com/t/total-newbie-here-who-needs-to-thicken-a-guitar-body-please-help/199984,,Pending (run download_discourse_step.ps1)
+Discourse,2025-02-20,Guitar Body 1.step,Newbie thickening a guitar body,https://discourse.mcneel.com/t/total-newbie-here-who-needs-to-thicken-a-guitar-body-please-help/199984,,Pending (run download_discourse_step.ps1)
+Discourse,2025-02-19,conic.stp,FilletEdge command problem sample,https://discourse.mcneel.com/t/i-did-a-test-in-rhino-with-the-fillet-edge-command-but-there-is-a-proble/199874,,Pending (run download_discourse_step.ps1)
+Discourse,2025-02-19,testnew.stp,FilletEdge command problem sample,https://discourse.mcneel.com/t/i-did-a-test-in-rhino-with-the-fillet-edge-command-but-there-is-a-proble/199874,,Pending (run download_discourse_step.ps1)
+Discourse,2025-02-16,UNO R4 MINIMA.step,Convert a step model/block instance to one polysurface,https://discourse.mcneel.com/t/convert-a-step-model-block-instance-to-a-one-polysurface/199705,,Pending (run download_discourse_step.ps1)
+Discourse,2025-02-11,12800-COR-EYEBOLTS-ENG-P20-23SEP24-YBA.stp,Rhino 8 STEP translator text not correct,https://discourse.mcneel.com/t/rhino-8-step-translator-text-not-correct/199367,,Pending (run download_discourse_step.ps1)
+Discourse,2025-01-21,J.01 Upper Carcase Vertical LED Profile 17 x 8.STEP,STEP import with wrong names,https://discourse.mcneel.com/t/step-import-with-wrong-names/198151,,Pending (run download_discourse_step.ps1)
+Discourse,2025-01-14,test.stp,STP import results in bad object (bug),https://discourse.mcneel.com/t/stp-import-results-in-bad-object-bug/196476,,Pending (run download_discourse_step.ps1)
+Discourse,2025-01-09,Ricon_100x40_EA.stp,Exported SketchUp .skp file is empty,https://discourse.mcneel.com/t/exported-sketchup-skp-file-is-empty/197526,,Pending (run download_discourse_step.ps1)
+Discourse,2024-12-12,2024-12-12_NotAsSTP.stp,STP import results in bad object (bug),https://discourse.mcneel.com/t/stp-import-results-in-bad-object-bug/196476,,Pending (run download_discourse_step.ps1)
+Discourse,2024-11-21,Manual Copper Busbar Bender for Transformer Coil Production.stp,Export to STEP AP242 discussion,https://discourse.mcneel.com/t/export-to-step-ap-242/86313,,Pending (run download_discourse_step.ps1)
+Discourse,2024-11-12,model1_2e5.stp,Working with NX STEP files,https://discourse.mcneel.com/t/working-with-nx-step-files/139321,,Pending (run download_discourse_step.ps1)
+Discourse,2024-11-12,model1_0254.stp,Working with NX STEP files,https://discourse.mcneel.com/t/working-with-nx-step-files/139321,,Pending (run download_discourse_step.ps1)
+Discourse,2024-11-12,model1_001.stp,Working with NX STEP files,https://discourse.mcneel.com/t/working-with-nx-step-files/139321,,Pending (run download_discourse_step.ps1)
+Discourse,2024-11-12,model1_01.stp,Working with NX STEP files,https://discourse.mcneel.com/t/working-with-nx-step-files/139321,,Pending (run download_discourse_step.ps1)
+Discourse,2024-11-11,Fillet_and_STEP_export_in_NX.stp,Working with NX STEP files,https://discourse.mcneel.com/t/working-with-nx-step-files/139321,,Pending (run download_discourse_step.ps1)
+Discourse,2024-11-04,MatryxBrakeLever_v2_molds v153.step,Creating a compression mold from .step or .stl,https://discourse.mcneel.com/t/creating-a-compression-mold-from-step-or-stl-file/194279,,Pending (run download_discourse_step.ps1)
+Discourse,2024-11-04,Holbrook model.STEP,Creating a compression mold from .step or .stl,https://discourse.mcneel.com/t/creating-a-compression-mold-from-step-or-stl-file/194279,,Pending (run download_discourse_step.ps1)
+Discourse,2024-10-09,Non-Planer 01 v0.step,How to split a surface using multiple curves,https://discourse.mcneel.com/t/how-to-split-a-surface-using-multiple-curves/192675,,Pending (run download_discourse_step.ps1)
+Discourse,2024-10-05,unione cubetti v1.step,Failed Boolean union,https://discourse.mcneel.com/t/failed-boolean-union/192405,,Pending (run download_discourse_step.ps1)
+Discourse,2024-10-04,shell-1experiemntValidate.stp,Make honeycomb solid from surface,https://discourse.mcneel.com/t/make-honeycomb-solid-from-surface/192226,,Pending (run download_discourse_step.ps1)
+Discourse,2024-09-30,STEP.stp,What does 3mf do to a surface,https://discourse.mcneel.com/t/what-does-new-kid-3mf-do-to-a-surface/192119,,Pending (run download_discourse_step.ps1)
+Discourse,2024-09-17,My block name.stp,Importing STEP files to Rhino creates a new block (RH-68343),https://discourse.mcneel.com/t/importing-step-files-to-rhino-creates-a-new-block/141298,,Pending (run download_discourse_step.ps1)
+Discourse,2024-09-12,8 Hubbard Park_Wreath Rail.stp,Using Sweep2 to generate accurate files,https://discourse.mcneel.com/t/using-sweep2-to-generate-accurate-files/191108,,Pending (run download_discourse_step.ps1)
+Discourse,2024-09-10,_V02-QUAD-00000-ASSY 242-ED2__FUSION_TO_STEP_RHINO.step,STEP/STP export with groups and blocks,https://discourse.mcneel.com/t/re-step-stp-export-with-groups-and-blocks/190517,,Pending (run download_discourse_step.ps1)
+Discourse,2024-09-10,_V02-QUAD-00000-ASSY 242-ED2.stp,STEP/STP export with groups and blocks,https://discourse.mcneel.com/t/re-step-stp-export-with-groups-and-blocks/190517,,Pending (run download_discourse_step.ps1)
+Discourse,2024-09-03,screws_v8_extruded.stp,Mirrored blocks STP export bug,https://discourse.mcneel.com/t/mirrored-blocks-stp-export-bug/189649,,Pending (run download_discourse_step.ps1)
+Discourse,2024-08-31,tool.stp,Problem opening Grasshopper file,https://discourse.mcneel.com/t/problem-opening-grasshopper-file/190460,,Pending (run download_discourse_step.ps1)
+Discourse,2024-08-31,carbody.stp,STEP/STP export with groups and blocks / CATIA data exchange,https://discourse.mcneel.com/t/step-stp-export-with-groups-and-blocks-extra-catia-data-exchange/190385,,Pending (run download_discourse_step.ps1)
+Discourse,2024-08-20,Front Fuse cover.STEP,Boolean difference,https://discourse.mcneel.com/t/boolean-difference/189750,,Pending (run download_discourse_step.ps1)
+Discourse,2024-08-20,Fuse.STEP,Boolean difference,https://discourse.mcneel.com/t/boolean-difference/189750,,Pending (run download_discourse_step.ps1)
+Discourse,2024-08-14,tower.stp,Why are fillets so bad,https://discourse.mcneel.com/t/why-are-fillets-so-bad/184006,,Pending (run download_discourse_step.ps1)
+Discourse,2024-08-01,exportFromInventor.stp,Importing STEP files to Rhino creates a new block (RH-68343),https://discourse.mcneel.com/t/importing-step-files-to-rhino-creates-a-new-block/141298,,Pending (run download_discourse_step.ps1)
+Discourse,2024-07-31,Circle.step,Importing STEP files to Rhino creates a new block (RH-68343),https://discourse.mcneel.com/t/importing-step-files-to-rhino-creates-a-new-block/141298,,Pending (run download_discourse_step.ps1)
+Discourse,2024-07-31,exportFromSolidworks.STEP,Importing STEP files to Rhino creates a new block (RH-68343),https://discourse.mcneel.com/t/importing-step-files-to-rhino-creates-a-new-block/141298,,Pending (run download_discourse_step.ps1)
+Discourse,2024-07-30,green-body.stp,Solids will not split,https://discourse.mcneel.com/t/solids-will-not-split/188800,,Pending (run download_discourse_step.ps1)
+Discourse,2024-07-26,shape.stp,Lack of persistent 3d dimension tool,https://discourse.mcneel.com/t/lack-of-persistent-3d-dimension-tool/187782,,Pending (run download_discourse_step.ps1)
+Discourse,2024-07-19,diamond.stp,Strange fillet edge behaviour,https://discourse.mcneel.com/t/strange-fillet-edge-behaviour/188279,,Pending (run download_discourse_step.ps1)
+Discourse,2024-07-16,2433_MOD_240716_Support Jauge Z v1.step,Rhino's appalling fillets,https://discourse.mcneel.com/t/rhinos-appalling-fillets/188008,,Pending (run download_discourse_step.ps1)
+Discourse,2024-07-09,845CAM.stp,Importing a .stp results in massive files,https://discourse.mcneel.com/t/importing-a-stp-results-in-massive-files/187755,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-28,model1.stp,Why are fillets so bad (procedural geometry),https://discourse.mcneel.com/t/re-why-are-fillets-so-bad-procedural-geometry/185409,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-26,Cones.STEP,Why are fillets so bad,https://discourse.mcneel.com/t/why-are-fillets-so-bad/184006,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-25,model1_1.stp,Why are fillets so bad,https://discourse.mcneel.com/t/why-are-fillets-so-bad/184006,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-25,cone fusion.step,Why are fillets so bad (Fusion cone),https://discourse.mcneel.com/t/why-are-fillets-so-bad/184006,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-25,creocone.stp,Why are fillets so bad (Creo cone),https://discourse.mcneel.com/t/why-are-fillets-so-bad/184006,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-14,1.stp,Rhino STEP export refuses to keep surface count in other CAD packages,https://discourse.mcneel.com/t/rhino-step-export-refuses-to-keep-surface-count-in-other-cad-packages/184553,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-13,radius.stp,Why are fillets so bad,https://discourse.mcneel.com/t/why-are-fillets-so-bad/184006,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-10,model2.stp,PushPull command does not work properly,https://discourse.mcneel.com/t/the-pushpull-command-does-not-work-properly/162592,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-10,model1.stp,PushPull command does not work properly,https://discourse.mcneel.com/t/the-pushpull-command-does-not-work-properly/162592,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-10,fix_stp_1.stp,PushPull command does not work properly,https://discourse.mcneel.com/t/the-pushpull-command-does-not-work-properly/162592,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-10,test-block.stp,Why are fillets so bad,https://discourse.mcneel.com/t/why-are-fillets-so-bad/184006,,Pending (run download_discourse_step.ps1)
+Discourse,2024-06-10,test-block.stp,Fillet fails examples 2023-03 hammering collection,https://discourse.mcneel.com/t/fillet-fails-examples-2023-03-hammering-collection/155236,,Pending (run download_discourse_step.ps1)
+Discourse,2024-05-20,240509_eckModul v3.step,What just happened to my Grasshopper,https://discourse.mcneel.com/t/re-what-just-happened-to-my-grasshopper/182304,,Pending (run download_discourse_step.ps1)
+Discourse,2024-05-13,Boom_I.stp,Align object to the world plane,https://discourse.mcneel.com/t/align-object-to-the-world-plane/181933,,Pending (run download_discourse_step.ps1)
+Discourse,2024-05-02,tube detail revised square edges.STEP,Issues creating closed polysurfaces for 5-axis CNC,https://discourse.mcneel.com/t/issues-with-creating-closed-polysurfaces-for-5-axis-cnc/181289,,Pending (run download_discourse_step.ps1)
+Discourse,2024-04-25,WREATH-ELBOW.STP,One-to-one online training request,https://discourse.mcneel.com/t/one-to-one-online-training-free-support/180899,,Pending (run download_discourse_step.ps1)
+Discourse,2024-03-27,StepFile.stp,Unable to open any .STP file,https://discourse.mcneel.com/t/unable-to-open-any-stp-file-help/178867,,Pending (run download_discourse_step.ps1)
+Discourse,2024-03-06,INNER SIDE RAIL - RH - RH HDPE.stp,Flat perspective question,https://discourse.mcneel.com/t/flat-perspective/177366,,Pending (run download_discourse_step.ps1)
+Discourse,2024-02-15,64 Craftsmen Long Gear.STEP,Rhino beginner command assistance,https://discourse.mcneel.com/t/rhino-beginner-command-assistance/175709,,Pending (run download_discourse_step.ps1)
+Discourse,2024-02-15,64 Craftsmen Short Gear.STEP,Rhino beginner command assistance,https://discourse.mcneel.com/t/rhino-beginner-command-assistance/175709,,Pending (run download_discourse_step.ps1)
+Discourse,2024-01-20,AssemblyCAD.STEP,Layer problem with inserted .obj files,https://discourse.mcneel.com/t/layer-problem-with-inserted-obj-files/173787,,Pending (run download_discourse_step.ps1)
+Discourse,2024-01-18,AssemblyCAD_02.STEP,Problem with grid on top of objects in ghosted mode,https://discourse.mcneel.com/t/problem-with-grid-on-top-of-objects-in-ghosted-mode/173608,,Pending (run download_discourse_step.ps1)
+Discourse,2024-01-17,YELLOW STEP.step,Molding cast,https://discourse.mcneel.com/t/molding-cast/173537,,Pending (run download_discourse_step.ps1)
+Discourse,2024-01-02,cube (1).stp,Loose fit BoundingBox,https://discourse.mcneel.com/t/loose-fit-boundingbox/172516,,Pending (run download_discourse_step.ps1)
+Discourse,2023-12-12,fusion.step,Boolean difference Breps,https://discourse.mcneel.com/t/boolean-difference-breps/171345,,Pending (run download_discourse_step.ps1)
+Discourse,2023-12-08,interlattice v1.step,Cannot solid union pipes,https://discourse.mcneel.com/t/cannot-solid-union-pipes/170943,,Pending (run download_discourse_step.ps1)
+Discourse,2023-12-07,F97578D277B4BDD3C6DA992642F33E1001DC868F_fixed.stp,STP file import (fixed sample),https://discourse.mcneel.com/t/stp-file-import/170909,,Pending (run download_discourse_step.ps1)
+Discourse,2023-12-07,26121fe6-d8f4-387b-8233-a3ece086a346_fixed.stp,STP file import (fixed sample),https://discourse.mcneel.com/t/stp-file-import/170909,,Pending (run download_discourse_step.ps1)
+Discourse,2023-12-07,26121fe6-d8f4-387b-8233-a3ece086a346.stp,STP file import,https://discourse.mcneel.com/t/stp-file-import/170909,,Pending (run download_discourse_step.ps1)
+Discourse,2023-12-07,F97578D277B4BDD3C6DA992642F33E1001DC868F.stp,STP file import,https://discourse.mcneel.com/t/stp-file-import/170909,,Pending (run download_discourse_step.ps1)
+Discourse,2023-11-16,water tap.stp,Water tap surfacing challenge (topic ID redacted),https://discourse.mcneel.com/t/water-tap-italian-design-surfacing-challenge,,Pending (run download_discourse_step.ps1)
+Discourse,2023-11-14,2 SolidsFixed.stp,STEP export bug with mirrored solid (topic ID redacted),https://discourse.mcneel.com/t/step-export-bug-with-mirrored-solid,,Pending (run download_discourse_step.ps1)
+Discourse,2023-11-08,The King's Castle.STEP,Copy color from wireframe/shaded to render mode (topic ID redacted),https://discourse.mcneel.com/t/how-to-copy-color-from-wireframe-shaded-mode-to-render-mode,,Pending (run download_discourse_step.ps1)
+Discourse,2023-11-02,Fillets are easy in Rhino.stp,What method achieves rounded corners with FilletSrf,https://discourse.mcneel.com/t/what-method-achieves-rounded-type-corners-with-filletsrf/167820,,Pending (run download_discourse_step.ps1)
+Discourse,2023-11-02,Test.stp,Reading curvature analysis and eliminating inconsistencies (topic ID redacted),https://discourse.mcneel.com/t/reading-curvature-analysis-and-eliminating-any-inconsistencies,,Pending (run download_discourse_step.ps1)
+Discourse,2023-10-31,2 Solids.stp,STEP export bug with mirrored solid (topic ID redacted),https://discourse.mcneel.com/t/step-export-bug-with-mirrored-solid,,Pending (run download_discourse_step.ps1)
+YouTrack,2026-09-01,STEP file (attachment),Export user text to STEP as metadata (feature; needs testing),https://mcneel.myjetbrains.com/youtrack/issue/RH-98266,,
+YouTrack,2025-12-18,STEP file (attachment),STEP export then import shifts surface control points (SubD-to-Brep) causing open edges; clean in Fusion,https://mcneel.myjetbrains.com/youtrack/issue/RH-91147,,
+YouTrack,2025-01-02,STEP file (attachment),Import STEP file generates open surfaces after ExplodeBlock (R8 vs R7),https://mcneel.myjetbrains.com/youtrack/issue/RH-85361,,
+YouTrack,2026-08,STEP file (attachment),STEP export writes straight lines as degree-1 splines instead of native LINE; breaks CAM/sheet-metal importers,https://mcneel.myjetbrains.com/youtrack/issue/RH-97978,,
+YouTrack,2026,STEP file (attachment),STEP export/import creates extra surfaces and lines on reimport (Mac),https://mcneel.myjetbrains.com/youtrack/issue/RH-96597,,
+YouTrack,2015-03-09,TopSolid STEP file (confidential),STEP file wrong import: many surfaces that do not trim properly,https://mcneel.myjetbrains.com/youtrack/issue/RH-29829,,
+YouTrack,2016-09-26,Mastercam STEP file,STEP import produces bad objects / many naked edges,https://mcneel.myjetbrains.com/youtrack/issue/RH-35717,,
+YouTrack,2013-01-24,STEP import bug.zip,STEP file with an untrimmed object,https://mcneel.myjetbrains.com/youtrack/issue/RH-5158,,
+YouTrack,2023-02-05,STEP file (request),STEP import support in iOS Rhino Viewer,https://mcneel.myjetbrains.com/youtrack/issue/RV-734,,
+YouTrack,2026,STEP file (attachment),STEP import shows curves only; solid uses OPEN_SHELL where CLOSED_SHELL expected,https://mcneel.myjetbrains.com/youtrack/issue/RH-78707,,
+YouTrack,2026,SolidWorks STEP file,STEP import leaves naked edges (tolerance vs feature size),https://mcneel.myjetbrains.com/youtrack/issue/RH-59178,,
+YouTrack,2026,STEP file (attachment),Imported STEP has untrimmed surfaces (thread surfaces on round-trip),https://mcneel.myjetbrains.com/youtrack/issue/RH-34927,,
+YouTrack,2026,STEP file (attachment),STEP import should drop near-degenerate spans that create sliver faces,https://mcneel.myjetbrains.com/youtrack/issue/RH-35396,,
+YouTrack,2026,STEP file (attachment),Imported layers come in black; export overrides object By-Layer display color,https://mcneel.myjetbrains.com/youtrack/issue/RH-63983,,
+YouTrack,2013-08-20,STEP file (sample),STEP export loses layer nesting (STEP has no layer hierarchy),https://mcneel.myjetbrains.com/youtrack/issue/RH-20983,,
+YouTrack,2018-01-12,STEP export,Scripted -Export to STEP of a non-manifold object pops a blocking warning box,https://mcneel.myjetbrains.com/youtrack/issue/RH-43506,,
+YouTrack,2022-02-02,STEP file (mesh entities),Feature request: STEP import and export of mesh entities,https://mcneel.myjetbrains.com/youtrack/issue/RH-67313,,
+YouTrack,2022-01-12,STEP AP214 file,Import/export of point clouds to STEP (inactive; no sample),https://mcneel.myjetbrains.com/youtrack/issue/RH-66970,,
+YouTrack,2016-01-07,STEP export,STEP export turns arcs into NURBS (won't fix),https://mcneel.myjetbrains.com/youtrack/issue/RH-32549,,
+YouTrack,2001-08-15,STEP export,Add STEP export header metadata (author/timestamp/system) - obsolete,https://mcneel.myjetbrains.com/youtrack/issue/RH-926,,
+YouTrack,2009-11-17,STEP export,Step export ignores layer visibility (won't fix),https://mcneel.myjetbrains.com/youtrack/issue/RH-6090,,
+YouTrack,2018-09-18,3dm (empty),export_STEP crash rose_delete_extent - Access Denied (inactive),https://mcneel.myjetbrains.com/youtrack/issue/RH-48548,,
+YouTrack,2024,STEP file (attachment),Detect/resolve block-name conflicts when importing STEP (enhancement; retargeted 9.x),https://mcneel.myjetbrains.com/youtrack/issue/RH-68343,,
+YouTrack,2024,STEP file (attachment),Create a Default layer for instances on import (V5-to-V6 regression),https://mcneel.myjetbrains.com/youtrack/issue/RH-56959,,
+YouTrack,2024,STEP file (attachment),STEP viewing in the iOS Rhino Viewer,https://mcneel.myjetbrains.com/youtrack/issue/RV-295,,
+YouTrack,2017-03-14,3dm + exported STEP,STEP file crashes when opened (import crash),https://mcneel.myjetbrains.com/youtrack/issue/RH-38434,,
+YouTrack,2013-01-24,STEP file (crash),Crash on file with NULL edge_geometry; drove Mac V6 STEP support,https://mcneel.myjetbrains.com/youtrack/issue/RH-39628,,
+YouTrack,2013-01-24,STEP file (crash),Crash on open null-pointer deref in StepConvertCurve.cpp (Stop-Ship),https://mcneel.myjetbrains.com/youtrack/issue/RH-15559,,
+YouTrack,2014-01-09,STEP plug-ins,Rhino crashes on shutdown after loading import_STEP / export_STEP,https://mcneel.myjetbrains.com/youtrack/issue/RH-23500,,
+YouTrack,2020,STEP file (crash),Mac STEP import crashes (wide-char strings) - could not reproduce,https://mcneel.myjetbrains.com/youtrack/issue/RH-57095,,
+YouTrack,2020,STEP file (crash),Mac STEP import crashes (wide-char strings) - could not reproduce,https://mcneel.myjetbrains.com/youtrack/issue/RH-57187,,
+YouTrack,2018,STEP/IGES file,Crash reporter now attaches the failing STEP/IGES file,https://mcneel.myjetbrains.com/youtrack/issue/RH-28358,,
+YouTrack,2017,STEP file (attachment),Naked edges in STEP import,https://mcneel.myjetbrains.com/youtrack/issue/RH-37675,,
+YouTrack,2013,STEP file (large assembly),Bad geometry / many errors on large assembly,https://mcneel.myjetbrains.com/youtrack/issue/RH-4703,,
+YouTrack,2015,STEP file (attachment),V6 regression vs V5 (ellipse/pole),https://mcneel.myjetbrains.com/youtrack/issue/RH-34942,,
+YouTrack,2013,STEP file (invalid),Invalid file won't open (not-a-bug),https://mcneel.myjetbrains.com/youtrack/issue/RH-19601,,
+YouTrack,2013,Unigraphics STEP file,Unigraphics schema not supported,https://mcneel.myjetbrains.com/youtrack/issue/RH-6289,,
+YouTrack,2024,STP file (attachment),Missing objects from STEP import (regression from RH-68343),https://mcneel.myjetbrains.com/youtrack/issue/RH-83827,,
+YouTrack,2024,STP file (attachment),Partial STP import; only some assembly components read,https://mcneel.myjetbrains.com/youtrack/issue/RH-83746,,
+YouTrack,2019,STEP export (TailorSteel),Incorrect geometry read by TailorSteel; exporter rework,https://mcneel.myjetbrains.com/youtrack/issue/RH-50481,,
+YouTrack,2021-05-27,STEP export (TailorSteel),Differences in STEP export between RH60 and RH70 (duplicate of RH-50481),https://mcneel.myjetbrains.com/youtrack/issue/RH-64404,,
+YouTrack,2011-07-14,STEP export,New STEP export options (param-space curves, black-object color),https://mcneel.myjetbrains.com/youtrack/issue/RH-10356,,
+YouTrack,2018,STEP file (many blocks),Slow import on files with many blocks (~10 min to ~3 min),https://mcneel.myjetbrains.com/youtrack/issue/RH-42682,,
+YouTrack,2018,STEP file (many blocks),Slow import on files with many blocks - Mac split,https://mcneel.myjetbrains.com/youtrack/issue/RH-43339,,
+YouTrack,2024,IGES/STEP file,Large CAD import yields tens of thousands of loose surfaces tanking FPS,https://mcneel.myjetbrains.com/youtrack/issue/RH-84130,,
+YouTrack,2013-06-28,STEP file (72Z boat),STEP import: surfaces untrimmed and some not imported,https://mcneel.myjetbrains.com/youtrack/issue/RH-19863,,
+YouTrack,2018-04-20,STEP file (attachment),STEP import doesn't import everything (Mac),https://mcneel.myjetbrains.com/youtrack/issue/RH-45631,,
+YouTrack,2018-04-20,STEP file (attachment),STEP import doesn't import everything (Windows),https://mcneel.myjetbrains.com/youtrack/issue/RH-45596,,
+YouTrack,2017-10-02,BoxLayersNew.stp,STEP import layers not correct (Mac),https://mcneel.myjetbrains.com/youtrack/issue/RH-41711,,
+YouTrack,2017-10-02,BoxLayers.stp,STEP import layers not correct (Windows),https://mcneel.myjetbrains.com/youtrack/issue/RH-41634,,
+YouTrack,2018-02-20,STEP file (attachment),STEP import misplaces block instance (Windows),https://mcneel.myjetbrains.com/youtrack/issue/RH-44280,,
+YouTrack,2018-02-21,STEP file (attachment),STEP import misplaces block instance (Mac),https://mcneel.myjetbrains.com/youtrack/issue/RH-44305,,
+YouTrack,2017-04-26,Onshape STEP file,STEP file does not import correctly (naked edges),https://mcneel.myjetbrains.com/youtrack/issue/RH-39085,,
+YouTrack,2015-03-18,COMSOL STEP file,Step import inconsistencies (displaced edges),https://mcneel.myjetbrains.com/youtrack/issue/RH-29920,,
+YouTrack,2016-09-16,3 STEP files (zip),STEP import missing surfaces (stacked control points),https://mcneel.myjetbrains.com/youtrack/issue/RH-35624,,
+YouTrack,2019-03-15,STEP file (confidential),STEP import ugliness - V5 does a better job,https://mcneel.myjetbrains.com/youtrack/issue/RH-51477,,
+YouTrack,2019-10-08,Part.stp / part_fromSW.STEP,STEP import gets it wrong (hyperbola edge returns NULL),https://mcneel.myjetbrains.com/youtrack/issue/RH-55132,,
+YouTrack,2019-07-02,interuttori cabina.zip (large STEP),STEP import bad trim (cone with seam-only trim),https://mcneel.myjetbrains.com/youtrack/issue/RH-53605,,
+YouTrack,2011-04-13,STEP file (screenshots),Import STEP: untranslated English strings in dialog,https://mcneel.myjetbrains.com/youtrack/issue/RH-9483,,
+YouTrack,2013-07-26,STEP file (attachment),Naked edges in step import (not within tolerance),https://mcneel.myjetbrains.com/youtrack/issue/RH-20544,,
+YouTrack,2013-02-19,STEP file (attachment),Naked edges in STEP import,https://mcneel.myjetbrains.com/youtrack/issue/RH-16308,,
+YouTrack,2018-09-10,STEP export,Split closed surfaces option missing on Mac STEP export,https://mcneel.myjetbrains.com/youtrack/issue/RH-48317,,
+YouTrack,2022-01-12,STEP export,Apple Silicon: Export STEP needs arm64 version,https://mcneel.myjetbrains.com/youtrack/issue/RH-66981,,
+YouTrack,2022-01-12,STEP import,Apple Silicon: Import STEP needs arm64 version,https://mcneel.myjetbrains.com/youtrack/issue/RH-66977,,
+YouTrack,2019-01-18,STEP export (SubD),Support SubD objects in STEP export (as breps),https://mcneel.myjetbrains.com/youtrack/issue/RH-50427,,
+YouTrack,2013-04-22,mirror_Rhino_5_test.3dm / mirror_Rhino_4_test.3dm,Export STEP: Deep Exploration renders surfaces ugly (V5 vs V4),https://mcneel.myjetbrains.com/youtrack/issue/RH-18637,,
+YouTrack,2011-07-08,STEP export,STEP export shrinks trimmed surfaces - export options request,https://mcneel.myjetbrains.com/youtrack/issue/RH-10325,,
+YouTrack,2009-04-10,STEP import/export,Install 64-bit STEP import and export,https://mcneel.myjetbrains.com/youtrack/issue/RH-4802,,
+YouTrack,2026-09-01,STEP file (attachment),Import STEP user text as metadata (relates to RH-98266),https://mcneel.myjetbrains.com/youtrack/issue/RH-88499,,
+YouTrack,2019-05-14,.step file (doc),Doc fix: STEP import units/tolerances wording,https://mcneel.myjetbrains.com/youtrack/issue/DOC-202,,
+SupportBee,n/a,STEP ticket (number redacted),Referenced by RH-85361 (Import STEP generates open surfaces); ticket ID redacted in tool output,https://mcneel.supportbee.com/tickets/,,
+SupportBee,n/a,STEP ticket (number redacted),Referenced by RH-39085 (Onshape STEP does not import correctly); ticket ID redacted in tool output,https://mcneel.supportbee.com/tickets/,,
+SupportBee,n/a,STEP ticket (number redacted),Referenced by RH-51477 (STEP import ugliness); ticket ID redacted in tool output,https://mcneel.supportbee.com/tickets/,,
+SupportBee,n/a,STEP ticket (number redacted),Referenced by RH-64404 (STEP export TailorSteel RH60 vs RH70); ticket ID redacted in tool output,https://mcneel.supportbee.com/tickets/,,
+Local,2026-09-02,d2-db-214.stp,Local AP214 STEP test model (future test set),,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile-future\AP214,Already local
+Local,2021-11-24,Ai-14R.stp,Local large STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile-large,Already local
+Local,2021-11-24,Cruise_Assembly.stp,Local large STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile-large,Already local
+Local,2021-11-24,NissanGT-R.STEP,Local large STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile-large,Already local
+Local,2021-11-24,ROTOR-201NAL-Z7.STEP,Local large STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile-large,Already local
+Local,2021-11-24,Rocky_House.stp,Local large STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile-large,Already local
+Local,2021-11-24,Scania-8x4.stp,Local large STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile-large,Already local
+Local,2021-11-24,Scania-Engine-V8-XT-Turbo.step,Local large STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile-large,Already local
+Local,2021-11-24,UMC-500_SS_Solid_Model_2019-06_r1.stp,Local large STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile-large,Already local
+Local,2026-09-02,as1-ac-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,as1-ac-214Ex.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,as1-ec-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,as1-md-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,as1-tc-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,as1-ug-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,boxy_with_cylindricity.stp,Local AP214 GD&T/PMP STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,boxy_with_diamsize.stp,Local AP214 GD&T/PMP STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,boxy_with_flatness.stp,Local AP214 GD&T/PMP STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,boxy_with_limitsandfits.stp,Local AP214 GD&T/PMP STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,boxy_with_linearsize.stp,Local AP214 GD&T/PMP STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,boxy_with_perp.stp,Local AP214 GD&T/PMP STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,boxy_with_surfacetex.stp,Local AP214 GD&T/PMP STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,f1-db-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,io1-ac-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,io1-ca-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,io1-ec-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,io1-md-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,io1-tc-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,io1-ug-214.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,io1-ug-214PlusLayers.stp,Local AP214 STEP test model,,F:\Users\scottd\Documents\GitHub\mx_testing\models\STEPfile\AP214,Already local
+Local,2026-09-02,nist_ftc_06_asme1_rd.stp,[STEP AP242 and AP203 files](https://www.nist.gov/document/nist-pmi-step-files) for [MBE PMI Validation and Conformance Testing Project](https://www.nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-validation),,F:\Users\scottd\Documents\STEP Files\NIST_MBE_PMI_FTC_Definitions,Already local
+Local,2026-09-02,nist_ftc_07_asme1_rd.stp,[STEP AP242 and AP203 files](https://www.nist.gov/document/nist-pmi-step-files) for [MBE PMI Validation and Conformance Testing Project](https://www.nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-validation),,F:\Users\scottd\Documents\STEP Files\NIST_MBE_PMI_FTC_Definitions,Already local
+Local,2026-09-02,nist_ftc_08_asme1_rc.stp,[STEP AP242 and AP203 files](https://www.nist.gov/document/nist-pmi-step-files) for [MBE PMI Validation and Conformance Testing Project](https://www.nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-validation),,F:\Users\scottd\Documents\STEP Files\NIST_MBE_PMI_FTC_Definitions,Already local
+Local,2026-09-02,nist_ftc_09_asme1_rd.stp,[STEP AP242 and AP203 files](https://www.nist.gov/document/nist-pmi-step-files) for [MBE PMI Validation and Conformance Testing Project](https://www.nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-validation),,F:\Users\scottd\Documents\STEP Files\NIST_MBE_PMI_FTC_Definitions,Already local
+Local,2026-09-02,nist_ftc_10_asme1_rb.stp,[STEP AP242 and AP203 files](https://www.nist.gov/document/nist-pmi-step-files) for [MBE PMI Validation and Conformance Testing Project](https://www.nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-validation),,F:\Users\scottd\Documents\STEP Files\NIST_MBE_PMI_FTC_Definitions,Already local
+Local,2026-09-02,nist_ftc_11_asme1_rb.stp,[STEP AP242 and AP203 files](https://www.nist.gov/document/nist-pmi-step-files) for [MBE PMI Validation and Conformance Testing Project](https://www.nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-validation),,F:\Users\scottd\Documents\STEP Files\NIST_MBE_PMI_FTC_Definitions,Already local

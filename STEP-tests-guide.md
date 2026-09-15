@@ -19,6 +19,13 @@ test" and § "To add a new STEP export test").
 | `StepExportFuture` | — | no, `[Explicit]` | `models\STEPfile-export-future\` |
 | `StepExportLarge` | — | no, `[Explicit]` | `models\STEPfile-large\` |
 
+Those 57 are what a clone of this repository alone runs. Every fixture also lists a second,
+`Optional="true"` location under `private_models\models\`, for customer files that must not be
+published - see the `readme.md` in that folder. A machine with that folder cloned runs considerably
+more: the Discourse corpus there adds 129 models to `StepImport` and `StepExport` and 10 to
+`StepImportFuture`, taking a default run to 315 tests and about five minutes. A machine without it
+finds nothing there and is unaffected, which is what `Optional` means.
+
 The export count is higher than the import count because `StepExport` scans the whole import corpus
 *plus* the two `.3dm` files that happen to sit in `models\STEPfile\AP214\`, *plus*
 `models\STEPfile-export\`.
