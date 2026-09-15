@@ -96,6 +96,23 @@
     <ModelDirectory Fixture="DxfExportLarge" Location="..\..\..\..\models\DXFfile-large\" Optional="true" Enabled="true" />
     <ModelDirectory Fixture="DxfExportLarge" Location="..\..\..\..\private_models\models\DXFfile-large\" Optional="true" Enabled="true" />
 
+    <!-- ===== DWG ===== -->
+
+    <ModelDirectory Fixture="DwgImport" Location="..\..\..\..\models\DWGfile\" Enabled="true" />
+    <ModelDirectory Fixture="DwgImport" Location="..\..\..\..\private_models\models\DWGfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DwgImportFuture" Location="..\..\..\..\models\DWGfile-future\" Enabled="true" />
+    <ModelDirectory Fixture="DwgImportFuture" Location="..\..\..\..\private_models\models\DWGfile-future\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DwgImportLarge" Location="..\..\..\..\models\DWGfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DwgImportLarge" Location="..\..\..\..\private_models\models\DWGfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DwgExport" Location="..\..\..\..\models\DWGfile\" Enabled="true" />
+    <ModelDirectory Fixture="DwgExport" Location="..\..\..\..\private_models\models\DWGfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DwgExport" Location="..\..\..\..\models\DWGfile-export\" Enabled="true" />
+    <ModelDirectory Fixture="DwgExport" Location="..\..\..\..\private_models\models\DWGfile-export\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DwgExportFuture" Location="..\..\..\..\models\DWGfile-export-future\" Enabled="true" />
+    <ModelDirectory Fixture="DwgExportFuture" Location="..\..\..\..\private_models\models\DWGfile-export-future\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DwgExportLarge" Location="..\..\..\..\models\DWGfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="DwgExportLarge" Location="..\..\..\..\private_models\models\DWGfile-large\" Optional="true" Enabled="true" />
+
   </ModelDirectories>
 
 </Settings>

@@ -1,0 +1,19 @@
+DWG IMPORT
+units Millimeters
+objects 8
+instances 0
+blockdefs 0
+layers 2
+breps 0
+extrusions 0
+surfaces 0
+meshes 0
+subds 0
+curves 8
+points 0
+other 0
+solids 0
+invalid 0
+area 0
+volume 0
+bbox -2.6645352591003757E-15,0,-0.4872807104646471 to 52,27,0.9850584882424247

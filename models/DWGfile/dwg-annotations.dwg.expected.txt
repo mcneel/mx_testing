@@ -1,0 +1,19 @@
+DWG IMPORT
+units Millimeters
+objects 4
+instances 0
+blockdefs 1
+layers 5
+breps 0
+extrusions 0
+surfaces 0
+meshes 0
+subds 0
+curves 0
+points 1
+other 3
+solids 0
+invalid 0
+area 0
+volume 0
+bbox 0,-10,0 to 40,4,0

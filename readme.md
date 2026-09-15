@@ -14,7 +14,7 @@ YOUR TESTS ADDITIONS ARE WELCOME!
 1. In Visual Studio, choose `Tests -> Run All Tests`.
 1. If the Test panel does not show up, you can open it using `Tests -> Test Explorer`.
 1. You can explore the project in the Solution Explorer panel (`Ctrl+Alt+L`): you can find the projects in `Solution (Rhino) -> Unit Tests`.
-1. There are three test projects: `MxTests` (mesh and intersection suites), `NetSDKTests` (RhinoCommon SDK tests) and `FileIO` (file format tests, one folder per format - `FileIO\STEP\`, `FileIO\IGES\` and `FileIO\DXF\` today). Each is self contained: its own `Rhino.Testing.Configs.xml`, its own `SetupFixture`, no project references between them.
+1. There are three test projects: `MxTests` (mesh and intersection suites), `NetSDKTests` (RhinoCommon SDK tests) and `FileIO` (file format tests, one folder per format - `FileIO\STEP\`, `FileIO\IGES\`, `FileIO\DXF\` and `FileIO\DWG\` today). Each is self contained: its own `Rhino.Testing.Configs.xml`, its own `SetupFixture`, no project references between them.
 1. There is a `MxTests` project and a `RhinoCommonDelayed` project. The first one is loaded by the testing framework by reflection and does NOT directly use RhinoCommon. This allows to set up hooks and other features to make sure that RhinoCommon is loaded properly, before `RhinoCommonDelayed` is loaded.
 1. There is a setting file located at `MxTests -> MxTests.testsettings.xml`. There is generally no need to modify any settings.
 
@@ -276,6 +276,15 @@ plugin ignores near-empty option dictionaries). Unlike IGES, the write options g
 native writer, so option-varied corpus models are meaningful; three specific keys are silently
 broken today and are documented, with the structural `$ACADVER` check as the tripwire, in
 `DXF-tests-guide.md` along with the pair-grammar structural checks and the corpus.
+
+#### To add a new DWG test: ####
+
+The DWG suites are the same pattern on `MX_DWG_*` / `MX_DWGEXPORT_*` and `models\DWGfile*\`,
+extension `.dwg`. DWG shares the plugin, API and options with DXF (see that section and
+`DXF-tests-guide.md`) but is a fully separate suite with its own corpus. The no-baseline
+structural checks are byte-level on the binary header - the six-byte version magic is the live
+probe that the `Version` option plumbs (`dwg-r2000.dwg` begins `AC1015`, the default `AC1032`).
+Details in `DWG-tests-guide.md`.
 
 ### Notes on inner mechanics ###
 

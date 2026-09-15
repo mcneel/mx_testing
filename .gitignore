@@ -60,6 +60,13 @@ models/DXFfile-large/**
 !models/DXFfile-large/**/*.exported.txt
 !models/DXFfile-large/**/readme.md
 
+# DWG large models: same arrangement as STEPfile-large above.
+models/DWGfile-large/**
+!models/DWGfile-large/**/
+!models/DWGfile-large/**/*.expected.txt
+!models/DWGfile-large/**/*.exported.txt
+!models/DWGfile-large/**/readme.md
+
 # Customer test models that must not be published. The test configs list
 # private_models\models\<fixture>\ as an Optional second location for every fixture, so a machine
 # without this folder simply finds nothing there. Give it its own private git remote and clone it
