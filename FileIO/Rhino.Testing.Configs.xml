@@ -147,6 +147,57 @@
     <ModelDirectory Fixture="StlExportLarge" Location="..\..\..\..\models\STLfile-large\" Optional="true" Enabled="true" />
     <ModelDirectory Fixture="StlExportLarge" Location="..\..\..\..\private_models\models\STLfile-large\" Optional="true" Enabled="true" />
 
+    <!-- ===== 3MF ===== -->
+
+    <ModelDirectory Fixture="TmfImport" Location="..\..\..\..\models\3MFfile\" Enabled="true" />
+    <ModelDirectory Fixture="TmfImport" Location="..\..\..\..\private_models\models\3MFfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="TmfImportFuture" Location="..\..\..\..\models\3MFfile-future\" Enabled="true" />
+    <ModelDirectory Fixture="TmfImportFuture" Location="..\..\..\..\private_models\models\3MFfile-future\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="TmfImportLarge" Location="..\..\..\..\models\3MFfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="TmfImportLarge" Location="..\..\..\..\private_models\models\3MFfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="TmfExport" Location="..\..\..\..\models\3MFfile\" Enabled="true" />
+    <ModelDirectory Fixture="TmfExport" Location="..\..\..\..\private_models\models\3MFfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="TmfExport" Location="..\..\..\..\models\3MFfile-export\" Enabled="true" />
+    <ModelDirectory Fixture="TmfExport" Location="..\..\..\..\private_models\models\3MFfile-export\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="TmfExportFuture" Location="..\..\..\..\models\3MFfile-export-future\" Enabled="true" />
+    <ModelDirectory Fixture="TmfExportFuture" Location="..\..\..\..\private_models\models\3MFfile-export-future\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="TmfExportLarge" Location="..\..\..\..\models\3MFfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="TmfExportLarge" Location="..\..\..\..\private_models\models\3MFfile-large\" Optional="true" Enabled="true" />
+
+    <!-- ===== GLTF ===== -->
+
+    <ModelDirectory Fixture="GltfImport" Location="..\..\..\..\models\GLTFfile\" Enabled="true" />
+    <ModelDirectory Fixture="GltfImport" Location="..\..\..\..\private_models\models\GLTFfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="GltfImportFuture" Location="..\..\..\..\models\GLTFfile-future\" Enabled="true" />
+    <ModelDirectory Fixture="GltfImportFuture" Location="..\..\..\..\private_models\models\GLTFfile-future\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="GltfImportLarge" Location="..\..\..\..\models\GLTFfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="GltfImportLarge" Location="..\..\..\..\private_models\models\GLTFfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="GltfExport" Location="..\..\..\..\models\GLTFfile\" Enabled="true" />
+    <ModelDirectory Fixture="GltfExport" Location="..\..\..\..\private_models\models\GLTFfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="GltfExport" Location="..\..\..\..\models\GLTFfile-export\" Enabled="true" />
+    <ModelDirectory Fixture="GltfExport" Location="..\..\..\..\private_models\models\GLTFfile-export\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="GltfExportFuture" Location="..\..\..\..\models\GLTFfile-export-future\" Enabled="true" />
+    <ModelDirectory Fixture="GltfExportFuture" Location="..\..\..\..\private_models\models\GLTFfile-export-future\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="GltfExportLarge" Location="..\..\..\..\models\GLTFfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="GltfExportLarge" Location="..\..\..\..\private_models\models\GLTFfile-large\" Optional="true" Enabled="true" />
+
+    <!-- ===== SKP ===== -->
+
+    <ModelDirectory Fixture="SkpImport" Location="..\..\..\..\models\SKPfile\" Enabled="true" />
+    <ModelDirectory Fixture="SkpImport" Location="..\..\..\..\private_models\models\SKPfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="SkpImportFuture" Location="..\..\..\..\models\SKPfile-future\" Enabled="true" />
+    <ModelDirectory Fixture="SkpImportFuture" Location="..\..\..\..\private_models\models\SKPfile-future\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="SkpImportLarge" Location="..\..\..\..\models\SKPfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="SkpImportLarge" Location="..\..\..\..\private_models\models\SKPfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="SkpExport" Location="..\..\..\..\models\SKPfile\" Enabled="true" />
+    <ModelDirectory Fixture="SkpExport" Location="..\..\..\..\private_models\models\SKPfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="SkpExport" Location="..\..\..\..\models\SKPfile-export\" Enabled="true" />
+    <ModelDirectory Fixture="SkpExport" Location="..\..\..\..\private_models\models\SKPfile-export\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="SkpExportFuture" Location="..\..\..\..\models\SKPfile-export-future\" Enabled="true" />
+    <ModelDirectory Fixture="SkpExportFuture" Location="..\..\..\..\private_models\models\SKPfile-export-future\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="SkpExportLarge" Location="..\..\..\..\models\SKPfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="SkpExportLarge" Location="..\..\..\..\private_models\models\SKPfile-large\" Optional="true" Enabled="true" />
+
   </ModelDirectories>
 
 </Settings>

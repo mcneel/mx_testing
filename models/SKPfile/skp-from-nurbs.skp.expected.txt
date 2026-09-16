@@ -1,0 +1,19 @@
+SKP IMPORT
+units Millimeters
+objects 2
+instances 0
+blockdefs 0
+layers 1
+breps 0
+extrusions 0
+surfaces 0
+meshes 2
+subds 0
+curves 0
+points 0
+other 0
+solids 2
+invalid 0
+area 821.66718724055352
+volume 1228.9646122436052
+bbox 0,-4.9999999999999991,0 to 35,6,12

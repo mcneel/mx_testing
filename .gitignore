@@ -81,6 +81,27 @@ models/STLfile-large/**
 !models/STLfile-large/**/*.exported.txt
 !models/STLfile-large/**/readme.md
 
+# 3MF large models: same arrangement as STEPfile-large above.
+models/3MFfile-large/**
+!models/3MFfile-large/**/
+!models/3MFfile-large/**/*.expected.txt
+!models/3MFfile-large/**/*.exported.txt
+!models/3MFfile-large/**/readme.md
+
+# GLTF large models: same arrangement as STEPfile-large above.
+models/GLTFfile-large/**
+!models/GLTFfile-large/**/
+!models/GLTFfile-large/**/*.expected.txt
+!models/GLTFfile-large/**/*.exported.txt
+!models/GLTFfile-large/**/readme.md
+
+# SKP large models: same arrangement as STEPfile-large above.
+models/SKPfile-large/**
+!models/SKPfile-large/**/
+!models/SKPfile-large/**/*.expected.txt
+!models/SKPfile-large/**/*.exported.txt
+!models/SKPfile-large/**/readme.md
+
 # Customer test models that must not be published. The test configs list
 # private_models\models\<fixture>\ as an Optional second location for every fixture, so a machine
 # without this folder simply finds nothing there. Give it its own private git remote and clone it

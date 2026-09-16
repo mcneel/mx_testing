@@ -1,0 +1,27 @@
+GLTF EXPORT
+mapztoy false
+exportmaterials true
+exporttexturecoordinates true
+exportvertexnormals true
+exportopenmeshes true
+exportvertexcolors false
+exportlayers false
+usedracocompression false
+srcunits Millimeters
+srcobjects 1
+srcinstances 0
+srcblockdefs 0
+srclayers 1
+srcbreps 0
+srcextrusions 0
+srcsurfaces 0
+srcmeshes 1
+srcsubds 0
+srccurves 0
+srcpoints 0
+srcother 0
+srcsolids 0
+srcinvalid 0
+srcarea 80000000
+srcvolume 0
+srcbbox 0,0,0 to 10000,0,8000

@@ -1,0 +1,107 @@
+{
+ "asset": {
+  "version": "2.0",
+  "generator": "mx_testing hand-authored corpus"
+ },
+ "scene": 0,
+ "scenes": [
+  {
+   "nodes": [
+    0,
+    1
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "mesh": 0
+  },
+  {
+   "mesh": 1
+  }
+ ],
+ "meshes": [
+  {
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0
+     },
+     "indices": 2
+    }
+   ]
+  },
+  {
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 1
+     },
+     "indices": 2
+    }
+   ]
+  }
+ ],
+ "buffers": [
+  {
+   "byteLength": 108,
+   "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAADAQAAAAAAAAAAAAADAQAAAwEAAAAAAAAAAAAAAwEAAAAAAAACgQQAAAAAAAAAAAADQQQAAAAAAAAAAAADQQQAAwEAAAAAAAACgQQAAwEAAAAAAAAABAAIAAAACAAMA"
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 96,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 96,
+   "byteLength": 12,
+   "target": 34963
+  }
+ ],
+ "accessors": [
+  {
+   "bufferView": 0,
+   "byteOffset": 0,
+   "componentType": 5126,
+   "count": 4,
+   "type": "VEC3",
+   "min": [
+    0,
+    0,
+    0
+   ],
+   "max": [
+    6,
+    6,
+    0
+   ]
+  },
+  {
+   "bufferView": 0,
+   "byteOffset": 48,
+   "componentType": 5126,
+   "count": 4,
+   "type": "VEC3",
+   "min": [
+    20,
+    0,
+    0
+   ],
+   "max": [
+    26,
+    6,
+    0
+   ]
+  },
+  {
+   "bufferView": 1,
+   "componentType": 5123,
+   "count": 6,
+   "type": "SCALAR"
+  }
+ ]
+}

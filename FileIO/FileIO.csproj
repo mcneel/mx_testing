@@ -51,6 +51,16 @@
     <Using Include="NUnit.Framework.Legacy.ClassicAssert" Alias="Assert" />
   </ItemGroup>
 
+  <!-- The 3MF suite reads the written package as what it is - an OPC ZIP - to check its parts
+       before any geometry is compared. On net48 the ZIP and XML-to-LINQ types live in framework
+       assemblies that are not referenced by default; on netcoreapp they are in the shared
+       framework and these references are unnecessary. -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+
   <Choose>
     <When Condition="'$(InRhino)' == 'True'">
       <ItemGroup>

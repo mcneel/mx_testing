@@ -14,7 +14,7 @@ YOUR TESTS ADDITIONS ARE WELCOME!
 1. In Visual Studio, choose `Tests -> Run All Tests`.
 1. If the Test panel does not show up, you can open it using `Tests -> Test Explorer`.
 1. You can explore the project in the Solution Explorer panel (`Ctrl+Alt+L`): you can find the projects in `Solution (Rhino) -> Unit Tests`.
-1. There are three test projects: `MxTests` (mesh and intersection suites), `NetSDKTests` (RhinoCommon SDK tests) and `FileIO` (file format tests, one folder per format - `FileIO\STEP\`, `FileIO\IGES\`, `FileIO\DXF\`, `FileIO\DWG\`, `FileIO\WavefrontObj\` and `FileIO\STL\` today). Each is self contained: its own `Rhino.Testing.Configs.xml`, its own `SetupFixture`, no project references between them.
+1. There are three test projects: `MxTests` (mesh and intersection suites), `NetSDKTests` (RhinoCommon SDK tests) and `FileIO` (file format tests, one folder per format - `FileIO\STEP\`, `FileIO\IGES\`, `FileIO\DXF\`, `FileIO\DWG\`, `FileIO\WavefrontObj\`, `FileIO\STL\`, `FileIO\ThreeMF\`, `FileIO\Gltf\` and `FileIO\Skp\` today). Each is self contained: its own `Rhino.Testing.Configs.xml`, its own `SetupFixture`, no project references between them.
 1. There is a `MxTests` project and a `RhinoCommonDelayed` project. The first one is loaded by the testing framework by reflection and does NOT directly use RhinoCommon. This allows to set up hooks and other features to make sure that RhinoCommon is loaded properly, before `RhinoCommonDelayed` is loaded.
 1. There is a setting file located at `MxTests -> MxTests.testsettings.xml`. There is generally no need to modify any settings.
 
@@ -307,6 +307,21 @@ takes weld/split/units from the machine's plugin profile.
 **Before re-authoring any corpus in this project, read the warning in `STL-tests-guide.md`**
 about `RhinoDoc.WriteFile` and dialog suppression: getting it wrong produces an unkillable test
 host, not a failing test.
+
+#### To add a new 3MF, glTF or SketchUp test: ####
+
+All three follow the shared pattern on their own namespaces (`MX_TMF_*`, `MX_GLTF_*`, `MX_SKP_*`
+and their `*EXPORT_*` counterparts) and folders (`models\3MFfile*`, `models\GLTFfile*`,
+`models\SKPfile*`). Each has a guide at the repository root with its structural checks, corpus
+and format-specific traps: `3MF-tests-guide.md`, `GLTF-tests-guide.md`, `SKP-tests-guide.md`.
+
+Two things to know before adding tests to these:
+
+- **glTF does not round trip.** Rhino cannot import the glTF it exports, so the export suite
+  checks structure only and Rhino's own output lives in `models\GLTFfile-future\`. The import
+  corpus is hand-authored JSON. See `GLTF-tests-guide.md`.
+- **3MF has no read API** (`File3mf` is write-only), so its import side goes through
+  `RhinoDoc.Import` with no options to pin.
 
 ### Notes on inner mechanics ###
 
