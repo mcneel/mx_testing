@@ -13,7 +13,8 @@ DWG is the fourth format on the shared pattern (see `STEP-tests-guide.md` for th
 separate suites** (own corpus, folders, fixtures, namespaces; no shared models). Everything the
 DXF guide says about `FileDwg.Read`/`FileDwg.Write`, the near-empty-dictionary import quirk, the
 bare-`doc.Export`-writes-2007 divergence, the headless unit-scale gap, and the three broken write
-option keys (`simplifytolerance`, `curveusemaxangle`, `meshtype 3dface`) applies verbatim here.
+option keys (`simplifytolerance`, `curveusemaxangle`, `meshtype 3dface` — RH-98711) applies
+verbatim here.
 The export sidecar reuses the DXF option vocabulary unchanged. One extra caution from the shared
 plumbing: the two dead keys fall back to the machine's *persisted export scheme*, not a compiled
 default — the corpus keeps `Simplify=false` everywhere so `simplifytolerance` is inert.

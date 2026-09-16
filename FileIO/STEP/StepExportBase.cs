@@ -488,10 +488,10 @@ namespace FileIO
     /// </summary>
     /// <remarks>
     /// Only ever called on a FILE_SCHEMA mismatch, and it never rescues the test - the failure
-    /// stands either way. It exists because the mismatch is intermittent: the writer occasionally
-    /// emits an unrelated schema (AP238-family names such as INTEGRATED_CNC_SCHEMA or
-    /// MODEL_BASED_INTEGRATED_MANUFACTURING_SCHEMA have both been seen) for a model whose options
-    /// pin AP214. A bare "expected X got Y" leaves the next person guessing; knowing whether an
+    /// stands either way. It exists because the mismatch is intermittent (RH-98709): the writer
+    /// occasionally emits an unrelated schema (INTEGRATED_CNC_SCHEMA, TECHNICAL_DATA_PACKAGING and
+    /// PROCESS_PLANNING_SCHEMA have all been seen) for a model whose options pin AP214. A bare
+    /// "expected X got Y" leaves the next person guessing; knowing whether an
     /// immediate second write produces the right schema separates "this model/options combination
     /// always writes Y" from "the writer carries stale state and the same call is not
     /// reproducible", which are different bugs with different owners.

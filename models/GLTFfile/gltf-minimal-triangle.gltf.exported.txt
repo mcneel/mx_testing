@@ -1,6 +1,6 @@
 GLTF EXPORT
 mapztoy false
-exportmaterials true
+exportmaterials false
 exporttexturecoordinates true
 exportvertexnormals true
 exportopenmeshes true
@@ -25,3 +25,21 @@ srcinvalid 0
 srcarea 50000000
 srcvolume 0
 srcbbox 0,0,0 to 10000,0,10000
+units Millimeters
+objects 1
+instances 0
+blockdefs 0
+layers 1
+breps 0
+extrusions 0
+surfaces 0
+meshes 1
+subds 0
+curves 0
+points 0
+other 0
+solids 0
+invalid 0
+area 50000000
+volume 0
+bbox 0,-10000,0 to 10000,0,0

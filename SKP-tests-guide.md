@@ -15,7 +15,7 @@ meshes, and curves arrive as edges or not at all depending on the reader's `Impo
 (pinned off by default). `MaxAngle` governs how finely curved surfaces are tessellated on the way
 out, which is why the corpus includes a cylinder rather than only boxes.
 
-**⚠ The `Version` write option does not reach the writer.** `skp-2014.skp` is written with
+**⚠ The `Version` write option does not reach the writer (RH-98712).** `skp-2014.skp` is written with
 `Version = SketchUp2014` and `skp-box.skp` with the 2021 default, and **both files declare format
 version 25** - the SketchUp SDK's own current format. The option is pinned in the sidecar as a
 request, the same way IGES and DXF pin theirs, so the day it starts working every baseline diffs

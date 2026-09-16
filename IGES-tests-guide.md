@@ -67,7 +67,7 @@ Part 21 checks) come from the fixed-format layout of every ASCII IGES file:
 A truncated or interleaved write fails these before any geometry is compared. On top of them the
 round trip asserts the file re-imports into at least one object.
 
-**⚠ The write options in the sidecar are requests, not yet effects.** `FileIgs.Write` currently
+**⚠ The write options in the sidecar are requests, not yet effects (RH-98710).** `FileIgs.Write` currently
 ignores its `FileIgsWriteOptions` argument: the native writer builds its options from the
 plugin's current options and never reads the Export dictionary (only units and tolerance follow a
 headless document). The sidecar option keys - `igesversion`, `surfacetype`, `solidtype`,

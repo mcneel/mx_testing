@@ -32,7 +32,7 @@ namespace FileIO
   /// Imports one STL file into a headless document and measures it. Always <see cref="FileStl.Read"/>
   /// with a full explicit <see cref="FileStlReadOptions"/> - a bare headless RhinoDoc.Import takes
   /// weld/split/units from the machine's saved plugin profile, so it is not deterministic across
-  /// machines. Known dead option, pinned by the guide: STLModelUnits is parsed by the reader but
+  /// machines. Known dead option (RH-98713), pinned by the guide: STLModelUnits is parsed but
   /// never used - scaling comes from the plugin state, which headless is the millimetre default.
   /// </summary>
   internal static class StlImporter

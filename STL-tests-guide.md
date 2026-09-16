@@ -18,7 +18,7 @@ point and text vanish, and the breps arrive as meshes.
 `RhinoDoc.Import`: without a dictionary the reader takes weld, split and units from the machine's
 saved plugin profile, so results differ between machines.
 
-**`STLModelUnits` is a dead option.** The reader parses it into a local that is never used again;
+**`STLModelUnits` is a dead option (RH-98713).** The reader parses it into a local that is never used again;
 scaling comes from plugin state (the millimetre default, headless). Pinned here for the day it is
 fixed. STL files carry no units of their own, which is why the option exists at all.
 

@@ -15,8 +15,8 @@ namespace FileIO
   /// </summary>
   /// <remarks>
   /// Unlike IGES, the DXF Export dictionary genuinely drives the native writer, so most keys here
-  /// are real effects and option-varied corpus models are meaningful. Two known exceptions are
-  /// pinned as requests-not-effects until the plumbing is fixed: <c>simplifytolerance</c> (managed
+  /// are real effects and option-varied corpus models are meaningful. Two known exceptions
+  /// (RH-98711) are pinned as requests-not-effects until the plumbing is fixed: <c>simplifytolerance</c> (managed
   /// writes a Double, native reads it with TryGetBool) and <c>curveusemaxangle</c> (Bool written,
   /// Double read) - the strictly-typed dictionary makes both silently dead. A third defect,
   /// ExportMeshesAs=ThreeDFace serializing "ThreeDFace" where the native side matches only

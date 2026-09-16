@@ -6,12 +6,15 @@ fixed - move it and its sidecar into the verified folder. Use `MX_GLTF_REGEN_DRY
 
 ## What is in here ##
 
-**Everything Rhino's own glTF exporter writes.** Rhino cannot import the glTF it exports -
-verified on 9.0.26258 for both .gltf and .glb, while hand-authored glTF imports fine - so these
-files sit here as the standing record of that defect rather than as import test material.
+**Rhino's own glTF output, which carries materials.** Headless import fails on glTF with
+materials - **RH-81973** - because creating the PBR material returns null unless the Commands
+plug-in is loaded. These files sit here as the standing record of that defect rather than as
+import test material.
 
-`gltf-box-no-extensions.gltf` is Rhino's output with `extensionsUsed` stripped: it fails too,
-which is what rules the KHR extensions out as the cause.
+Two probes pin the cause down: `gltf-box-no-extensions.gltf` is Rhino's output with
+`extensionsUsed` stripped and it still fails, ruling out the KHR extensions; while the same file
+with its `materials` array and primitive material references removed **does** import, and lives in
+`models\GLTFfile\probe-nomaterials.gltf` as a passing test.
 
 These have no baselines. Write one by hand stating what the import *should* produce if you want
 the fixture to assert rather than merely fail.

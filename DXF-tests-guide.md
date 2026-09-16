@@ -30,7 +30,7 @@ explicit options on BOTH sides, never bare `RhinoDoc.Import`/`Export`:
 **The write options genuinely plumb** (unlike IGES): the export dictionary drives the native
 writer, so option-varied corpus models are meaningful — `solids-acis.dxf` is written with
 `surfacetype solids` and demonstrably produces ACIS 3DSOLID entities that re-import closed.
-**Three known defects**, all silent, all pinned in sidecars as requests until fixed:
+**Three known defects (RH-98711)**, all silent, all pinned in sidecars as requests until fixed:
 
 | Key | Defect |
 | --- | --- |

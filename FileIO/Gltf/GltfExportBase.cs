@@ -11,14 +11,23 @@ namespace FileIO
 {
   /// <summary>
   /// The write options one glTF export test runs with. The dictionary reaches the exporter, so
-  /// these are real effects. Draco compression is pinned but left OFF in the committed corpus:
-  /// with it on the mesh payload becomes an opaque compressed blob, which is a fine thing to
-  /// test but a poor thing to pin geometry counts against.
+  /// these are real effects.
+  ///
+  /// <para><b>ExportMaterials defaults to false here, unlike RhinoCommon.</b> A glTF carrying
+  /// materials cannot be imported back into a headless document - RH-81973 - because creating the
+  /// PBR material returns null unless the Commands plug-in is loaded. Exporting with materials off
+  /// is therefore what lets this suite round trip like every other format. A materials-on export is
+  /// still covered: the writer's output is checked structurally, and the unreadable result is kept
+  /// in models\GLTFfile-future\ as the standing witness for RH-81973.</para>
+  ///
+  /// <para>Draco compression is pinned but left off in the committed corpus: with it on the mesh
+  /// payload becomes an opaque compressed blob, which is a fine thing to test but a poor thing to
+  /// pin geometry counts against.</para>
   /// </summary>
   internal sealed class GltfExportOptions
   {
     internal bool MapZToY;
-    internal bool ExportMaterials = true;
+    internal bool ExportMaterials;   // default OFF - see the remarks on the class
     internal bool ExportTextureCoordinates = true;
     internal bool ExportVertexNormals = true;
     internal bool ExportOpenMeshes = true;
@@ -108,16 +117,14 @@ namespace FileIO
     internal static readonly string[] AllKeys =
       OptionKeys.Concat(SourceKeys).Concat(StepOracle.AllKeys).ToArray();
 
+    internal static readonly string[] DefaultKeys = AllKeys;
+
     /// <summary>
-    /// With the round trip disabled (see GltfExportRunner.RoundTripBroken) a regenerated sidecar
-    /// records the write options and the source measurement only - there is no read-back to
-    /// measure. The unprefixed keys stay in AllKeys so that hand-written -future baselines can
-    /// still state what the round trip ought to produce.
+    /// The keys a regenerated sidecar can actually fill for a materials-on export: there is no
+    /// read-back to measure (RH-81973), so the round-trip column is dropped rather than written
+    /// as zeroes.
     /// </summary>
-    internal static readonly string[] DefaultKeys =
-      GltfExportRunner.RoundTripBroken
-        ? OptionKeys.Concat(SourceKeys).ToArray()
-        : AllKeys;
+    internal static readonly string[] SourceOnlyKeys = OptionKeys.Concat(SourceKeys).ToArray();
 
     internal static readonly string[] CountKeys =
       DefaultKeys.Where(k => k != "area" && k != "volume" && k != "srcarea" && k != "srcvolume").ToArray();
@@ -286,21 +293,23 @@ namespace FileIO
   internal static class GltfExportRunner
   {
     /// <summary>
-    /// Rhino cannot import the glTF Rhino exports, so this suite does not round trip.
+    /// Whether a file written with these options can be read back, and so whether this run round
+    /// trips or stops at the structural checks.
     /// </summary>
     /// <remarks>
-    /// Verified 2026-09-15 on Rhino 9 WIP 9.0.26258: every file written by FileGltf.Write comes
-    /// back from RhinoDoc.Import as false with zero objects, in both .gltf and .glb form, while a
-    /// hand-authored minimal glTF imports fine - so the reader works and the pair does not. It is
-    /// not the KHR extensions the exporter declares either: stripping extensionsUsed from a
-    /// Rhino-written file does not help. The unreadable files are parked in
-    /// models\GLTFfile-future\ with the probe that isolates the defect.
+    /// Headless import of a glTF that carries materials fails - RH-81973 - so a materials-on
+    /// export is checked structurally and no further. With materials off the round trip works
+    /// normally, which is how the committed corpus is pinned.
     ///
-    /// While this is true the export suite asserts the source measurement plus the structural
-    /// checks and stops. Flip this to false when the reader is fixed; the round-trip arm is
-    /// written and waiting, and the baselines will need regenerating to gain their result column.
+    /// Isolated 2026-09-15 on 9.0.26258: Rhino's own glTF output imports once its materials array
+    /// and the primitives' material references are removed by hand, while the same file untouched
+    /// does not. That also rules out the KHR extensions the exporter declares - stripping
+    /// extensionsUsed alone changes nothing. The probes are in models\GLTFfile-future\.
     /// </remarks>
-    internal static readonly bool RoundTripBroken = true;
+    static bool CanRoundTrip(GltfExportOptions options)
+    {
+      return !options.ExportMaterials;
+    }
 
     internal static void Run(string filepath, string[] defaultKeys, bool writeDebugModel)
     {
@@ -360,12 +369,10 @@ namespace FileIO
 
         GltfStructure.Check(where, outputPath, options);
 
-        // ⚠ No round trip. Rhino cannot read the glTF Rhino writes - see RoundTripBroken below -
-        // so this suite asserts the source measurement and the file's structure, and stops there.
-        // The moment the reader is fixed, flip RoundTripBroken to false: the read-back arm below
-        // is written and waiting, and every export baseline will then need regenerating to gain
-        // its round-trip column.
-        if (RoundTripBroken)
+        // With materials on there is nothing to read back - RH-81973 - so the run stops at the
+        // source measurement and the structural checks. With materials off it round trips like
+        // every other format.
+        if (!CanRoundTrip(options))
         {
           Emit(filename, options, result, hasOracle);
 
@@ -544,6 +551,10 @@ namespace FileIO
       var where = $"{filename} [export regen]";
       GltfExportOptions options = GltfExportOptions.From(old, where);
 
+      // A materials-on export has no readable result, so keep only what can be measured.
+      if (!CanRoundTrip(options))
+        keys = keys.Where(k => GltfExportOracle.SourceOnlyKeys.Contains(k)).ToArray();
+
       string outputDir = TempDir();
       string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filepath) + ".gltf");
 
@@ -592,7 +603,7 @@ namespace FileIO
 
         result.Bytes = new FileInfo(outputPath).Length;
 
-        if (!RoundTripBroken)
+        if (CanRoundTrip(options))
         {
           RhinoDoc readBack = GltfImporter.CreateDoc();
           try

@@ -22,7 +22,7 @@ namespace FileIO
   ///
   /// Deliberately absent: an ExportMeshesAs=ThreeDFace variant - the managed side serializes
   /// "ThreeDFace" where the native side matches only "ThreeDFaces", so the option silently falls
-  /// through to lines and a model named for it would lie. Add it when the key mismatch is fixed.
+  /// through to lines and a model named for it would lie. Add it when RH-98711 is fixed.
   ///
   /// [Explicit] twice over; refuses to run without MX_DXF_AUTHOR_OUT_DIR:
   /// <code>

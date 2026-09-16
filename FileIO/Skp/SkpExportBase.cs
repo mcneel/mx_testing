@@ -196,8 +196,8 @@ namespace FileIO
       Assert.IsTrue(int.TryParse(parts[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int major),
         $"{where}: '{parts[0]}' in version string '{version}' is not a number.");
 
-      // ⚠ Deliberately NOT compared against the pinned version option. Every file this suite
-      // writes declares format 25, including the one written with Version = SketchUp2014, so the
+      // ⚠ Deliberately NOT compared against the pinned version option (RH-98712). Every file
+      // this suite writes declares format 25, including the one written with SketchUp2014, so the
       // Version write option does not reach the writer - it always emits the SketchUp SDK's own
       // current format. Asserting the pinned version here would leave the suite permanently red
       // on a defect it has already recorded, so the check stops at "the header is well formed and

@@ -317,9 +317,10 @@ and format-specific traps: `3MF-tests-guide.md`, `GLTF-tests-guide.md`, `SKP-tes
 
 Two things to know before adding tests to these:
 
-- **glTF does not round trip.** Rhino cannot import the glTF it exports, so the export suite
-  checks structure only and Rhino's own output lives in `models\GLTFfile-future\`. The import
-  corpus is hand-authored JSON. See `GLTF-tests-guide.md`.
+- **glTF exports with materials off by default**, because headless import fails on glTF that
+  carries materials (RH-81973). That lets the export suite round trip normally; the one
+  materials-on model is checked structurally instead. The import corpus is hand-authored JSON and
+  Rhino's own output lives in `models\GLTFfile-future\`. See `GLTF-tests-guide.md`.
 - **3MF has no read API** (`File3mf` is write-only), so its import side goes through
   `RhinoDoc.Import` with no options to pin.
 

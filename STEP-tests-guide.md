@@ -372,7 +372,7 @@ rewrites the other.
 
 ---
 
-## ⚠ Known intermittent failure: the writer sometimes declares the wrong FILE_SCHEMA
+## ⚠ Known intermittent failure: the writer sometimes declares the wrong FILE_SCHEMA (RH-98709)
 
 `StepExport` occasionally fails a `fileschema` comparison with a schema name that has nothing to
 do with the model or the pinned options — both `INTEGRATED_CNC_SCHEMA` and
@@ -385,7 +385,7 @@ also exercised the IGES/DXF/DWG suites; the written files are kept beside their 
 the comparison. It does not reproduce on demand: after those two hits the full suite passed five
 consecutive times with no change to the code or corpus.
 
-**This is a real Rhino defect and the assertion is deliberately NOT relaxed.** A file whose
+**This is a real Rhino defect - RH-98709 - and the assertion is deliberately NOT relaxed.** A file whose
 header declares the wrong schema is rejected by receiving CAD systems, so a suite that tolerated
 it would be lying. If it fails on you:
 
@@ -394,7 +394,7 @@ it would be lying. If it fails on you:
    same document with the same options and reports what schema *that* file declares; right the
    second time means the writer is carrying state between exports, wrong again means it is a
    property of that model or those options.
-3. Add both to the YouTrack rather than re-running until it passes.
+3. Add both to RH-98709 rather than re-running until it passes.
 
 Everything in this file other than this section describes deterministic behaviour.
 

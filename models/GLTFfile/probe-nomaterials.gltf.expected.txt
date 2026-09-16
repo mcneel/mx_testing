@@ -1,0 +1,19 @@
+GLTF IMPORT
+units Millimeters
+objects 1
+instances 0
+blockdefs 0
+layers 1
+breps 0
+extrusions 0
+surfaces 0
+meshes 1
+subds 0
+curves 0
+points 0
+other 0
+solids 1
+invalid 0
+area 340.00000156462164
+volume 400.00000111758646
+bbox 0,0,0 to 9.9999997764825821,8.00000037997961,4.999999888241291

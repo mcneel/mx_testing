@@ -8,38 +8,38 @@ exportvertexcolors false
 exportlayers false
 usedracocompression false
 srcunits Millimeters
-srcobjects 2
+srcobjects 1
 srcinstances 0
 srcblockdefs 0
 srclayers 1
 srcbreps 0
 srcextrusions 0
 srcsurfaces 0
-srcmeshes 2
+srcmeshes 1
 srcsubds 0
 srccurves 0
 srcpoints 0
 srcother 0
-srcsolids 0
+srcsolids 1
 srcinvalid 0
-srcarea 72000000
-srcvolume 0
-srcbbox 0,0,0 to 26000,0,6000
+srcarea 340.00000156462164
+srcvolume 400.00000111758646
+srcbbox 0,0,0 to 9.9999997764825821,8.00000037997961,4.999999888241291
 units Millimeters
-objects 2
+objects 1
 instances 0
 blockdefs 0
 layers 1
 breps 0
 extrusions 0
 surfaces 0
-meshes 2
+meshes 1
 subds 0
 curves 0
 points 0
 other 0
-solids 0
+solids 1
 invalid 0
-area 72000000
-volume 0
-bbox 0,-6000,0 to 26000,0,0
+area 340.00000156462164
+volume 400.00000111758646
+bbox 0,-4.999999888241291,0 to 9.9999997764825821,0,8.00000037997961

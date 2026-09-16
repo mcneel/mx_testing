@@ -15,7 +15,8 @@ namespace FileIO
   /// </summary>
   /// <remarks>
   /// <see cref="FileIgsWriteOptions"/> has over forty knobs; the sidecar pins the handful that
-  /// change what geometry ends up in the file. Everything pinned here is written into every
+  /// change what geometry ends up in the file. NOTE they are requests, not effects: FileIgs.Write
+  /// ignores its options entirely (RH-98710). They are pinned anyway so the fix diffs loudly. Everything pinned here is written into every
   /// baseline, so a moved Rhino default shows up as a diff. The rest keep RhinoCommon's defaults.
   /// Two options are deliberately not sidecar keys but follow the source document instead:
   /// <c>Units</c> and <c>Tolerance</c> are set from the document being exported, because writing
