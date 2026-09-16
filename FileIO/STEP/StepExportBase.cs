@@ -435,11 +435,12 @@ namespace FileIO
         if (oracle != null)
         {
           var pinned = oracle.Entries.FirstOrDefault(e => e.Key == StepExportOracle.FileSchemaKey);
-          if (pinned.Key != null)
-            Assert.IsTrue(
-              result.FileSchema.IndexOf(pinned.Value.Trim(), StringComparison.InvariantCultureIgnoreCase) >= 0,
+          if (pinned.Key != null &&
+              result.FileSchema.IndexOf(pinned.Value.Trim(), StringComparison.InvariantCultureIgnoreCase) < 0)
+            Assert.Fail(
               $"{where}: '{StepExportOracle.FileSchemaKey}' expected to contain '{pinned.Value.Trim()}' " +
-              $"but the file declares '{result.FileSchema}'.");
+              $"but the file declares '{result.FileSchema}'." +
+              SecondOpinion(where, filepath, options, outputDir, pinned.Value.Trim()));
         }
 
         RhinoDoc readBack = StepImporter.CreateDoc();
@@ -479,6 +480,55 @@ namespace FileIO
       {
         if (keep || (failed && writeDebugModel)) KeepOutput(outputPath, filepath);
         TryDelete(outputDir);
+      }
+    }
+
+    /// <summary>
+    /// Writes the same document a second time and reports what schema THAT file declares.
+    /// </summary>
+    /// <remarks>
+    /// Only ever called on a FILE_SCHEMA mismatch, and it never rescues the test - the failure
+    /// stands either way. It exists because the mismatch is intermittent: the writer occasionally
+    /// emits an unrelated schema (AP238-family names such as INTEGRATED_CNC_SCHEMA or
+    /// MODEL_BASED_INTEGRATED_MANUFACTURING_SCHEMA have both been seen) for a model whose options
+    /// pin AP214. A bare "expected X got Y" leaves the next person guessing; knowing whether an
+    /// immediate second write produces the right schema separates "this model/options combination
+    /// always writes Y" from "the writer carries stale state and the same call is not
+    /// reproducible", which are different bugs with different owners.
+    /// </remarks>
+    static string SecondOpinion(string where, string filepath, StepExportOptions options,
+                                string outputDir, string wanted)
+    {
+      string retryPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filepath) + ".retry.stp");
+
+      try
+      {
+        RhinoDoc doc = StepExporter.OpenSource(filepath, out _);
+        try
+        {
+          if (!StepExporter.Write(retryPath, doc, options, out _))
+            return System.Environment.NewLine + "  [second opinion] the retry write returned false.";
+        }
+        finally
+        {
+          doc.Dispose();
+        }
+
+        string retrySchema = StepExporter.ReadFileSchema(retryPath);
+        bool retryOk = retrySchema.IndexOf(wanted, StringComparison.InvariantCultureIgnoreCase) >= 0;
+
+        return System.Environment.NewLine +
+          $"  [second opinion] an immediate second write of the same document with the same options " +
+          $"declared '{retrySchema}' - " +
+          (retryOk
+            ? "i.e. it got it RIGHT the second time, so the writer is not reproducible and this is "
+              + "state carried between exports, not a property of this model."
+            : "i.e. it is wrong again, so this looks like a property of this model or these options "
+              + "rather than stale state.");
+      }
+      catch (Exception e)
+      {
+        return System.Environment.NewLine + $"  [second opinion] could not be taken: {e.Message}";
       }
     }
 

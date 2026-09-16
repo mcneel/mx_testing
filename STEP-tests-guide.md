@@ -372,6 +372,32 @@ rewrites the other.
 
 ---
 
+## ⚠ Known intermittent failure: the writer sometimes declares the wrong FILE_SCHEMA
+
+`StepExport` occasionally fails a `fileschema` comparison with a schema name that has nothing to
+do with the model or the pinned options — both `INTEGRATED_CNC_SCHEMA` and
+`MODEL_BASED_INTEGRATED_MANUFACTURING_SCHEMA` (AP238-family names) have been seen on models whose
+sidecar pins `schema AP214` / `fileschema AUTOMOTIVE_DESIGN`.
+
+Observed 2026-09-15 on Rhino 9 WIP 9.0.26258: two different models, hours apart, in runs that
+also exercised the IGES/DXF/DWG suites; the written files are kept beside their models as
+`#<name>.exported.stp` and genuinely contain the wrong `FILE_SCHEMA` — this is the writer, not
+the comparison. It does not reproduce on demand: after those two hits the full suite passed five
+consecutive times with no change to the code or corpus.
+
+**This is a real Rhino defect and the assertion is deliberately NOT relaxed.** A file whose
+header declares the wrong schema is rejected by receiving CAD systems, so a suite that tolerated
+it would be lying. If it fails on you:
+
+1. Keep `#<name>.exported.stp` — it is the evidence.
+2. Read the `[second opinion]` line in the failure message. The runner immediately re-writes the
+   same document with the same options and reports what schema *that* file declares; right the
+   second time means the writer is carrying state between exports, wrong again means it is a
+   property of that model or those options.
+3. Add both to the YouTrack rather than re-running until it passes.
+
+Everything in this file other than this section describes deterministic behaviour.
+
 ## One asymmetry between the two suites
 
 **Import fails hard on a missing baseline. Export does not.**
