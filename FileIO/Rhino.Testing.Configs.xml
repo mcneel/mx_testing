@@ -130,6 +130,23 @@
     <ModelDirectory Fixture="ObjExportLarge" Location="..\..\..\..\models\OBJfile-large\" Optional="true" Enabled="true" />
     <ModelDirectory Fixture="ObjExportLarge" Location="..\..\..\..\private_models\models\OBJfile-large\" Optional="true" Enabled="true" />
 
+    <!-- ===== STL ===== -->
+
+    <ModelDirectory Fixture="StlImport" Location="..\..\..\..\models\STLfile\" Enabled="true" />
+    <ModelDirectory Fixture="StlImport" Location="..\..\..\..\private_models\models\STLfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="StlImportFuture" Location="..\..\..\..\models\STLfile-future\" Enabled="true" />
+    <ModelDirectory Fixture="StlImportFuture" Location="..\..\..\..\private_models\models\STLfile-future\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="StlImportLarge" Location="..\..\..\..\models\STLfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="StlImportLarge" Location="..\..\..\..\private_models\models\STLfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="StlExport" Location="..\..\..\..\models\STLfile\" Enabled="true" />
+    <ModelDirectory Fixture="StlExport" Location="..\..\..\..\private_models\models\STLfile\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="StlExport" Location="..\..\..\..\models\STLfile-export\" Enabled="true" />
+    <ModelDirectory Fixture="StlExport" Location="..\..\..\..\private_models\models\STLfile-export\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="StlExportFuture" Location="..\..\..\..\models\STLfile-export-future\" Enabled="true" />
+    <ModelDirectory Fixture="StlExportFuture" Location="..\..\..\..\private_models\models\STLfile-export-future\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="StlExportLarge" Location="..\..\..\..\models\STLfile-large\" Optional="true" Enabled="true" />
+    <ModelDirectory Fixture="StlExportLarge" Location="..\..\..\..\private_models\models\STLfile-large\" Optional="true" Enabled="true" />
+
   </ModelDirectories>
 
 </Settings>

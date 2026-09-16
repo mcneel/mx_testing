@@ -281,7 +281,12 @@ namespace FileIO
         doc.Objects.AddInstanceObject(idef, Transform.Translation(0, 105, 0));
         doc.Objects.AddInstanceObject(idef, Transform.Translation(12, 105, 0));
 
-        Assert.IsTrue(doc.WriteFile(outPath, new FileWriteOptions { FileVersion = 7 }),
+        // SuppressAllInput/SuppressDialogBoxes are not optional here. RhinoDoc.WriteFile over an
+        // EXISTING .3dm asks the user something; without them this [Explicit] author does not
+        // fail, it blocks forever, and the blocked test host cannot be killed with Stop-Process
+        // -Force or taskkill /F /T - the machine needs a reboot to clear it. Writing to a fresh
+        // folder hides this, which is exactly how it stayed hidden until a re-author.
+        Assert.IsTrue(doc.WriteFile(outPath, new FileWriteOptions { FileVersion = 7, SuppressAllInput = true, SuppressDialogBoxes = true }),
           $"RhinoDoc.WriteFile('{outPath}') returned false.");
 
         TestContext.Progress.WriteLine(

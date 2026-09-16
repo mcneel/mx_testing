@@ -100,7 +100,12 @@ namespace FileIO
           Vector3d.XAxis, new Point3d(0, 85, 0), new Point3d(15, 85, 0), new Point3d(7.5, 89, 0), 0.0);
         doc.Objects.AddLinearDimension(dim, new ObjectAttributes { LayerIndex = notes });
 
-        Assert.IsTrue(doc.WriteFile(outPath, new FileWriteOptions { FileVersion = 7 }),
+        // SuppressAllInput/SuppressDialogBoxes are not optional here. RhinoDoc.WriteFile over an
+        // EXISTING .3dm asks the user something; without them this [Explicit] author does not
+        // fail, it blocks forever, and the blocked test host cannot be killed with Stop-Process
+        // -Force or taskkill /F /T - the machine needs a reboot to clear it. Writing to a fresh
+        // folder hides this, which is exactly how it stayed hidden until a re-author.
+        Assert.IsTrue(doc.WriteFile(outPath, new FileWriteOptions { FileVersion = 7, SuppressAllInput = true, SuppressDialogBoxes = true }),
           $"RhinoDoc.WriteFile('{outPath}') returned false.");
 
         TestContext.Progress.WriteLine(
