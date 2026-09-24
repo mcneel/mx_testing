@@ -63,6 +63,7 @@ namespace MxTests
               rc = false;
               continue;
             }
+            if (temp.Length == 0) temp = new[] { input.DuplicateMesh() }; // nothing was cut: the input stays whole
 
             foreach (var m in temp)
             {
