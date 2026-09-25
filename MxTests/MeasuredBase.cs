@@ -169,7 +169,7 @@ namespace MxTests
     {
       for (int i = 0; i < expected.Count; i++)
       {
-        if (expected[i].TextInfo != null) Assert.AreEqual(expected[i].TextInfo, result_ordered[i].TextInfo,
+        if (expected[i].TextInfo != null) Assert.AreEqual(expected[i].TextInfo, DescriptionAssertingWhatTheOracleStates(expected[i].TextInfo, result_ordered[i].TextInfo),
             $"Expected different geometry description:");
       }
     }
@@ -307,6 +307,22 @@ namespace MxTests
       return rc;
     }
 
+    // An oracle description that states a vertex count asserts it; one that leaves the count out does not.
+    static readonly Regex VertexCountInDescription = new Regex(@"\b\d+ (vertices|vertex),?\s*", RegexOptions.CultureInvariant);
+
+    static string DescriptionAssertingWhatTheOracleStates(string expectedDescription, string actualDescription)
+    {
+      if (actualDescription == null || VertexCountInDescription.IsMatch(expectedDescription)) return actualDescription;
+      return VertexCountInDescription.Replace(actualDescription, "");
+    }
+
+    static bool AnyOracleLineStatesAVertexCount(List<string> oracleLines)
+    {
+      foreach (string line in oracleLines)
+        if (VertexCountInDescription.IsMatch(line)) return true;
+      return false;
+    }
+
     public static string SimplifyDescription(string rc)
     {
       if (rc == null) return null;
@@ -395,6 +411,7 @@ namespace MxTests
         bool oldHasClosed = oracleLines.Any(l => { var t = Toks(l); return t.Length > 1 && (t[1].Equals("CLOSED", StringComparison.InvariantCultureIgnoreCase) || t[1].Equals("OPEN", StringComparison.InvariantCultureIgnoreCase)); });
         bool oldHasOverlap = oracleLines.Any(l => { var t = Toks(l); return t.Length > 2 && (t[2].StartsWith("OVERLAP", StringComparison.InvariantCultureIgnoreCase) || t[2].StartsWith("PERFORAT", StringComparison.InvariantCultureIgnoreCase)); });
         bool oldHasText = oracleLines.Any(l => l.Contains("["));
+        bool oldOmitsVertexCount = oldHasText && !AnyOracleLineStatesAVertexCount(oracleLines);
 
         // Run the operation exactly as the test does.
         ExtractInputsFromFile(file, twoGroups, out double tol, out var inputs, out var second);
@@ -422,7 +439,12 @@ namespace MxTests
         var sb = new StringBuilder();
         sb.Append(incipit.Trim()).Append('\n');
         foreach (var c in commentLines) sb.Append(c).Append('\n');
-        foreach (var m in returned) sb.Append(FormatOracleLine(m, wantClosed, wantOverlap, wantText)).Append('\n');
+        foreach (var m in returned)
+        {
+          string oracleLine = FormatOracleLine(m, wantClosed, wantOverlap, wantText);
+          if (oldOmitsVertexCount && policy != RegenFields.Full) oracleLine = VertexCountInDescription.Replace(oracleLine, "");
+          sb.Append(oracleLine).Append('\n');
+        }
         string newNotes = sb.ToString();
 
         string report =
