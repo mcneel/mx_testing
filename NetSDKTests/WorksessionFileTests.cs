@@ -410,6 +410,28 @@ namespace NetSDKTests
           Assert.That(file.Write(path, version), Is.False, "Write version " + version);
           Assert.That(file.ToByteArray(version), Is.Null, "ToByteArray version " + version);
         }
+        Assert.That(File.Exists(path), Is.False, "a write that failed created a file");
+      }
+    }
+
+    [Test]
+    public void FailedWriteLeavesExistingFileAlone()
+    {
+      using (var file = TestFile())
+      {
+        var path = Path.Combine(m_folder, "existing.rws");
+        Assert.That(file.Write(path), Is.True);
+        var before = File.ReadAllBytes(path);
+
+        Assert.That(file.Write(path, 3), Is.False);
+        Assert.That(File.ReadAllBytes(path), Is.EqualTo(before), "unsupported version");
+
+        // Version 4 needs exactly one active model.
+        var second = file.GetModel(1);
+        second.IsActive = true;
+        file.SetModel(1, second);
+        Assert.That(file.Write(path, 4), Is.False);
+        Assert.That(File.ReadAllBytes(path), Is.EqualTo(before), "two active models in version 4");
       }
     }
 
