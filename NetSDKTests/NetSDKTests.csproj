@@ -38,6 +38,8 @@
          SubD.Evaluate) is not in a released RhinoCommon yet. See RH-71098, RH-53383. -->
     <Compile Remove="SubDComponentParameter.cs" />
     <Compile Remove="SubDEvaluate.cs" />
+    <!-- Rhino.FileIO.WorksessionFile is not in a released RhinoCommon yet. See RH-99012. -->
+    <Compile Remove="WorksessionFileTests.cs" />
   </ItemGroup>
 
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
@@ -53,6 +55,14 @@
   <ItemGroup>
     <Content Include="models\**\*.3dm">
       <Link>models\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- worksession files written by RhinoCore, shared with the openNURBS tests. -->
+  <ItemGroup Condition="'$(InRhino)' == 'True'">
+    <Content Include="..\..\..\..\opennurbs\tests\worksession_files\*.rws;..\..\..\..\opennurbs\tests\worksession_files\*.txt">
+      <Link>worksession_files\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
