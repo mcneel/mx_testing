@@ -37,6 +37,14 @@ namespace MxTests
       return list;
     }
 
+    static List<string> Couples(IntersectingMeshPair[] intersectingPairs)
+    {
+      var list = new List<string>();
+      foreach (var (meshIndexA, meshIndexB, _, _) in intersectingPairs)
+        list.Add(meshIndexA <= meshIndexB ? meshIndexA + "-" + meshIndexB : meshIndexB + "-" + meshIndexA);
+      return list;
+    }
+
     [Test]
     public void TwoOverlappingMeshes_IntersectAndReportTheCouple()
     {
@@ -98,13 +106,12 @@ namespace MxTests
       {
         foreach (bool fast in new[] { true, false })
         {
-          bool rc = Intersection.MeshMeshPredicate(new[] { a, b }, null, Tolerance, fast, out int[] pairs, out int[] faces, log, System.Threading.CancellationToken.None);
+          bool rc = Intersection.MeshMeshPredicate(new[] { a, b }, null, Tolerance, fast, out IntersectingMeshPair[] pairs, log, System.Threading.CancellationToken.None);
           Assert.That(log.ToString(), Does.Not.StartWith("Error:"), log.ToString());
           Assert.That(rc, Is.True, "fast=" + fast);
           Assert.That(Couples(pairs), Is.EquivalentTo(new[] { "0-1" }), "fast=" + fast);
-          Assert.That(faces.Length, Is.EqualTo(2), "one face couple per mesh couple, fast=" + fast);
-          Assert.That(faces[0], Is.InRange(0, a.Faces.Count - 1), "fast=" + fast);
-          Assert.That(faces[1], Is.InRange(0, b.Faces.Count - 1), "fast=" + fast);
+          Assert.That(pairs[0].FaceIndexA, Is.InRange(0, a.Faces.Count - 1), "fast=" + fast);
+          Assert.That(pairs[0].FaceIndexB, Is.InRange(0, b.Faces.Count - 1), "fast=" + fast);
         }
       }
     }
@@ -117,15 +124,14 @@ namespace MxTests
       using (var b = Mesh.CreateFromPlane(Plane.WorldXY, new Interval(5, 15), new Interval(5, 15), 4, 4))
       using (var log = new TextLog())
       {
-        bool fast = Intersection.MeshMeshPredicate(new[] { a, b }, null, Tolerance, true, out int[] fastPairs, out _, log, System.Threading.CancellationToken.None);
+        bool fast = Intersection.MeshMeshPredicate(new[] { a, b }, null, Tolerance, true, out IntersectingMeshPair[] fastPairs, log, System.Threading.CancellationToken.None);
         Assert.That(fast, Is.False, "no face crosses another: the fast form reports nothing");
         Assert.That(fastPairs, Is.Empty);
 
-        bool precise = Intersection.MeshMeshPredicate(new[] { a, b }, null, Tolerance, false, out int[] precisePairs, out int[] faces, log, System.Threading.CancellationToken.None);
+        bool precise = Intersection.MeshMeshPredicate(new[] { a, b }, null, Tolerance, false, out IntersectingMeshPair[] precisePairs, log, System.Threading.CancellationToken.None);
         Assert.That(log.ToString(), Does.Not.StartWith("Error:"), log.ToString());
         Assert.That(precise, Is.True, "coplanar overlap is an intersection for the precise form");
         Assert.That(Couples(precisePairs), Is.EquivalentTo(new[] { "0-1" }));
-        Assert.That(faces.Length, Is.EqualTo(2));
       }
     }
 
@@ -138,11 +144,13 @@ namespace MxTests
       using (var b = Box(0.5, 0.5, 0.5, 1.5, 1.5, 1.5))
       using (var log = new TextLog())
       {
-        bool rc = Intersection.MeshMeshPredicate(new[] { a }, new[] { far, b }, Tolerance, true, out int[] pairs, out int[] faces, log, System.Threading.CancellationToken.None);
+        bool rc = Intersection.MeshMeshPredicate(new[] { a }, new[] { far, b }, Tolerance, true, out IntersectingMeshPair[] pairs, log, System.Threading.CancellationToken.None);
         Assert.That(log.ToString(), Does.Not.StartWith("Error:"), log.ToString());
         Assert.That(rc, Is.True);
-        Assert.That(pairs, Is.EqualTo(new[] { 0, 1 }), "(index in first set, index in second set)");
-        Assert.That(faces.Length, Is.EqualTo(2));
+        Assert.That(pairs.Length, Is.EqualTo(1));
+        var (meshIndexA, meshIndexB, _, _) = pairs[0];
+        Assert.That(meshIndexA, Is.EqualTo(0), "index in the first set");
+        Assert.That(meshIndexB, Is.EqualTo(1), "index in the second set");
       }
     }
 

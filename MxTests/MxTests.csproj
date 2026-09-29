@@ -38,6 +38,8 @@
   <ItemGroup Condition="'$(InRhino)' == 'False'">
     <!-- the MeshMeshPredicate overload with witness faces is not in a released RhinoCommon yet. See RH-67482. -->
     <Compile Remove="MeshIntersectPredicate.cs" />
+    <!-- Rhino.Geometry.Intersect.IntersectingMeshPair is not in a released RhinoCommon yet. See RH-99019. -->
+    <Compile Remove="MeshMeshPredicateSdk.cs" />
   </ItemGroup>
 
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
