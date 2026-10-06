@@ -535,7 +535,7 @@ namespace MxTests
 
 
     [Test]
-    public void AlignerSupportsTheDocumentedGeometryKinds()
+    public void VertexAlignerSupportsTheDocumentedGeometryKinds()
     {
       SetupFixture.Prerequisites();
 
@@ -543,23 +543,23 @@ namespace MxTests
       var line = new LineCurve(new Point3d(0, 0, 0), new Point3d(1, 0, 0));
        var arc = new ArcCurve(new Arc(new Point3d(0, 0, 0), new Point3d(1, 1, 0), new Point3d(2, 0, 0)));
 
-      Assert.That(Aligner.SupportsGeometry(Triangle(new Point3d(0, 0, 0), new Point3d(1, 0, 0), new Point3d(0, 1, 0))), Is.True);
-      Assert.That(Aligner.SupportsGeometry(new PointCloud(new[] { new Point3d(0, 0, 0) })), Is.True);
-      Assert.That(Aligner.SupportsGeometry(polyline), Is.True);
-      Assert.That(Aligner.SupportsGeometry(line), Is.True);
-      Assert.That(Aligner.SupportsGeometry(arc), Is.False, "an arc has no control points on the curve");
-      Assert.That(Aligner.SupportsGeometry(null), Is.False);
+      Assert.That(VertexAligner.SupportsGeometry(Triangle(new Point3d(0, 0, 0), new Point3d(1, 0, 0), new Point3d(0, 1, 0))), Is.True);
+      Assert.That(VertexAligner.SupportsGeometry(new PointCloud(new[] { new Point3d(0, 0, 0) })), Is.True);
+      Assert.That(VertexAligner.SupportsGeometry(polyline), Is.True);
+      Assert.That(VertexAligner.SupportsGeometry(line), Is.True);
+      Assert.That(VertexAligner.SupportsGeometry(arc), Is.False, "an arc has no control points on the curve");
+      Assert.That(VertexAligner.SupportsGeometry(null), Is.False);
     }
 
     [Test]
-    public void AlignerMovesAPolylineOntoAMesh()
+    public void VertexAlignerMovesAPolylineOntoAMesh()
     {
       SetupFixture.Prerequisites();
 
       var mesh = Triangle(new Point3d(0, 0, 0), new Point3d(1, 0, 0), new Point3d(0, 1, 0));
       var polyline = new PolylineCurve(new[] { new Point3d(0, 0, 0.05), new Point3d(4, 0, 0), new Point3d(4, 4, 0) });
 
-      int moved = Aligner.AlignVertices(new GeometryBase[] { mesh, polyline }, 0.1, true, false);
+      int moved = VertexAligner.Align(new GeometryBase[] { mesh, polyline }, 0.1, true, false);
 
       Assert.That(moved, Is.EqualTo(1));
       Assert.That(polyline.Point(0).DistanceTo(new Point3d(0, 0, 0)), Is.LessThanOrEqualTo(Epsilon),
@@ -568,14 +568,14 @@ namespace MxTests
     }
 
     [Test]
-    public void AlignerAveragesAcrossGeometryKinds()
+    public void VertexAlignerAveragesAcrossGeometryKinds()
     {
       SetupFixture.Prerequisites();
 
       var mesh = Triangle(new Point3d(0, 0, 0), new Point3d(1, 0, 0), new Point3d(0, 1, 0));
       var cloud = new PointCloud(new[] { new Point3d(0, 0, 0.1) });
 
-      int moved = Aligner.AlignVertices(new GeometryBase[] { mesh, cloud }, 0.2, false, true);
+      int moved = VertexAligner.Align(new GeometryBase[] { mesh, cloud }, 0.2, false, true);
 
       Assert.That(moved, Is.EqualTo(2));
       Assert.That(mesh.Vertices.Point3dAt(0).Z, Is.EqualTo(0.05).Within(Epsilon));
@@ -583,15 +583,15 @@ namespace MxTests
     }
 
     [Test]
-    public void AlignerRejectsUnsupportedGeometry()
+    public void VertexAlignerRejectsUnsupportedGeometry()
     {
       SetupFixture.Prerequisites();
 
       var mesh = Triangle(new Point3d(0, 0, 0), new Point3d(1, 0, 0), new Point3d(0, 1, 0));
       var arc = new ArcCurve(new Arc(new Point3d(0, 0, 0), new Point3d(1, 1, 0), new Point3d(2, 0, 0)));
 
-      Assert.Throws<ArgumentException>(() => Aligner.AlignVertices(new GeometryBase[] { mesh, arc }, 0.2, false, false));
-      Assert.Throws<ArgumentNullException>(() => Aligner.AlignVertices(null, 0.2, false, false));
+      Assert.Throws<ArgumentException>(() => VertexAligner.Align(new GeometryBase[] { mesh, arc }, 0.2, false, false));
+      Assert.Throws<ArgumentNullException>(() => VertexAligner.Align(null, 0.2, false, false));
     }
 
     [Test]
@@ -602,7 +602,7 @@ namespace MxTests
       // two grids whose facing borders are 0.25 apart, well inside their own 1.0 spacing
       var meshes = new GeometryBase[] { Grid3x3(0.0), Grid3x3(2.25) };
 
-      double suggested = Aligner.SuggestDistance(meshes);
+      double suggested = VertexAligner.SuggestDistance(meshes);
 
       Assert.That(suggested, Is.EqualTo(0.25).Within(Epsilon),
         "the border vertices are nearer to the other grid than to their own neighbours");
@@ -614,9 +614,9 @@ namespace MxTests
       SetupFixture.Prerequisites();
 
       var meshes = new[] { Grid3x3(0.0), Grid3x3(2.25) };
-      double suggested = Aligner.SuggestDistance(meshes);
+      double suggested = VertexAligner.SuggestDistance(meshes);
 
-      int moved = Aligner.AlignVertices(meshes, suggested, false, false);
+      int moved = VertexAligner.Align(meshes, suggested, false, false);
 
       Assert.That(moved, Is.EqualTo(3), "the three facing border vertices join");
       foreach (int border in new[] { 0, 3, 6 })
@@ -631,8 +631,8 @@ namespace MxTests
       // far apart: every vertex is nearest to one of its own
       var meshes = new GeometryBase[] { Grid3x3(0.0), Grid3x3(50.0) };
 
-      Assert.That(Aligner.SuggestDistance(meshes), Is.Zero);
-      Assert.Throws<ArgumentNullException>(() => Aligner.SuggestDistance(null));
+      Assert.That(VertexAligner.SuggestDistance(meshes), Is.Zero);
+      Assert.Throws<ArgumentNullException>(() => VertexAligner.SuggestDistance(null));
     }
 
     [Test]
@@ -645,7 +645,7 @@ namespace MxTests
       var grid = Grid3x3(0.0);
       var polyline = new PolylineCurve(new[] { new Point3d(0, 0, 0.25), new Point3d(1, 0, 0.25), new Point3d(2, 0, 0.25) });
 
-      double suggested = Aligner.SuggestDistance(new GeometryBase[] { grid, polyline });
+      double suggested = VertexAligner.SuggestDistance(new GeometryBase[] { grid, polyline });
 
       Assert.That(suggested, Is.EqualTo(0.25).Within(Epsilon));
     }
