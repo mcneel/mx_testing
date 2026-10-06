@@ -59,7 +59,7 @@ namespace MxTests
             .Select(o => o.Geometry.Duplicate())
             .ToList();
 
-          int moved = Aligner.AlignVertices(inputs, distance, onlyNaked, average);
+          int moved = VertexAligner.Align(inputs, distance, onlyNaked, average);
 
           foreach (var stale in file.Objects.Where(o => o.Attributes.LayerIndex == b.Index).Select(o => o.Id).ToList())
             file.Objects.Delete(stale);
@@ -137,7 +137,7 @@ namespace MxTests
         foreach (var stale in file.Objects.Where(o => o.Attributes.LayerIndex == results.Index).Select(o => o.Id).ToList())
           file.Objects.Delete(stale);
 
-        int moved = Aligner.AlignVertices(inputs, distance, false, false);
+        int moved = VertexAligner.Align(inputs, distance, false, false);
 
         foreach (var result in inputs)
         {
@@ -331,7 +331,7 @@ namespace MxTests
         var tl = new StringBuilder();
 
         foreach (var geometry in input)
-          if (!Aligner.SupportsGeometry(geometry))
+          if (!VertexAligner.SupportsGeometry(geometry))
             Assert.Ignore($"Model contains {geometry.GetType().Name}, which vertex alignment does not support.");
 
         if (input.Count != expected.Count)
@@ -344,7 +344,7 @@ namespace MxTests
         if (m_select_vertices != null)
           flags = input.Select(g => Enumerable.Range(0, PointsOf(g).Count).Select(i => m_select_vertices.Contains(i)).ToList()).ToList();
 
-        int moved = Aligner.AlignVertices(input, m_distance, m_only_naked, m_average, flags);
+        int moved = VertexAligner.Align(input, m_distance, m_only_naked, m_average, flags);
 
         tl.AppendLine($"Align(distance={m_distance.ToString(CultureInfo.InvariantCulture)}, average={m_average}, onlyNaked={m_only_naked}"
           + $", select={(m_select_vertices == null ? "all" : string.Join("+", m_select_vertices))}) moved {moved} vertices");
