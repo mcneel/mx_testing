@@ -1,4 +1,4 @@
-# Mesh intersections unit tests #
+# Mesh boolean and intersections unit tests #
 
 ### :dart: Goals ###
 
