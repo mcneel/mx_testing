@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace MxTests
 {
-  // Mesh.Split and Mesh.SelfSplit: an empty array when nothing was cut, null when the split failed or was cancelled.
+  // Mesh.Split and Mesh.SelfSplit: null when nothing was cut, never an uncut copy.
   [TestFixture]
   public class MeshSplitResultSdkTests
   {
@@ -23,11 +23,10 @@ namespace MxTests
     }
 
     [Test]
-    public void SplitByAMeshThatDoesNotTouchGivesAnEmptyArray()
+    public void SplitByAMeshThatDoesNotTouchGivesNull()
     {
       var pieces = Box(0, 0, 0, 1, 1, 1).Split(new[] { Box(5, 5, 5, 6, 6, 6) }, Options(CancellationToken.None));
-      Assert.That(pieces, Is.Not.Null, "Nothing was cut: that is a result, not a failure.");
-      Assert.That(pieces, Is.Empty);
+      Assert.That(pieces, Is.Null);
     }
 
     [Test]
@@ -50,11 +49,10 @@ namespace MxTests
     }
 
     [Test]
-    public void SelfSplitOfAMeshThatDoesNotCrossItselfGivesAnEmptyArray()
+    public void SelfSplitOfAMeshThatDoesNotCrossItselfGivesNull()
     {
       var pieces = Box(0, 0, 0, 1, 1, 1).SelfSplit(Options(CancellationToken.None));
-      Assert.That(pieces, Is.Not.Null, "Nothing was cut: that is a result, not a failure.");
-      Assert.That(pieces, Is.Empty);
+      Assert.That(pieces, Is.Null);
     }
 
     [Test]
