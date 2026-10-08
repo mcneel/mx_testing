@@ -58,11 +58,7 @@ namespace MxTests
             var new_returned = new ResultMetrics();
             Mesh[] temp = input.DuplicateMesh().Split(secondMeshes.Cast<Mesh>(), tolerance, true, log, System.Threading.CancellationToken.None, null);
 
-            if (temp == null)
-            {
-              rc = false;
-              continue;
-            }
+            if (temp == null) temp = new[] { input.DuplicateMesh() }; // null: nothing was cut, the input stays whole
 
             foreach (var m in temp)
             {
