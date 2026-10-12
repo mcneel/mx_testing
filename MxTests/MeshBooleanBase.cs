@@ -35,36 +35,34 @@ namespace MxTests
         returned = new List<ResultMetrics>();
         textLog = null;
 
-        // order of picked objects in Rhino command results in different output
-        // at times. Try mimicing this by computing with lists in two different orders
         List<Mesh> inMeshes = new List<Mesh>(inputMeshes.Cast<Mesh>());
 
         MeshBooleanOptions options = new MeshBooleanOptions { TextLog = new TextLog(), Tolerance = tolerance, };
 
         var secondMeshesAsMeshes = secondMeshes?.Cast<Mesh>();
 
-          Mesh[] temp = CreateBooleanOperation(inMeshes, secondMeshesAsMeshes, options, out Result commandResult);
+        Mesh[] temp = CreateBooleanOperation(inMeshes, secondMeshesAsMeshes, options, out Result commandResult);
 
-          textLog = options.TextLog.ToString();
+        textLog = options.TextLog.ToString();
 
-          if (commandResult != Result.Success || temp == null)
+        if (commandResult != Result.Success || temp == null)
+        {
+          rc = false;
+        }
+        else
+        {
+          foreach (var m in temp)
           {
-            rc = false;
+            double area = AreaMassProperties.Compute(m).Area;
+            returned.Add(new ResultMetrics
+            {
+              Measurement = area,
+              Mesh = m,
+              Closed = m.IsClosed,
+              TextInfo = ObtainVividDescription(m)
+            });
           }
-          else
-          {
-              foreach(var m in temp)
-              {
-                double area = AreaMassProperties.Compute(m).Area;
-                  returned.Add(new ResultMetrics
-                  {
-                    Measurement = area,
-                    Mesh = m,
-                    Closed = m.IsClosed,
-                    TextInfo = ObtainVividDescription(m)
-                  });
-              }
-          }
+        }
 
         returned.Sort((a, b) => a.Measurement.CompareTo(b.Measurement));
         return rc;

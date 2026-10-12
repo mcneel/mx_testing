@@ -157,6 +157,34 @@ namespace MxTests
       return MinorImplmentations.MeshIsPointInside(radius, u, v, x, y, z);
     }
 
+    #region Mesh.IsPointInside admission gate
+
+    // An open shell has no inside, so it is refused rather than answered by ray parity.
+    [Test]
+    public void MeshIsPointInsideRefusesOpenShell()
+    {
+      SetupFixture.Prerequisites();
+      MinorImplmentations.MeshIsPointInsideRefusesOpenShell();
+    }
+
+    // Two cubes sharing a face: closed, yet non-manifold, so parity has no answer.
+    [Test]
+    public void MeshIsPointInsideRefusesClosedNonManifold()
+    {
+      SetupFixture.Prerequisites();
+      MinorImplmentations.MeshIsPointInsideRefusesClosedNonManifold();
+    }
+
+    // Inconsistent winding does not change the enclosed region, so the answer must not depend on it.
+    [Test]
+    public void MeshIsPointInsideAnswersForUnorientedClosedMesh()
+    {
+      SetupFixture.Prerequisites();
+      MinorImplmentations.MeshIsPointInsideAnswersForUnorientedClosedMesh();
+    }
+
+    #endregion
+
     [Test]
     public void MeshRay()
     {
@@ -628,6 +656,78 @@ namespace MxTests
         using (var sphere = Mesh.CreateFromSphere(new Sphere(new Point3d(), radius), u, v))
         {
           return sphere.IsPointInside(new Point3d(x, y, z), 0.0, true);
+        }
+      }
+
+      // Each face's diagonal joins its first and third corners: the centre lies on the x = 1 diagonal, (0.5, 0.4, 0.5) does not.
+      static Mesh UnitCube()
+      {
+        var mesh = new Mesh();
+        mesh.Vertices.Add(0, 0, 0); mesh.Vertices.Add(1, 0, 0);
+        mesh.Vertices.Add(1, 1, 0); mesh.Vertices.Add(0, 1, 0);
+        mesh.Vertices.Add(0, 0, 1); mesh.Vertices.Add(1, 0, 1);
+        mesh.Vertices.Add(1, 1, 1); mesh.Vertices.Add(0, 1, 1);
+
+        mesh.Faces.AddFace(0, 2, 1); mesh.Faces.AddFace(0, 3, 2); // z = 0
+        mesh.Faces.AddFace(4, 5, 6); mesh.Faces.AddFace(4, 6, 7); // z = 1
+        mesh.Faces.AddFace(0, 1, 5); mesh.Faces.AddFace(0, 5, 4); // y = 0
+        mesh.Faces.AddFace(3, 7, 6); mesh.Faces.AddFace(3, 6, 2); // y = 1
+        mesh.Faces.AddFace(0, 4, 7); mesh.Faces.AddFace(0, 7, 3); // x = 0
+        mesh.Faces.AddFace(1, 2, 6); mesh.Faces.AddFace(1, 6, 5); // x = 1
+        mesh.Normals.ComputeNormals();
+        return mesh;
+      }
+
+      internal static void MeshIsPointInsideRefusesOpenShell()
+      {
+        using (var lidless = UnitCube())
+        {
+          lidless.Faces.DeleteFaces(new[] { 2, 3 }); // both z = 1 triangles
+          Assert.IsFalse(lidless.IsClosed, "the fixture must be open");
+          Assert.IsTrue(lidless.IsManifold(), "a boundary edge must not read as non-manifold");
+
+          // Enclosed on five sides: the +X ray crosses the x = 1 face once.
+          Assert.IsFalse(lidless.IsPointInside(new Point3d(0.5, 0.4, 0.5), 0.0, false),
+            "an open shell has no inside, so it must be refused rather than answered by parity");
+          Assert.IsFalse(lidless.IsPointInside(new Point3d(0.5, 0.4, 0.5), 1e-6, false));
+          Assert.IsFalse(lidless.IsPointInside(new Point3d(0.5, 0.5, 0.5), 0.0, false));
+          Assert.IsFalse(lidless.IsPointInside(new Point3d(0.5, 0.5, 5.0), 0.0, false));
+        }
+      }
+
+      internal static void MeshIsPointInsideRefusesClosedNonManifold()
+      {
+        using (var stacked = UnitCube())
+        using (var upper = UnitCube())
+        {
+          upper.Translate(0.0, 0.0, 1.0);
+          stacked.Append(upper);
+
+          Assert.IsTrue(stacked.IsClosed, "no boundary edge, so the closed flag stays set");
+          Assert.IsFalse(stacked.IsManifold(), "the shared face's edges carry four faces");
+
+          Assert.IsFalse(stacked.IsPointInside(new Point3d(0.5, 0.5, 0.5), 0.0, false));
+          Assert.IsFalse(stacked.IsPointInside(new Point3d(0.5, 0.5, 1.5), 0.0, false));
+        }
+      }
+
+      internal static void MeshIsPointInsideAnswersForUnorientedClosedMesh()
+      {
+        using (var flipped = UnitCube())
+        {
+          MeshFace f = flipped.Faces[0];
+          flipped.Faces.SetFace(0, f.A, f.C, f.B);
+
+          Assert.IsTrue(flipped.IsClosed);
+          Assert.IsTrue(flipped.IsManifold(true, out bool isOriented, out bool _));
+          Assert.IsFalse(isOriented, "the fixture must actually be inconsistently wound");
+          Assert.IsFalse(flipped.IsSolid, "so IsSolid() rejects it, which is the point of this test");
+
+          Assert.IsTrue(flipped.IsPointInside(new Point3d(0.5, 0.5, 0.5), 0.0, false),
+            "one reversed winding does not change which region the mesh encloses");
+          Assert.IsTrue(flipped.IsPointInside(new Point3d(0.1, 0.9, 0.3), 0.0, false));
+          Assert.IsFalse(flipped.IsPointInside(new Point3d(1.5, 0.5, 0.5), 0.0, false));
+          Assert.IsFalse(flipped.IsPointInside(new Point3d(0.5, 0.5, 5.0), 0.0, false));
         }
       }
 
