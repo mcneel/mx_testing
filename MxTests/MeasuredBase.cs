@@ -276,8 +276,6 @@ namespace MxTests
                   if (split[i].StartsWith("[", StringComparison.InvariantCultureIgnoreCase)) { open_bracket_index = i; break; }
                 }
 
-                Console.WriteLine(open_bracket_index);
-
                 if (open_bracket_index != -1)
                 {
                   rc.TextInfo =
@@ -287,8 +285,6 @@ namespace MxTests
 
                   rc.TextInfo = SimplifyDescription(rc.TextInfo);
                 }
-
-                Console.WriteLine(rc.TextInfo);
 
                 return rc;
               }

@@ -2,7 +2,7 @@
 
 ### :dart: Goals ###
 
-This is a an NUnit 3.7 testing project for Mesh Intersection.
+This is an NUnit testing project for mesh intersections and mesh booleans.
 
 Its purpose is to run tests in Visual Studio, without the need of a big setup. In fact, right now there is no automatic testing system before PR are automatically merged.
 
@@ -14,11 +14,11 @@ YOUR TESTS ADDITIONS ARE WELCOME!
 1. In Visual Studio, choose `Tests -> Run All Tests`.
 1. If the Test panel does not show up, you can open it using `Tests -> Test Explorer`.
 1. You can explore the project in the Solution Explorer panel (`Ctrl+Alt+L`): you can find the projects in `Solution (Rhino) -> Unit Tests`.
-1. There is a `MxTests` project and a `RhinoCommonDelayed` project. The first one is loaded by the testing framework by reflection and does NOT directly use RhinoCommon. This allows to set up hooks and other features to make sure that RhinoCommon is loaded properly, before `RhinoCommonDelayed` is loaded.
-1. There is a setting file located at `MxTests -> MxTests.testsettings.xml`. There is generally no need to modify any settings.
+1. `MxTests` keeps every RhinoCommon-specific implementation inside an internal or private nested class, so that resolving and loading RhinoCommon happens before any of it is touched. This is why the fixtures are thin wrappers over a nested `...Implementation` class rather than using RhinoCommon types directly.
+1. Settings live in `MxTests -> Rhino.Testing.Configs.xml`. There is generally no need to modify any of them: when built inside the Rhino tree (`InRhino`), the `MxTests.csproj` target `WriteRhinoSystemDirectory` rewrites `RhinoSystemDirectory` in the *build output* copy, so never hand-edit that value in the committed file.
 
 ### :new: New test setup ###
-The `MxTests.testsettings.xml` file contains settings for model lookup, and directories are specified in the `<ModelDirectory>` tag.
+`Rhino.Testing.Configs.xml` says where models are looked up: one `<ModelDirectory>` entry per folder inside `<ModelDirectories>`, whose `Fixture` attribute names the test fixture class the folder feeds. A folder with no entry is never read, whatever it contains -- and a folder is not found by sitting next to one that is, so a `models\Foo-future\` beside `models\Foo\` runs nothing.
 
 **General notes on test files:**
 1. When the model is placed in a watched directory, the testing system will automatically load the file, perform splits, and check that the areas and properties match the specifications.

@@ -6,6 +6,21 @@ using System.Linq;
 
 namespace MxTests
 {
+  // Non-generic so the report prints once per run, not once per closed AnyCommand<T>.
+  static class RunEnvironmentReport
+  {
+    static int s_reported;
+
+    public static void Once()
+    {
+      if (0 != System.Threading.Interlocked.Exchange(ref s_reported, 1)) return;
+      Console.WriteLine($"SettingsFile: {SetupFixture.Settings.SettingsFile}");
+      Console.WriteLine($"SettingsDir: {SetupFixture.Settings.SettingsDir}");
+      Console.WriteLine($"RhinoSystemDir: {SetupFixture.Settings.RhinoSystemDir}");
+      Console.WriteLine($"RhinoCommon: {typeof(Rhino.Geometry.Mesh).Assembly.Location}");
+    }
+  }
+
   /// <summary>
   /// AnyCommand is a class that provides basic command integration for testing.
   /// In order to avoid exposing RhinoCommon types and proviking a too early dll search,
@@ -40,13 +55,8 @@ namespace MxTests
     /// <param name="filepath">The file path</param>
     public virtual void Run(string filename, string filepath)
     {
-      Console.WriteLine($"SettingsFile: {SetupFixture.Settings.SettingsFile}");
-      Console.WriteLine($"SettingsDir: {SetupFixture.Settings.SettingsDir}");
-      Console.WriteLine($"RhinoSystemDir: {SetupFixture.Settings.RhinoSystemDir}");
-      Console.WriteLine($"Resolver.RhinoSystemDirectory: {SetupFixture.Settings.RhinoSystemDir}");
-      Console.WriteLine($"RhinoCommon: {typeof(Rhino.Geometry.Mesh).Assembly.Location}");
-      Console.WriteLine($"Test filename: {filename}");
-      Console.WriteLine($"Path: {filepath}");
+      // Not in SetupFixture.OneTimeSetup: naming a RhinoCommon type there loads it before its resolver exists.
+      RunEnvironmentReport.Once();
     }
   }
 }
