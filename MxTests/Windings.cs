@@ -138,8 +138,6 @@ namespace MxTests
 
                   //ignore all rest
 
-                  Console.WriteLine(rc.TextInfo);
-
                   return rc;
                 }
             )

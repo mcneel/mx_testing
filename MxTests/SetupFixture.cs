@@ -75,7 +75,7 @@ namespace MxTests
         
       base.OneTimeSetup();
 
-      // your custom setup
+      // Name no RhinoCommon type in this method: the JIT would load it before the resolver above is installed.
     }
 
     public override void OneTimeTearDown()
